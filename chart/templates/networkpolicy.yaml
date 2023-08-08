@@ -1,0 +1,42 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-web.networkPolicyName" . | quote}}
+  labels:
+    {{- include "srm-web.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "srm-web.selectorLabels" . | nindent 6 }}
+  egress:
+  {{- if .Values.features.mariadb }}
+  - to:
+    - podSelector:
+        matchLabels:
+          app: mariadb
+          release: {{ .Release.Name | quote }}
+    ports:
+    - port: 3306
+  {{- else }}
+  - ports:
+    - port: 3306
+  {{- end -}}
+  {{- include "srm-web.netpolicy.egress.ports.tcp" . | nindent 2 -}}
+  {{- include "srm-web.netpolicy.egress.ports.udp" . | nindent 2 -}}
+  {{- if .Values.features.to }}
+  - ports:
+    - port: 3333
+    to:
+    - podSelector:
+        matchLabels:
+    {{- include "srm-to.selectorLabels" . | nindent 10 }}
+  {{- end }}
+  ingress:
+  - ports:
+    {{- if .Values.web.tlsSecret }}
+    - port: 8443
+    {{- else }}
+    - port: 8080
+    {{- end }}
+  {{ end -}}

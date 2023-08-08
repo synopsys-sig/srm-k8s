@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "srm-web.fullname" . }}
+  labels:
+    {{- include "srm-web.labels" . | nindent 4 }}
+  annotations:
+{{ toYaml .Values.web.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.web.service.type }}
+  ports:
+    - name: http
+      protocol: TCP
+      {{- if .Values.web.tlsSecret }}
+      port: 9443
+      targetPort: 8443
+      {{- else }}
+      port: 9090
+      targetPort: 8080
+      {{- end }}
+  selector:
+    {{- include "srm-web.selectorLabels" . | nindent 4 }}

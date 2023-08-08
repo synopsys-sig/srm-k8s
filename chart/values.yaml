@@ -1,0 +1,345 @@
+# kubectl create secret docker-registry private-registry \
+#   --docker-server=<your-registry-server> \
+#   --docker-username=<your-username> \
+#   --docker-password=<your-password> \
+#   --docker-email=<your-email>
+imagePullSecrets: []
+#  - name: private-registry
+
+features:
+  scanfarm: false
+  mariadb: true
+  minio: false
+  to: false
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations:
+    web:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    scanfarm:
+      scan:
+        nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+      storage:
+        nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+      cache:
+        nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  hosts:
+    - host: chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+networkPolicy:
+  enabled: false
+  k8sApiPort: 443
+  web:
+    egress:
+      extraPorts:
+        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999]
+        udp: [53, 389, 636, 3269]
+
+openshift:
+  createSCC: false
+
+web:
+  affinity: {}
+
+  authentication:
+    saml:
+      enabled: false
+      appName:
+      hostBasePath:
+      # samlIdpXmlFileConfigMap required fields:
+      # - saml-idp.xml
+      samlIdpXmlFileConfigMap:
+      # samlSecret required field:
+      # saml-keystore.props (where the saml-keystore.props key value refers to a file with the following HOCON format)
+      # auth.saml2.keystorePassword = """keystore-password"""
+      # auth.saml2.privateKeyPassword = """private-key-password"""
+      samlSecret: ""
+
+  # cacertsSecret required fields:
+  # - cacerts (must trust database cert when using 'REQUIRE SSL' with an external database)
+  # - cacerts-password (the default Java cacerts password is 'changeit')
+  # kubectl -n srm create secret generic srm-web-cacerts-secret --from-file cacerts=./cacerts --from-literal cacerts-password=changeit
+  cacertsSecret: ""
+
+  database:
+    # credentialSecret required field:
+    # - db.props (where the db.props key value refers to a file with the following HOCON format)
+    #
+    # swa.db.user = """username"""
+    # swa.db.password = """password"""
+    # kubectl -n srm create secret generic srm-web-db-cred-secret --from-file db.props=./db.props
+    credentialSecret: ""
+    externalDbUrl:
+
+  image:
+    registry: docker.io
+    repository: codedx/codedx-tomcat
+    tag: v2023.8.0
+    pullPolicy: IfNotPresent
+
+  javaOpts: "-XX:MaxRAMPercentage=90.0"
+
+  # licenseSecret required fields:
+  # - license.lic
+  # kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic
+  licenseSecret: ""
+
+  # loggingConfigMap required field:
+  # - logback.xml
+  # kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml
+  loggingConfigMap: ""
+
+  nodeSelector: {}
+
+  podAnnotations: {}
+
+  podDisruptionBudget:
+    enabled: false
+
+  podSecurityContext:
+    fsGroup: 1000
+    runAsGroup: 1000
+    runAsUser: 1000
+
+  props:
+    limits:
+      analysis:
+        concurrent: 2
+      database:
+        poolSize: 5
+        timeout: 60000
+      jobs:
+        cpu: 2000
+        memory: 2000
+        database: 2000
+        disk: 2000
+    extra: []
+
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 8192Mi
+      ephemeral-storage: 2868Mi
+
+  persistence:
+    accessMode: ReadWriteOnce
+    existingClaim: ""
+    size: 64Gi
+    storageClass:
+
+  priorityClass:
+    create: false
+    value: 10100
+
+  scanfarm:
+    sast:
+      version: 2023.6.1
+    sca:
+      version: 8.9.0
+
+  securityContext:
+    readOnlyRootFilesystem: true
+
+  service:
+    annotations: {}
+    type: ClusterIP
+    port: 9090
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  # tlsSecret required fields:
+  # - tls.crt
+  # - tls.key
+  # kubectl -n srm create secret tls web-tls-secret --cert=path/to/cert-file --key=path/to/key-file
+  tlsSecret:
+
+  tolerations: []
+
+  # toSecret required field:
+  # - to-key.props (where the to-key.props key value refers to a file with the following HOCON format)
+  #
+  # tws.api-key = """password"""
+  # kubectl -n srm create secret generic to-key-secret --from-file to-key.props=./to-key.props
+  toSecret:
+
+  # webSecret required fields:
+  # - admin-password
+  # kubectl -n srm create secret generic srm-web-secret --from-literal admin-password=password
+  webSecret: ""
+
+
+cnc:
+  imagePullPolicy: "Always"
+
+  cim:
+    cimtools:
+      enabled: false
+    cimweb:
+      enabled: false
+    ingress:
+      enabled: false
+    setupJob:
+      enabled: false
+
+  cnc-common-infra:
+    cleanupSchedule: '*/55 * * * *'
+
+  cnc-db-admin:
+    enabled: false
+
+  cnc-scan-service:
+    syncJob:
+      enabled: false
+    retention:
+      enabled: false
+
+  cnc-cache-service:
+    enabled: true
+
+  scanfarm:
+    enabled: true
+    srm:
+      enabled: true
+      port: "9090"
+
+  trust-stores:
+    enabled: false
+
+mariadb:
+  db:
+    # user must be codedx
+    user: codedx
+    # name must be codedx
+    name: codedx
+  # existingSecret required fields:
+  # - mariadb-root-password
+  # - mariadb-password
+  # kubectl -n srm create secret generic srm-mariadb-secret --from-literal mariadb-root-password=password --from-literal mariadb-password=password
+  existingSecret: ""
+  image:
+    registry: docker.io
+    repository: codedx/codedx-mariadb
+    tag: v1.24.0
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    #  - private-registry
+  serviceAccount:
+    create: true
+  master:
+    config: |-
+      [mysqld]
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mariadb
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      tmpdir=/opt/bitnami/mariadb/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+      log-error=/opt/bitnami/mariadb/logs/mysqld.log
+      character-set-server=utf8mb4
+      collation-server=utf8mb4_general_ci
+      optimizer_search_depth=0
+      lower_case_table_names=1
+      innodb_flush_log_at_trx_commit=0
+      log_bin_trust_function_creators=1
+      expire_logs_days=5
+      [client]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+    # masterCaConfigMap required field:
+    # - ca.crt
+    # kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt
+    masterCaConfigMap:
+    # masterTlsSecret required fields:
+    # - tls.crt
+    # - tls.key
+    # kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file
+    masterTlsSecret:
+    nodeSelector: {}
+    persistence:
+      existingClaim:
+      storageClass:
+      size: 64Gi
+    podDisruptionBudget:
+      enabled: false
+      maxUnavailable: 0
+    priorityClass:
+      create: false
+      value: 10200
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 8192Mi
+    tolerations: []
+  replication:
+    enabled: false
+  slave:
+    annotations:
+      backup.codedx.io/type: none
+    config: |-
+      [mysqld]
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mariadb
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      tmpdir=/opt/bitnami/mariadb/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+      log-error=/opt/bitnami/mariadb/logs/mysqld.log
+      character-set-server=utf8mb4
+      collation-server=utf8mb4_general_ci
+      optimizer_search_depth=0
+      lower_case_table_names=1
+      innodb_flush_log_at_trx_commit=0
+      log_bin_trust_function_creators=1
+      expire_logs_days=5
+
+      [client]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+    nodeSelector: {}
+    persistence:
+      backup:
+        size: 64Gi
+      size: 64Gi
+      storageClass:
+    podDisruptionBudget:
+      enabled: false
+      minAvailable: 1
+    priorityClass:
+      create: false
+      value: 10200
+    replicas: 1
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 8192Mi
+    tolerations: []
+  tests:
+    enabled: false

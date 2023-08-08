@@ -1,0 +1,187 @@
+{{- if .Values.features.to -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "srm-to.fullname" . | quote }}
+  labels:
+    {{- include "srm-to.labels" . | nindent 4 }}
+spec:
+  replicas: {{ required "numReplicas is required" .Values.to.service.numReplicas }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "srm-to.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "srm-to.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "srm-to.serviceAccountName" . | quote }}
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      {{- if .Values.to.nodeSelectors }}
+      nodeSelector:
+      {{- toYaml .Values.to.nodeSelectors | trim | nindent 8 }}
+      {{- end }}
+      {{- if .Values.to.tolerations }}
+      tolerations:
+      {{- toYaml .Values.to.tolerations | trim | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: tool-service
+        image: "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.toolService }}:{{ .Values.to.image.tag }}"
+        imagePullPolicy: Always
+        resources:
+          {{- toYaml .Values.to.resources | trim | nindent 10 }}
+        command: 
+          - "/opt/codedx/service/bin/service"
+        args:
+          - "-adminApiKeyPath"
+          - "/opt/codedx/service/secrets/adminApiKey"
+          - "-codeDxBaseUrl"
+          - "{{ include "srm-web.serviceurl" . }}"
+          - "-codeDxCaConfigMapName"
+          - "{{ .Values.to.caConfigMap }}"
+          - "-imageNameCodeDxTools"
+          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.tools }}:{{ .Values.web.image.tag }}"
+          - "-imageNameCodeDxToolsMono"
+          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.toolsMono }}:{{ .Values.web.image.tag }}"
+          - "-imageNamePrepare"
+          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.prepare }}:{{ .Values.to.image.tag }}"
+          - "-imageNameNewAnalysis"
+          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.newAnalysis }}:{{ .Values.to.image.tag }}"
+          - "-imageNameSendErrorResults"
+          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.sendErrorResults }}:{{ .Values.to.image.tag }}"
+          - "-imageNameSendResults"
+          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.sendResults }}:{{ .Values.to.image.tag }}"
+          {{- if .Values.imagePullSecrets -}}
+          {{- with index .Values.imagePullSecrets 0 }}
+          - "-imagePullSecretKey"
+          - "{{ .name }}"
+          {{- end -}}
+          {{- end }}
+          - "-kubernetesNamespace"
+          - "{{ .Release.Namespace }}"
+          - "-logFile"
+          - "/opt/codedx/service/logs/service.log"
+          - "-logMaxSizeMB"
+          - "{{ .Values.to.logs.maxSizeMB }}"
+          - "-logMaxBackups"
+          - "{{ .Values.to.logs.maxBackups }}"
+          - "-minimumWorkflowStepRunTime"
+          - "{{ .Values.to.minimumWorkflowStepRunTimeSeconds }}"
+          - "-storageEndpoint"
+          - "{{ include "srm-to.storageEndpoint" . }}"
+          - "-storageTlsEnabled={{ include "srm-to.storageTlsEnabled" . }}"
+          - "-storageBucket"
+          - "{{ .Values.to.workflowStorage.bucketName }}"
+          - "-storageCredentialSecretName"
+          - "{{ include "srm-to.storageCredentialSecretName" . }}"
+          - "-storageTlsConfigMapName"
+          - "{{ include "srm-to.storageTlsConfigMapName" . }}"
+          - "-storageTlsConfigMapPublicCertName"
+          - "{{ include "srm-to.storageTlsConfigMapPublicCertName" . }}"
+          - "-port"
+          - "{{ required "toolServicePort is required" .Values.to.toolServicePort }}"
+          - "-serviceName"
+          - "{{ .Release.Name }}"
+          {{- if .Values.to.tlsSecret }}
+          - "-serviceTlsCertPath"
+          - "/opt/codedx/service/tls/tls.crt"
+          - "-serviceTlsKeyPath"
+          - "/opt/codedx/service/tls/tls.key"
+          {{- end }}
+          - "-workDir"
+          - "/opt/codedx/service/work"
+          - "-workflowControllerInstanceName"
+          - "{{ .Release.Name }}"
+          - "-workflowPriorityClassName"
+          - "{{ include "srm-to.workflow.priorityClassName" . }}"
+          - "-workflowRoleNames"
+          - "{{ include "srm-to.workflow.role.name" . }}"
+        readinessProbe:
+          httpGet:
+            port: 3333
+            path: /ready
+          {{- if .Values.to.tlsSecret }}
+            scheme: HTTPS
+          {{- end }}
+          initialDelaySeconds: 20
+          periodSeconds: 60
+          failureThreshold: 4
+          timeoutSeconds: 30
+        livenessProbe:
+          httpGet:
+            port: 3333
+            path: /alive
+          {{- if .Values.to.tlsSecret }}
+            scheme: HTTPS
+          {{- end }}
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          failureThreshold: 4
+          timeoutSeconds: 30
+        volumeMounts:
+        - name: tool-service-secret-volume
+          mountPath: "/opt/codedx/service/secrets/adminApiKey"
+          readOnly: true
+          subPath: adminApiKey
+        - name: storage-secret-volume
+          mountPath: "/opt/codedx/service/secrets/storageUsername"
+          readOnly: true
+          subPath: storageUsername
+        - name: storage-secret-volume
+          mountPath: "/opt/codedx/service/secrets/storagePassword"
+          readOnly: true
+          subPath: storagePassword
+        {{ if .Values.to.workflowStorage.configMapName -}}
+        - name: storage-cert-volume
+          mountPath: /etc/ssl/certs/cdx-minio.pem
+          subPath: cdx-minio.pem
+          readOnly: true
+        {{ end -}}
+        {{ if .Values.to.tlsSecret -}}
+        - name: tool-service-tls-volume
+          mountPath: "/opt/codedx/service/tls"
+        {{ end -}}
+        ports:
+        - containerPort: 3333
+          name: http
+      priorityClassName: {{ include "srm-to.service.priorityClassName" . | quote }}
+      volumes:
+      - name: tool-service-secret-volume
+        secret:
+          secretName: {{ include "srm-to.to.secret" . | quote }}
+          items:
+          - key: api-key
+            path: adminApiKey
+      - name: storage-secret-volume
+        secret:
+          secretName: {{ include "srm-to.storageCredentialSecretName" . | quote }}
+          items:
+          - key: access-key
+            path: storageUsername
+          - key: secret-key
+            path: storagePassword
+      {{ if .Values.to.workflowStorage.configMapName -}}
+      - name: storage-cert-volume
+        configMap:
+          name: {{ .Values.to.workflowStorage.configMapName }}
+          items:
+            - key: {{ .Values.to.workflowStorage.configMapPublicCertKeyName }}
+              path: cdx-minio.pem
+      {{ end -}}
+      {{ if .Values.to.tlsSecret -}}
+      - name: tool-service-tls-volume
+        secret:
+          secretName: {{ .Values.to.tlsSecret }}
+      {{ end -}}
+      - name: logs
+        emptyDir: {}
+{{- end -}}

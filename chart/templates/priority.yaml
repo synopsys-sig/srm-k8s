@@ -1,0 +1,9 @@
+{{- if .Values.web.priorityClass.create -}}
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ include "srm-web.priorityClassName" . | quote }}
+value: {{ .Values.web.priorityClass.value }}
+globalDefault: false
+description: "The priority class for the SRM web application."
+{{- end -}}

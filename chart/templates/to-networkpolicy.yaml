@@ -1,0 +1,107 @@
+{{- if and .Values.features.to .Values.networkPolicy.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-to.networkPolicyName" . | quote }}
+  labels:
+    {{- include "srm-to.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "srm-to.selectorLabels" . | nindent 6 }}
+  egress:
+  - ports:
+    - port: {{ required "kubeapi-server target/pod port must be defined" .Values.networkPolicy.k8sApiPort }}
+      protocol: TCP
+    - port: 53
+      protocol: TCP
+    - port: 53
+      protocol: UDP
+  - ports:
+    {{- if .Values.web.tlsSecret }}
+    - port: 8443
+    {{- else }}
+    - port: 8080
+    {{- end }}
+    to:
+    - podSelector:
+        matchLabels:
+          {{- include "srm-web.selectorLabels" . | nindent 10 }}
+  - ports:
+    - port: 9000
+    to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: {{ include "minio.ref.name" . }}
+          app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  ingress:
+  - ports:
+    - port: 3333
+    from:
+    - podSelector:
+        matchLabels:
+          {{- include "srm-web.selectorLabels" . | nindent 10 }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-to.argo-networkPolicyName" . | quote }}
+  labels:
+    {{- include "srm-to.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: '{{ .Release.Name }}-{{ .Values.argo.controller.name }}'
+      release: {{ .Release.Name | quote }}
+  egress:
+  - ports:
+    - port: {{ required "kubeapi-server target/pod port must be defined" .Values.networkPolicy.k8sApiPort }}
+      protocol: TCP
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-to.minio-networkPolicyName" . | quote }}
+  labels:
+    {{- include "srm-to.labels" . | nindent 4 }}
+spec:
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "srm-to.selectorLabels" . | nindent 10 }}
+    - podSelector:
+        matchLabels:
+          workflowOwner: {{ .Release.Name | quote }}
+    - podSelector:
+        matchLabels:
+          {{- include "srm-to.job-labels" . | nindent 10 }}
+          component: hook
+    ports:
+    - protocol: TCP
+      port: 9000
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "minio.ref.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-to.workflow-networkPolicyName" . | quote }}
+  labels:
+    {{- include "srm-to.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      workflowOwner: {{ .Release.Name | quote }}
+  egress:
+  - {}
+  policyTypes: ["Ingress", "Egress"]
+{{- end -}}

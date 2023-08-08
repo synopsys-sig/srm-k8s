@@ -1,0 +1,169 @@
+features:
+  minio: true
+  to: true
+
+web:
+  podDisruptionBudget:
+    enabled: true
+  priorityClass:
+    create: true
+  toSecret:
+
+mariadb:
+  master:
+    podDisruptionBudget:
+      enabled: true
+    priorityClass:
+      create: true
+  slave:
+    podDisruptionBudget:
+      enabled: true
+    priorityClass:
+      create: true
+
+to:
+  caConfigMap:
+  # toSecret required fields:
+  # - api-key
+  # kubectl -n srm create secret generic tool-service-pd --from-literal api-key=password
+  toSecret:
+  image:
+    registry: docker.io
+    repository:
+      tools: 'codedx/codedx-tools'
+      toolsMono: 'codedx/codedx-toolsmono'
+      helmPreDelete: 'codedx/codedx-cleanup'
+      prepare: 'codedx/codedx-prepare'
+      newAnalysis: 'codedx/codedx-newanalysis'
+      sendErrorResults: 'codedx/codedx-error-results'
+      sendResults: 'codedx/codedx-results'
+      toolService: 'codedx/codedx-tool-service'
+    tag: v1.26.0
+  logs:
+    maxSizeMB: 10
+    maxBackups: 20
+  minimumWorkflowStepRunTimeSeconds: 3
+  service:
+    numReplicas: 1
+    type: ClusterIP
+    toolServicePort: 3333
+  serviceAccount:
+    create: true
+    annotations: {}
+    name:
+  name:
+  nodeSelector: {}
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  priorityClass:
+    workflowValue: 10000
+    serviceValue: 10100
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+  tools:
+    nodeSelectorKey:
+    nodeSelectorValue:
+    podTolerationKey:
+    podTolerationValue:
+    requests:
+      tool:
+        cpu: '500m'
+        memory: '500Mi'
+    limits:
+      tool:
+        cpu: '2'
+        memory: '2G'
+  tolerations: []
+  toolServicePort: 3333
+  # tlsSecret required fields:
+  # - tls.crt
+  # - tls.key
+  # kubectl -n srm create secret tls to-tls-secret --cert=path/to/cert-file --key=path/to/key-file
+  tlsSecret:
+  workflowStorage:
+    # Workflow storage endpoint to use, either an external endpoint (e.g., AWS, GCP) or the older, bundled MinIO instance. Specify the
+    # hostname and port (e.g., hostname:port).
+    endpoint:
+    # Whether the endpoint is secured with HTTPS.
+    endpointSecure:
+    # Name of workflow storage bucket that will store workflow files. This should be an existing bucket when the account associated 
+    # with the storage credentials cannot create the bucket on its own.
+    bucketName: code-dx-storage
+    # Use an existing secret, with fields access-key and secret-key, for the storage credential. The credential must be able
+    # to create and delete objects in the bucket given by the 'bucketName' parameter.
+    existingSecret:
+    # Specifies a ConfigMap name that contains certificate data that should be explicitly trusted when connecting to
+    # workflow storage. Use configMapName when the workflow storage server's certificate was not issued by a well known CA.
+    configMapName: ""
+    # Specifies the key name in the configMapName ConfigMap containing the certificate data.
+    configMapPublicCertKeyName: ""
+
+minio:
+  enabled: true
+  global:
+    minio:
+      # existingSecret required fields:
+      # - access-key
+      # - secret-key
+      # kubectl -n srm create secret generic minio-secret --from-literal=access-key=admin --from-literal=secret-key=password
+      existingSecret:
+  image:
+    registry: docker.io
+    repository: bitnami/minio
+    # Note: Tag '2021.4.6-debian-10-r11' predates license change
+    tag: 2021.4.6-debian-10-r11
+    pullSecrets: []
+    #  - private-registry
+  nodeSelector: {}
+  podAnnotations: {}
+  persistence:
+    size: 64Gi
+    existingClaim:
+    storageClass:
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: 0
+  priorityClassValue: 10100
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 500Mi
+  tlsSecret:
+  tolerations: []
+
+argo:
+  # depends on https://github.com/codedx/codedx-kubernetes/tree/master/setup/core/crds/v1
+  controller:
+    containerRuntimeExecutor: pns
+    extraEnv:
+    - name: 'RECENTLY_STARTED_POD_DURATION'
+      value: '10s'
+    instanceID:
+      enabled: true
+      useReleaseName: true
+    nodeSelector: {}
+    pdb:
+      # workflow controller can tolerate occasional downtime
+      enabled: false
+    priorityClassValue: 10100
+    resources:
+      limits:
+        cpu: 500m
+        memory: 500Mi
+    tolerations: []
+  images:
+    controller: codedx-workflow-controller
+    executor: codedx-argoexec
+    namespace: codedx
+    pullSecrets: []
+    #  - name: private-registry
+    tag: v2.17.0
+  minio:
+    install: false
+  server:
+    enabled: false
+  ui:
+    enabled: false

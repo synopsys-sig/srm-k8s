@@ -1,0 +1,318 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "srm-web.fullname" . }}
+  labels:
+    {{- include "srm-web.labels" . | nindent 4 }}
+spec:
+  # The SRM web component does not officially support more than one instance running
+  # against the same database server - doing so will lead to errors in the web interface.
+  # More than one SRM web instance running during an installation or database schema
+  # upgrade *is very likely to corrupt your database!*
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "srm-web.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.web.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "srm-web.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "srm-web.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.web.podSecurityContext | nindent 8 }}
+      {{- if .Values.nodeSelectors }}
+      nodeSelector:
+      {{- toYaml .Values.web.nodeSelectors | trim | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+      {{- toYaml .Values.web.tolerations | trim | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: srm
+          env:
+            - name: TMPDIR
+              value: /tmp
+            - name: CATALINA_BASE
+              value: /opt/tomcat
+            - name: CATALINA_TMPDIR
+              value: /opt/tomcat/temp
+            - name: SUPERUSER_NAME
+              value: "admin"
+          image: "{{ .Values.web.image.registry }}/{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          readinessProbe:
+            httpGet:
+              path: /codedx/x/system-status/ready
+              {{- if .Values.web.tlsSecret }}
+              scheme: HTTPS
+              port: 8443
+              {{- else }}
+              port: 8080
+              {{- end }}
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /codedx/x/system-status/alive
+              {{- if .Values.web.tlsSecret }}
+              scheme: HTTPS
+              port: 8443
+              {{- else }}
+              port: 8080
+              {{- end }}
+            initialDelaySeconds: 300
+            periodSeconds: 15
+            timeoutSeconds: 10
+          command: ["start.sh"]
+          securityContext:
+            {{- toYaml .Values.web.securityContext | nindent 12 }}
+          args:
+            - {{ include "srm-web.database.props.system-property" . }}
+          ports:
+            {{- if .Values.web.tlsSecret }}
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            {{- else }}
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+             {{- end }}
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12 }}
+          volumeMounts:
+            - name: database-credential-secret
+              mountPath: {{ include "srm-web.database.props.path" . }}
+              subPath: {{ include "srm-web.database.props.filename" . }}
+            - name: ephemeral-tmp
+              mountPath: /tmp
+            {{ if .Values.web.tlsSecret -}}
+            - mountPath: /usr/local/tomcat/conf/server.xml
+              name: server-xml
+              subPath: server.xml
+            - mountPath: /usr/local/tomcat/conf/ssl.crt
+              name: tls
+              subPath: ssl.crt
+            - mountPath: /usr/local/tomcat/conf/ssl.key
+              name: tls
+              subPath: ssl.key
+            {{- end }}
+            - name: ephemeral-tomcat
+              mountPath: /opt/tomcat
+            {{ if .Values.web.licenseSecret -}}
+            - name: license-secret
+              mountPath: {{ include "srm-web.license.path" . }}
+              subPath: {{ include "srm-web.license.filename" . }}
+            {{- end }}
+            - name: logging-cfgmap
+              mountPath: {{ include "srm-web.logback.path" . }}
+              subPath: {{ include "srm-web.logback.filename" . }}
+            - name: props-cfgmap
+              mountPath: {{ include "srm-web.main.props.path" . }}
+              subPath: {{ include "srm-web.main.props.filename" . }}
+            - name: props-cfgmap
+              mountPath: {{ include "srm-web.connection-pool.path" . }}
+              subPath: {{ include "srm-web.connection-pool.filename" . }}
+            - name: web-secret
+              mountPath: {{ include "srm-web.admin.password.path" . }}
+              subPath: {{ include "srm-web.admin.password.filename" . }}
+            - name: props-cfgmap
+              mountPath: /usr/local/tomcat/bin/setenv.sh
+              subPath: tomcat.env
+            - name: props-cfgmap
+              mountPath: {{ include "srm-web.ml.props.path" . }}
+              subPath: {{ include "srm-web.ml.props.filename" . }}
+            - name: pv
+              mountPath: {{ include "srm-web.appdata.path" . }}
+            {{ if .Values.web.cacertsSecret -}}
+            - name: cacerts-secret
+              mountPath: /opt/java/openjdk/lib/security/cacerts
+              subPath: cacerts
+            - name: cacerts-password-secret
+              mountPath: {{ include "srm-web.cacerts.password.path" . }}
+              subPath: {{ include "srm-web.cacerts.password.filename" . }}
+            {{- end }}
+            {{ if .Values.features.scanfarm -}}
+            - name: sf-props
+              mountPath: {{ include "srm-web.sf.props.path" . }}
+              subPath: {{ include "srm-web.sf.props.filename" . }}
+            {{- end }}
+            {{ if .Values.features.to -}}
+            - name: to-key-props
+              mountPath: {{ include "srm-web.to-key.props.path" . }}
+              subPath: {{ include "srm-web.to-key.props.filename" . }}
+            - name: to-props
+              mountPath: {{ include "srm-web.to.props.path" . }}
+              subPath: {{ include "srm-web.to.props.filename" . }}
+            {{- end }}
+            {{ range .Values.web.props.extra -}}
+            - name: "extra-props-{{ .key }}"
+              mountPath: "{{ include "srm-web.appdata.path" . }}/{{ .key }}"
+              subPath: {{ .key | quote }}
+            {{ end }}
+            {{ if .Values.web.authentication.saml.enabled -}}
+            - name: saml-idp
+              mountPath: {{ include "srm-web.saml-idp.path" . }}
+              subPath: {{ include "srm-web.saml-idp.filename" . }}
+            - name: saml-props
+              mountPath: {{ include "srm-web.saml.props.path" . }}
+              subPath: {{ include "srm-web.saml.props.filename" . }}
+            - name: saml-keystore-props
+              mountPath: {{ include "srm-web.saml-keystore.props.path" . }}
+              subPath: {{ include "srm-web.saml-keystore.props.filename" . }}
+            {{- end }}
+      initContainers:
+        - name: srm-dbinit
+          securityContext:
+            {{- toYaml .Values.web.securityContext | nindent 12 }}
+          image: "{{ .Values.web.image.registry }}/{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          resources:
+            limits:
+              memory: "100Mi"
+              cpu: "100m"
+          {{- if .Values.features.mariadb }}
+          command: ["bash", "-c", "for i in {1..60}; do if (timeout 2 bash -c \"</dev/tcp/{{ .Release.Name }}-mariadb/3306\" echo $?); then echo 'Successfully connected to MariaDB port'; exit 0; else echo 'Retrying database connection...'; sleep 2; fi; done; echo 'MariaDB is unavailable'; exit 1"]
+          {{- else }}
+          command: ["bash", "-c", "url='{{ .Values.web.database.externalDbUrl }}' && pat='^jdbc:mysql://([^/:]+):?([0-9]+)?/.+$' && [[ $url =~ $pat ]] && host=${BASH_REMATCH[1]} && port=${BASH_REMATCH[2]:-3306} && for i in {1..60}; do if (timeout 2 bash -c </dev/tcp/$host/$port echo $?); then echo 'Successfully connected to database port'; exit 0; else echo 'Retrying database connection...'; sleep 2; fi; done; echo 'Database is unavailable'; exit 1"]
+          {{- end }}
+      restartPolicy: Always
+      {{- with .Values.web.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{ $propsConfigMapName := include "srm-web.props.configMapName" . | quote }}
+        {{ if .Values.web.licenseSecret -}}
+        - name: license-secret
+          secret:
+            secretName: {{ .Values.web.licenseSecret | quote }}
+            items:
+            - key: {{ include "srm-web.license.filename" . }}
+              path: {{ include "srm-web.license.filename" . }}
+        {{- end }}
+        - name: pv
+          persistentVolumeClaim:
+            claimName: {{ include "srm-web.volume.fullname" . | quote }}
+        - name: database-credential-secret
+          secret:
+            secretName: {{ include "srm-web.database-credential.secret" . | quote }}
+        - name: props-cfgmap
+          configMap:
+            name: {{ $propsConfigMapName }}
+        - name: logging-cfgmap
+          configMap:
+            name: {{ include "srm-web.props.loggingConfigMapName" . | quote }}
+        - name: web-secret
+          secret:
+            secretName: {{ include "srm-web.web.secret" . | quote }}
+        - emptyDir: {}
+          name: ephemeral-tomcat
+        - emptyDir: {}
+          name: ephemeral-tmp
+        {{ if .Values.web.cacertsSecret -}}
+        - name: cacerts-secret
+          secret:
+            secretName: {{ .Values.web.cacertsSecret | quote }}
+            items:
+            - key: cacerts
+              path: cacerts
+        - name: cacerts-password-secret
+          secret:
+            secretName: {{ .Values.web.cacertsSecret | quote }}
+            items:
+            - key: {{ include "srm-web.cacerts.password.filename" . }}
+              path: {{ include "srm-web.cacerts.password.filename" . }}
+        {{- end }}
+        {{- range .Values.web.props.extra }}
+        - name: "extra-props-{{ .key }}"
+          {{- if eq (required ".Values.web.props.extra entries must have a 'type' defined!" .type) "secret" }}
+          secret:
+            secretName: {{ .name | quote }}
+            items:
+            - key: {{ .key | quote }}
+              path: {{ .key | quote }}
+          {{- else if eq .type "values" }}
+          configMap:
+            name: {{ $propsConfigMapName }}
+            items:
+            - key: {{ .key | quote }}
+              path: {{ .key | quote }}
+          {{- end -}}
+        {{- end }}
+        {{ if .Values.web.authentication.saml.enabled -}}
+        - name: saml-idp
+          configMap:
+            name: {{ .Values.web.authentication.saml.samlIdpXmlFileConfigMap | quote }}
+            items:
+            - key: {{ include "srm-web.saml-idp.filename" . }}
+              path: {{ include "srm-web.saml-idp.filename" . }}
+        - name: saml-props
+          configMap:
+            name: {{ $propsConfigMapName }}
+            items:
+            - key: {{ include "srm-web.saml.props.filename" . }}
+              path: {{ include "srm-web.saml.props.filename" . }}
+        - name: saml-keystore-props
+          secret:
+            secretName: {{ .Values.web.authentication.saml.samlSecret | quote }}
+            items:
+            - key: {{ include "srm-web.saml-keystore.props.filename" . }}
+              path: {{ include "srm-web.saml-keystore.props.filename" . }}
+        {{- end }}
+        {{ if .Values.web.tlsSecret -}}
+        - name: server-xml
+          configMap:
+            name: {{ include "srm-web.props.serverConfigMapName" . | quote }}
+            items:
+            - key: server.xml
+              path: server.xml
+        - name: tls
+          secret:
+            secretName: {{ .Values.web.tlsSecret }}
+            items:
+            - key: tls.crt
+              path: ssl.crt
+            - key: tls.key
+              path: ssl.key
+        {{- end }}
+        {{ if .Values.features.scanfarm -}}
+        - name: sf-props
+          configMap:
+            name: {{ $propsConfigMapName }}
+            items:
+            - key: {{ include "srm-web.sf.props.filename" . }}
+              path: {{ include "srm-web.sf.props.filename" . }}
+        {{- end }}
+        {{ if .Values.features.to -}}
+        - name: to-key-props
+          secret:
+            secretName: {{ include "srm-web.to.secret" . | quote }}
+            items:
+            - key: {{ include "srm-web.to-key.props.filename" . }}
+              path: {{ include "srm-web.to-key.props.filename" . }}
+        - name: to-props
+          configMap:
+            name: {{ $propsConfigMapName }}
+            items:
+            - key: {{ include "srm-web.to.props.filename" . }}
+              path: {{ include "srm-web.to.props.filename" . }}
+        {{- end }}

@@ -1,0 +1,19 @@
+{{- if .Values.features.to -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cdx-toolsvc-resource-requirements
+data:
+  requests.cpu: {{ .Values.to.tools.requests.tool.cpu | quote }}
+  limits.cpu: {{ .Values.to.tools.limits.tool.cpu | quote }}
+  requests.memory: {{ .Values.to.tools.requests.tool.memory | quote }}
+  limits.memory: {{ .Values.to.tools.limits.tool.memory | quote }}
+  {{- if and .Values.to.tools.nodeSelectorKey .Values.to.tools.nodeSelectorValue }}
+  nodeSelectorKey: {{ .Values.to.tools.nodeSelectorKey | quote }}
+  nodeSelectorValue: {{ .Values.to.tools.nodeSelectorValue | quote }}
+  {{- end }}
+  {{- if and .Values.to.tools.podTolerationKey .Values.to.tools.podTolerationValue }}
+  podTolerationKey: {{ .Values.to.tools.podTolerationKey | quote }}
+  podTolerationValue: {{ .Values.to.tools.podTolerationValue | quote }}
+  {{- end }}
+{{- end -}}

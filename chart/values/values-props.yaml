@@ -1,0 +1,7 @@
+web:
+  props:
+    extra:
+    - key:  codedx-public-props
+      type: values
+      values:
+      - "project.default-branch-name = default"

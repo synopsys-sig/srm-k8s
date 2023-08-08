@@ -1,0 +1,66 @@
+{{- if (and .Values.networkPolicy.enabled .Values.features.mariadb) -}}
+{{- if .Values.mariadb.replication.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-web.secondary-db-networkPolicyName" . | quote }}
+  labels:
+    {{- include "srm-web.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: mariadb
+      component: slave
+      release: {{ .Release.Name | quote }}
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: mariadb
+          component: master
+          release: {{ .Release.Name | quote }}
+    ports:
+    - port: 3306
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+---
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "srm-web.primary-db-networkPolicyName" . }}
+  labels:
+    {{- include "srm-web.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app: mariadb
+      component: master
+      release: {{ .Release.Name | quote }}
+  ingress:
+    # DB port
+    - from:
+      - podSelector:
+          matchLabels:
+            {{- include "srm-web.selectorLabels" . | nindent 12 }}
+      ports:
+      - port: 3306
+    # replication port
+    - from:
+      - podSelector:
+          matchLabels:
+            app: mariadb
+            component: slave
+            release: {{ .Release.Name | quote }}
+      ports:
+      - port: 3306
+  egress:
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+{{- end -}}

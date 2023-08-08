@@ -1,0 +1,19 @@
+{{- if .Values.features.to -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "srm-to.fullname" . | quote }}
+  labels:
+    {{- include "srm-to.labels" . | nindent 4 }}
+  annotations:
+{{ toYaml .Values.to.service.annotations | indent 4 }}
+spec:
+  type: {{ required "service.type must be defined" .Values.to.service.type | quote }}
+  ports:
+  - name: http
+    port: {{ required "toolServicePort is required" .Values.to.toolServicePort }}
+    protocol: TCP
+    targetPort: 3333
+  selector:
+    {{- include "srm-to.selectorLabels" . | nindent 4 }}
+{{- end -}}

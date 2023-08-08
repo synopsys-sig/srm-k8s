@@ -1,0 +1,108 @@
+{{- if .Values.features.scanfarm -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "srm-sf.svc-job" . | quote }}
+  labels:
+    {{- include "srm-sf.svc-job-labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install, post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "srm-sf.svc-job-labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "srm-web.serviceAccountName" . | quote }}
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      {{- if .Values.web.nodeSelectors }}
+      nodeSelector:
+      {{- toYaml .Values.web.nodeSelectors | trim | nindent 8 }}
+      {{- end }}
+      {{- if .Values.web.tolerations }}
+      tolerations:
+      {{- toYaml .Values.web.tolerations | trim | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      containers:
+      - name: configuration-job
+        image: "{{ .Values.web.image.registry }}/{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            echo 'Waiting for SRM web...'
+            while [ 1 ]; do if (timeout 2 bash -c "</dev/tcp/{{ include "srm-web.fullname" . }}/9090" echo $?); then echo 'SRM Web is ready'; break; else echo 'SRM Web is not yet ready; retrying...'; sleep 2; fi; done
+
+            ADMINPWD=$(cat '{{ include "srm-web.admin.password.path" . }}')
+            ADMINCRED=$(echo -n "admin:$ADMINPWD" | base64 --wrap=0)
+
+            NAME='scan-service-srm-api-key'
+            ID_PATTERN="\"id\":([0-9]*),\"name\":\"$NAME\""
+            KEYRESPONSE=$(curl -f -H "Authorization: Basic $ADMINCRED" {{ include "srm-web.serviceurl" . }}/x/admin/users/key)
+            if [ 0 -ne $? ]; then echo 'Failed to make request to "{{ include "srm-web.serviceurl" . }}/x/admin/users/key" - does your admin K8s secret "{{ include "srm-web.web.secret" . }}" have the correct password?'; exit 1; fi
+
+            if [[ $KEYRESPONSE =~ $ID_PATTERN ]]
+            then
+              echo "Regenerating key for user ID ${BASH_REMATCH[1]}..."
+              RESPONSE=$(curl \
+                -f \
+                -X POST \
+                -H "Authorization: Basic $ADMINCRED" \
+                {{ include "srm-web.serviceurl" . }}/x/admin/users/key/${BASH_REMATCH[1]}/regenerate)
+              if [ 0 -ne $? ]; then echo 'Failed to regenerate service key'; exit 1; fi
+            else
+              echo "Generating key for user $NAME..."
+              RESPONSE=$(curl \
+                -f \
+                -H "Authorization: Basic $ADMINCRED" \
+                -H "Content-Type: application/json" \
+                -d "{\"name\":\"$NAME\"}" \
+                {{ include "srm-web.serviceurl" . }}/x/admin/users/key/internal-service)
+              if [ 0 -ne $? ]; then echo 'Failed to generate new service key'; exit 1; fi
+            fi
+
+            KEY=$(echo $RESPONSE | grep -oP '(?<=secret":")[^"]*')
+            KEYDOC=$(echo -n "{\"secret\":\"$KEY\"}" | base64 --wrap=0)
+
+            DATA="{\"apiVersion\":\"v1\",\"kind\":\"Secret\",\"metadata\":{\"namespace\":\"{{ .Release.Namespace }}\",\"name\":\"$NAME\"},\"type\":\"Opaque\",\"data\":{\"srm-api.key\":\"$KEYDOC\"}}"
+
+            curl -k -f -s -S -o /dev/null -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" -H "Accept: application/json" https://$KUBERNETES_SERVICE_HOST/api/v1/namespaces/{{ .Release.Namespace }}/secrets/$NAME
+            if [ 0 -eq $? ]
+            then
+              echo "Updating existing K8s secret resource named $NAME..."
+              curl -k -f -s -S -o /dev/null \
+                -XPATCH \
+                -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+                -H "Accept: application/json" \
+                -H "Content-Type: application/strategic-merge-patch+json" \
+                -d $DATA \
+                https://$KUBERNETES_SERVICE_HOST/api/v1/namespaces/{{ .Release.Namespace }}/secrets/$NAME
+              if [ 0 -ne $? ]; then echo 'Failed to update the existing K8s secret for the SRM API key'; exit 1; fi
+            else
+              echo "Creating new K8s secret resource named $NAME..."
+              curl -k -f -s -S -o /dev/null \
+                -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+                -H "Content-Type: application/json" \
+                -d $DATA \
+                https://$KUBERNETES_SERVICE_HOST/api/v1/namespaces/{{ .Release.Namespace }}/secrets
+              if [ 0 -ne $? ]; then echo 'Failed to create a new K8s secret containing the SRM API key'; exit 1; fi
+            fi
+            exit $?
+        volumeMounts:
+        - name: web-secret
+          mountPath: {{ include "srm-web.admin.password.path" . }}
+          subPath: {{ include "srm-web.admin.password.filename" . }}
+      volumes:
+      - name: web-secret
+        secret:
+          secretName: {{ include "srm-web.web.secret" . | quote }}
+{{- end -}}

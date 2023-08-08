@@ -1,0 +1,137 @@
+#
+# Follow the instructions at https://cert-manager.io/docs/usage/kube-csr/ to install cert-manager kube-csr
+#
+# $ export CERT_MANAGER_NAMESPACE='cert-manager'
+# $ export SRM_NAMESPACE='srm'
+# $ export SRM_RELEASE_NAME='srm'
+# $ export CERT_SIGNER='clusterissuers.cert-manager.io/ca-issuer'
+# 
+# $ export CA_CONFIGMAP_NAME='srm-ca-configmap'
+# $ export SRM_WEB_SECRET_NAME='srm-web-tls-secret'
+# $ export SRM_DB_SECRET_NAME='srm-db-tls-secret'
+# $ export SRM_TO_SECRET_NAME='srm-to-tls-secret'
+# $ export SRM_MINIO_SECRET_NAME='srm-minio-tls-secret'
+# $ export SRM_WEB_CACERTS_SECRET_NAME='srm-web-cacerts-secret'
+# 
+# $ # Fetch CA cert from cert-manager
+# $ kubectl -n $CERT_MANAGER_NAMESPACE get secret codedx-dev-ca-issuer-key-pair -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
+# 
+# $ # Create CA ConfigMap
+# $ kubectl -n $SRM_NAMESPACE create configmap $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
+# 
+# $ # Add ca.crt to cacerts file
+# $ keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
+#
+# $ # Create cacerts Secret
+# $ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=./cacerts --from-literal cacerts-password=changeit
+#
+# $ # Start pwsh session
+# $ pwsh
+# $ $global:PSNativeCommandArgumentPassing='Legacy'
+# $ Install-Module guided-setup
+# 
+# $ # Create SRM web certificate
+# $ $webSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-web"
+# $ New-Certificate $env:CERT_SIGNER './ca.crt ' $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $env:SRM_NAMESPACE
+# 
+# $ # Create SRM web Secret
+# $ New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
+# 
+# $ # Create primary DB certificate
+# $ $dbSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'mariadb'
+# $ New-Certificate $env:CERT_SIGNER './ca.crt ' $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $env:SRM_NAMESPACE
+# 
+# $ # Create DB Secret
+# $ New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
+# 
+# $ # Create TO certificate
+# $ $toSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-to"
+# $ New-Certificate $env:CERT_SIGNER './ca.crt ' $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $env:SRM_NAMESPACE
+# 
+# $ # Create TO Secret
+# $ New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
+# 
+# $ # Create MinIO certificate
+# $ $minioSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'minio'
+# $ New-Certificate $env:CERT_SIGNER './ca.crt ' $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $env:SRM_NAMESPACE
+# 
+# $ # Create MinIO Secret
+# $ New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_MINIO_SECRET_NAME './minio-tls.crt' './minio-tls.key'
+
+mariadb:
+  master:
+    masterCaConfigMap: srm-ca-configmap
+    masterTlsSecret: srm-db-tls-secret
+    config: |-
+      [mysqld]
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mariadb
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      tmpdir=/opt/bitnami/mariadb/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+      log-error=/opt/bitnami/mariadb/logs/mysqld.log
+      character-set-server=utf8mb4
+      collation-server=utf8mb4_general_ci
+      optimizer_search_depth=0
+      lower_case_table_names=1
+      innodb_flush_log_at_trx_commit=0
+      log_bin_trust_function_creators=1
+      expire_logs_days=5
+      ssl_cert=/bitnami/mariadb/tls/cert/tls.crt
+      ssl_key=/bitnami/mariadb/tls/cert/tls.key
+      ssl_ca=/bitnami/mariadb/tls/ca/ca.crt
+      [client]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+  slave:
+    config: |-
+      [mysqld]
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mariadb
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      tmpdir=/opt/bitnami/mariadb/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+      log-error=/opt/bitnami/mariadb/logs/mysqld.log
+      character-set-server=utf8mb4
+      collation-server=utf8mb4_general_ci
+      optimizer_search_depth=0
+      lower_case_table_names=1
+      innodb_flush_log_at_trx_commit=0
+      log_bin_trust_function_creators=1
+      expire_logs_days=5
+
+      [client]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      ssl_ca=/bitnami/mariadb/tls/ca/ca.crt
+
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+
+minio:
+  tlsSecret: srm-minio-tls-secret
+
+to:
+  caConfigMap: srm-ca-configmap
+  tlsSecret: srm-to-tls-secret
+  workflowStorage:
+    configMapName: srm-ca-configmap
+    configMapPublicCertKeyName: ca.crt
+
+web:
+  cacertsSecret: srm-web-cacerts-secret
+  tlsSecret: srm-web-tls-secret

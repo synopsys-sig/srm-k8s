@@ -1,0 +1,17 @@
+{{- if not .Values.web.persistence.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "srm-web.volume.fullname" . }}
+  labels:
+    {{- include "srm-web.labels" . | nindent 4 }}
+spec:
+  accessModes:
+  - {{ .Values.web.persistence.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.web.persistence.size }}
+{{- if .Values.web.persistence.storageClass }}
+  storageClassName: {{ .Values.web.persistence.storageClass | quote }}
+{{- end -}}
+{{- end -}}

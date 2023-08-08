@@ -1,0 +1,82 @@
+function Get-SigRepoSecretName($config) {
+	"$($config.releaseName)-sig-repo-secret"
+}
+
+function New-SigRepoSecret($config) {
+
+	New-GenericSecret $config.namespace (Get-SigRepoSecretName $config) -keyValues @{
+		"username"=$config.sigRepoUsername
+		"password"=$config.sigRepoPwd
+	} -dryRun | Out-File (Get-SigRepoSecretK8sPath $config)
+}
+
+function New-ScanFarmInternalStorageConfig($config) {
+
+	@"
+cnc:
+  cnc-storage-service:
+    endpoint:
+      internal:
+        url: $($config.scanFarmStorageInClusterUrl)
+"@ | Out-File (Get-ScanFarmInternalUrlValuesPath $config)
+}
+
+function New-ScanFarmExternalProxiedStorageConfig($config) {
+
+  $externalWebSvcProtocol = "http"
+	if ($config.ingressTlsSecretName) {
+		$externalWebSvcProtocol = "https"
+	}
+  $externalWebSvcUrl = "$externalWebSvcProtocol`://$($config.ingressHostname)"
+
+  # The following MinIO configuration support currently limited to MinIO proxied behind the
+  # SRM ingress via the "upload" path
+  # 
+  # Note: A non-proxied MinIO can be configured by using external configuration to "erase"
+  # the proxyPath and set cnc.cnc-storage-service.endpoint.external.url to the MinIO 
+  # endpoint (e.g. https://my.minio.domain.name:9000)
+	@"
+cnc:
+  cnc-storage-service:
+    endpoint:
+      external:
+        proxyPath: upload
+        url: $externalWebSvcUrl
+"@ | Out-File (Get-ScanFarmExternalUrlValuesPath $config)
+}
+
+function New-ScanFarmConfig($config) {
+
+  New-SigRepoSecret $config
+	New-ScanFarmDatabaseConfig $config
+	New-ScanFarmCacheConfig $config
+	New-ScanFarmStorageConfig $config
+
+	$webSvcName = $config.GetWebServiceName()
+	$webSvcUrl = "http://$webSvcName`:9090/srm"
+
+
+	@"
+features:
+  scanfarm: true
+cnc:
+  cnc-cache-service:
+    javaOpts: "-Dcom.synopsys.coverity.cache.srm.secure=false"
+  scanfarm:
+    enabled: true
+    http:
+      enabled: true
+    mode: "SRM"
+    srm:
+      url: $webSvcUrl
+    tools:
+      sync:
+        enabled: true
+        existingSecret: $(Get-SigRepoSecretName $config)
+
+"@ | Out-File (Get-ScanFarmValuesPath $config)
+
+	if ($config.scanFarmStorageHasInClusterUrl) {
+		New-ScanFarmInternalStorageConfig $config
+	}
+}

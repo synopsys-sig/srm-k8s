@@ -1,0 +1,11 @@
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else }}
+Here's the port-forward command to access the SRM web service at http://localhost:{{ .Values.web.service.port }}/srm
+$ kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "srm-web.fullname" . }} {{ .Values.web.service.port }}
+{{- end }}
+
+You can get the initial SRM admin password by running this command:
+$ kubectl get secret --namespace {{ .Release.Namespace }} {{ include "srm-web.web.secret" . }} -o jsonpath="{.data.admin-password}" | base64 --decode

@@ -1,0 +1,17 @@
+{{- if .Values.features.to -}}
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ include "srm-to.workflow.priorityClassName" . | quote }}
+value: {{ .Values.to.priorityClass.workflowValue }}
+globalDefault: false
+description: "The priority class for SRM Tool Orchestration workflows."
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ include "srm-to.service.priorityClassName" . | quote }}
+value: {{ .Values.to.priorityClass.serviceValue }}
+globalDefault: false
+description: "The priority class for the SRM Tool Orchestration service."
+{{- end -}}
