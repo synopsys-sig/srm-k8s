@@ -10,13 +10,13 @@ provide a certificate for your database CA if you want to use TLS to
 secure the communication between SRM and your database (recommended).
 
 To use AWS RDS with MariaDB engine, follow these instructions:
-https://github.com/synopsys-sig/srm-k8s/blob/feature/srm/docs/db/use-rds-for-srm-database.md
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/db/use-rds-for-srm-database.md
 
 To use AWS RDS with MySQL engine, follow these instructions:
-https://github.com/synopsys-sig/srm-k8s/blob/feature/srm/docs/db/use-rds-mysql-for-srm-database.md
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/db/use-rds-mysql-for-srm-database.md
 
 Otherwise, follow these instructions to create your SRM database:
-https://github.com/synopsys-sig/srm-k8s/blob/feature/srm/docs/db/use-external-database.md
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/db/use-external-database.md
 '@
 
 	UseExternalDatabase([Config] $config) : base(

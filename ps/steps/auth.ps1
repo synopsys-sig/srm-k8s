@@ -42,7 +42,7 @@ Refer to the following URL for LDAP configuration instructions. Read the
 instructions at this time and remember to add any necessary certificates 
 if you plan to use LDAPS:
 
-https://github.com/synopsys-sig/srm-k8s/blob/feature/srm/docs/auth/use-ldap.md
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/auth/use-ldap.md
 '@
 
 	LdapInstructions([Config] $config) : base(
@@ -248,7 +248,7 @@ You can find the entire list of SRM SAML properties at
 https://community.synopsys.com/s/document-item?bundleId=codedx&topicId=install_guide%2FCodeDxConfiguration%2Fsaml-props.html&_LANG=enus
 
 To configure additional SAML properties, follow these instructions:
-https://github.com/synopsys-sig/srm-k8s/blob/feature/srm/docs/auth/use-saml.md
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/auth/use-saml.md
 '@
 
 	SamlExtraConfig([Config] $config) : base(

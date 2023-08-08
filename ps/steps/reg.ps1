@@ -41,7 +41,7 @@ class DockerRegistryHost  : Step {
 Specify the hostname for your Docker registry.
 '@
 
-	static [string] hidden $pullPushInstructionLink = 'https://github.com/synopsys-sig/srm-k8s/blob/feature/srm/docs/deploy/registry.md'
+	static [string] hidden $pullPushInstructionLink = 'https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md'
 
 	static [string] hidden $notes = "- Follow instructions at $([DockerRegistryHost]::pullPushInstructionLink) to pull/push SynopsysDocker images to your private registry."
 

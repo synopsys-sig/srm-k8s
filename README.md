@@ -94,7 +94,7 @@ K8s Installation Notes
   * Configure external dependencies (PostgreSQL, Redis, Object Storage)
   * Assign a pool-type label (pool-type=small) to analysis node(s).
   * Assign a ScannerNode pod toleration (NodeType=ScannerNode:NoSchedule) to analysis node(s).
-- Follow instructions at https://github.com/synopsys-sig/srm-ks8/blob/feature/srm/docs/deploy/registry.md to pull/push SynopsysDocker images to your private registry.
+- Follow instructions at https://github.com/synopsys-sig/srm-ks8/blob/main/docs/deploy/registry.md to pull/push SynopsysDocker images to your private registry.
 
 
 ----------------------
