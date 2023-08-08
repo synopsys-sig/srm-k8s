@@ -6,7 +6,7 @@ The following sections describe how to set both public and private properties by
 
 ## Proxy Server Example
 
-The following steps will configure a [proxy server](https://community.synopsys.com/s/document-item?bundleId=codedx&topicId=install_guide%2FCodeDxConfiguration%2Fproxy.html&_LANG=enus) for SRM using both public and private property values.
+The following steps will configure a [proxy server](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/CodeDxConfiguration/proxy.html) for SRM using both public and private property values.
 
 ### Public Property Values
 

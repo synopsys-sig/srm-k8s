@@ -325,7 +325,7 @@ You can configure a node selector for specific projects and/or tools by
 adding the nodeSelectorKey and nodeSelectorValue fields to a SRM 
 Resource Requirement - browse to the following URL for more details:
 
-https://community.synopsys.com/s/document-item?bundleId=codedx&topicId=user_guide%2FAnalysis%2Ftool-orchestration.html&_LANG=enus#resource-requirements
+https://sig-product-docs.synopsys.com/bundle/srm/page/user_guide/Analysis/resource_requirements.html
 
 Note: You can use the same node selector key and value for multiple workloads.
 '@
