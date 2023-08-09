@@ -106,6 +106,9 @@ class ScanFarmCacheBucketName : Step {
 The Scan Farm includes a cache service that depends on an existing
 bucket in your storage system.
 
+The cache service bucket should not be geographically distributed and
+it should not enable versioning, retention, or other special features.
+
 IMPORTANT NOTE: You *must* configure your cache service bucket with
 an object expiration greater than (not equal to) 7 days.
 '@
@@ -113,6 +116,9 @@ an object expiration greater than (not equal to) 7 days.
 	static [string] hidden $azureDescription = @'
 The Scan Farm includes a cache service that depends on an existing
 blob container in your Azure storage account.
+
+The cache service container should not be geographically distributed and
+it should not enable versioning, retention, or other special features.
 
 IMPORTANT NOTE: You *must* configure your cache service blob container
 with an object expiration greater than (not equal to) 7 days. You should

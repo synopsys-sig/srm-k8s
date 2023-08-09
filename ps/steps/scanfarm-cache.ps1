@@ -1,3 +1,45 @@
+class ScanFarmRedisRequirements : Step {
+
+	static [string] hidden $description = @'
+The next screen will ask for your Redis hostname. Here are the
+requirements and recommendations for your Redis instance:
+
+* Redis must be configured without eviction. The cache service design
+  requires that all metadata be resident in Redis at all times. If Redis
+  is not correctly configured, the cache service will refuse to start.
+
+* The Redis memory limit should be 1 GB, however this should be adjusted
+  based on your requirements. The cache service checks the memory usage of
+  the Redis server at start-up and will not start if memory usage is more
+  than 99% of the server limit.
+
+* The cache service does not use Redis persistence, therefore configure
+  Redis without persistence. If persistence is enabled, the Redis pod memory
+  limit must be significantly higher than the Redis server memory limit.
+'@
+	
+	ScanFarmRedisRequirements([Config] $config) : base(
+		[ScanFarmRedisRequirements].Name, 
+		$config,
+		'Scan Farm Redis Requirements',
+		[ScanFarmRedisRequirements]::description,
+		'Do you want to continue?') {}
+
+	[IQuestion]MakeQuestion([string] $prompt) {
+		return new-object MultipleChoiceQuestion($prompt, 
+			[tuple]::create('&Yes', 'Yes, I want to continue'),
+			-1)
+	}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		return $true
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.skipScanFarm
+	}
+}
+
 class ScanFarmRedisHost : Step {
 
 	static [string] hidden $description = @'

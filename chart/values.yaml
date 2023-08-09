@@ -82,7 +82,7 @@ web:
   image:
     registry: docker.io
     repository: codedx/codedx-tomcat
-    tag: v2023.8.0
+    tag: v2023.8.1
     pullPolicy: IfNotPresent
 
   javaOpts: "-XX:MaxRAMPercentage=90.0"

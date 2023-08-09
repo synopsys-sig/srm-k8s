@@ -160,6 +160,7 @@ $s = @{}
 [ScanFarmRedisHost],
 [ScanFarmRedisPassword],
 [ScanFarmRedisPort],
+[ScanFarmRedisRequirements],
 [ScanFarmRedisTls],
 [ScanFarmSastLicense],
 [ScanFarmScaLicense],
@@ -228,7 +229,7 @@ $s = @{}
 Add-StepTransitions $graph $s[[UseScanFarm]] $s[[SigRepoUsername]],$s[[SigRepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
 	$s[[ScanFarmDatabaseHost]],$s[[ScanFarmDatabasePort]],$s[[ScanFarmDatabaseUsername]],$s[[ScanFarmDatabasePwd]],
 	$s[[ScanFarmDatabaseTls]],$s[[ScanFarmDatabaseCert]],$s[[ScanFarmScanServiceDatabaseName]],$s[[ScanFarmStorageServiceDatabaseName]],
-	$s[[ScanFarmRedisHost]],$s[[ScanFarmRedisPort]],$s[[ScanFarmRedisDatabase]],
+	$s[[ScanFarmRedisRequirements]],$s[[ScanFarmRedisHost]],$s[[ScanFarmRedisPort]],$s[[ScanFarmRedisDatabase]],
 	$s[[ScanFarmRedisAuth]],$s[[ScanFarmRedisPassword]],$s[[ScanFarmRedisTls]],$s[[ScanFarmRedisCert]],
 	$s[[ScanFarmStorage]],$s[[ScanFarmStorageBucketName]],$s[[ScanFarmCacheBucketName]]
 
