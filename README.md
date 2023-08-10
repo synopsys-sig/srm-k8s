@@ -60,11 +60,11 @@ Your first SRM Kubernetes deployment is a four-step process:
 
 ## Prerequisites
 
-The deployment scripts in this repository require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. Additionally, the scripts in this repository depend on a Java JRE, specifically, the keytool program, which should be in your PATH. Before running the scripts, you should also have your kubectl context configured for your cluster. If this is impossible, set your context to a cluster with the same K8s version as the cluster hosting your SRM software.
+The deployment scripts in this repository require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. Additionally, the scripts in this repository depend on a [Java JRE](https://adoptium.net/temurin/releases/?version=11), specifically, the keytool program, which should be in your PATH. Before running the scripts, you should also have your kubectl context configured for your cluster. If this is impossible, set your context to a cluster with the same K8s version as the cluster hosting your SRM software.
 
-- PowerShell Core
-- Java JRE (specifically, keytool in your PATH)
-- kubectl context (kubectl config use-context your-context)
+- [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview) (not [Windows PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell))
+- [Java JRE](https://adoptium.net/temurin/releases/?version=11) (specifically, keytool in your PATH)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) context (kubectl config use-context your-context)
 
 ### Pod Resources
 
