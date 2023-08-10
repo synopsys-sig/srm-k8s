@@ -8,7 +8,46 @@ If you previously installed Code Dx, the SRM predecessor, you should upgrade you
 
 # Deploying SRM on Kubernetes
 
-You will use Helm to deploy SRM on your Kubernetes cluster. The SRM deployment includes optional features and requires you to specify parameters suitable for your deployment. This GitHub repository contains tools to help simplify deploying SRM on your cluster.
+You will use Helm to deploy SRM on your Kubernetes cluster. The SRM deployment includes optional features and requires you to specify parameters suitable for your deployment.
+
+## Quick Start
+
+If you want to run SRM using default settings, run helm directly using the chart in this repository. The Quick Start deployment method supports both SRM Core and SRM with the Tool Orchestration feature.
+
+>Note: If you want to customize your deployment or use the Scan Farm feature, refer to the Helm Chart Configuration section.
+
+### Quick Start - SRM Core
+
+Run the following commands to install SRM Core using the default configuration:
+
+```
+$ git clone https://github.com/synopsys-sig/srm-k8s
+$ helm repo add codedx https://codedx.github.io/codedx-kubernetes
+$ helm repo update
+$ helm dependency update srm-k8s/chart
+$ helm -n srm upgrade --install --create-namespace srm srm-k8s/chart # --set openshift.createSCC=true
+```
+
+>Note: If you are using OpenShift, remove `#` when running the last command.
+
+### Quick Start - SRM with Tool Orchestration
+
+Run the following commands to install SRM with Tool Orchestration using the default configuration:
+
+```
+$ git clone https://github.com/synopsys-sig/srm-k8s
+$ helm repo add codedx https://codedx.github.io/codedx-kubernetes
+$ helm repo update
+$ helm dependency update srm-k8s/chart
+$ kubectl apply -f srm-k8s/crds/v1
+$ helm -n srm upgrade --install --create-namespace -f srm-k8s/chart/values/values-to.yaml srm srm-k8s/chart # --set openshift.createSCC=true
+```
+
+>Note: If you are using OpenShift, remove `#` when running the last command.
+
+## Helm Chart Configuration
+
+This GitHub repository contains tools to help simplify deploying SRM on your cluster.
 
 Your first SRM Kubernetes deployment is a four-step process:
 
@@ -144,3 +183,14 @@ $ run helm/kubectl commands
 ```
 
 >Note: If you previously pulled SRM Docker images from the Synopsys Docker registry, re-pull/push the Docker images for the upgraded SRM version before running your helm command.
+
+## Uninstall
+
+You can remove SRM by running the following commands (replace release name and K8s namespace as necessary):
+
+```
+$ helm -n srm delete srm
+$ kubectl delete ns srm
+```
+
+Delete any remaining Persistent Volumes (PV) and any related PV data.
