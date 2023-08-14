@@ -23,6 +23,7 @@ Run the following commands to install SRM Core using the default configuration:
 ```
 $ git clone https://github.com/synopsys-sig/srm-k8s
 $ helm repo add codedx https://codedx.github.io/codedx-kubernetes
+$ helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
 $ helm repo update
 $ helm dependency update srm-k8s/chart
 $ helm -n srm upgrade --install --create-namespace srm srm-k8s/chart # --set openshift.createSCC=true
@@ -37,6 +38,7 @@ Run the following commands to install SRM with Tool Orchestration using the defa
 ```
 $ git clone https://github.com/synopsys-sig/srm-k8s
 $ helm repo add codedx https://codedx.github.io/codedx-kubernetes
+$ helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
 $ helm repo update
 $ helm dependency update srm-k8s/chart
 $ kubectl apply -f srm-k8s/crds/v1
