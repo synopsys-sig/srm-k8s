@@ -22,14 +22,13 @@ Obtain SIG docker registry credentials to provide access to download Synopsys SI
 
 ## Docker Registry Login
 
-Copy the Synopsys SIG Docker images to your private registry with these steps:
+Log on to the Synopsys SIG Docker registry and your private Docker registry with these steps:
 
 1. Login to Synopsys SIG Community at https://community.synopsys.com/s/.
 2. Navigate to Licenses > SRM.
 3. Click on View/Request Docker Registry Credential to open the license pop-up. This pop-up contains
 copy buttons to copy the credentials.
 4. Log on to the Synopsys SIG registry using the following command, specifying the username and password you copied:
-
 ```
 $ docker login sig-repo.synopsys.com
 ```
@@ -49,17 +48,17 @@ The following example commands use a fictitious private registry hosted in AWS a
 The first example stores Synopsys Docker images at the root of your private registry:
 
 ```
-$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.0
-$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.0 id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.0
-$ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.0
+$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.1
+$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.1 id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.1
+$ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.1
 ```
 
 The following example stores Synopsys Docker images under "my-srm" in your private registry. In this scenario, you must enter "my-srm" as your private registry repository prefix in the Guided Setup:
 
 ```
-$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.0
-$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.0 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.0
-$ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.0
+$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.1
+$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.1 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.1
+$ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.1
 ```
 
 See the following sections for the Docker images you must obtain via docker pull/tag/push commands. Pattern your commands after the above examples and run pull/tag/push for each Docker image your SRM deployment requires.
@@ -68,7 +67,26 @@ See the following sections for the Docker images you must obtain via docker pull
 
 The SRM Web pod requires this Docker image:
 
-- codedx/codedx-tomcat:v2023.8.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.1
+
+You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'codedx/codedx-tomcat:v2023.8.1' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
 
 ### SRM Database Docker images
 
@@ -76,33 +94,119 @@ If you are using an external SRM database, skip this section.
 
 The SRM Database pod requires this Docker image:
 
-- codedx/codedx-mariadb:v1.24.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-mariadb:v1.24.0
 
-### SRM Scan Farm Docker images
+You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'codedx/codedx-mariadb:v1.24.0' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
+
+### SRM Scan Farm Common Docker images
 
 If you are not using the SRM Scan Farm feature, skip this section.
 
 The SRM Scan Farm feature requires these Docker images:
 
-- cnc-cache-service:version
-- cnc-common-infra:version
-- cnc-scan-service:version
-- cnc-scan-service-migration:version
-- cnc-storage-service:version
-- cnc-storage-service-migration:version
+- sig-repo.synopsys.com/synopsys/cnc-cache-service:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-common-infra:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-scan-service:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-scan-service-migration:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-storage-service:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-storage-service-migration:2023.6.1
+
+You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'cnc-cache-service:2023.6.1',
+'cnc-common-infra:2023.6.1',
+'cnc-scan-service:2023.6.1',
+'cnc-scan-service-migration:2023.6.1',
+'cnc-storage-service:2023.6.1',
+'cnc-storage-service-migration:2023.6.1' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
+
+### SRM Scan Farm SAST Docker images
 
 The SRM Scan Farm SAST feature requires these Docker images:
 
-- cnc-cov-capture-linux64-\<cov-version>:version
-- cnc-cov-analysis-linux64-\<cov-version>:version
+- sig-repo.synopsys.com/synopsys/cnc-cov-capture-linux64-2023.6.1:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-2023.6.1:2023.6.1
 
->Note: Replace the Coverity version placeholder (e.g. 2023.6.1).
+>Note: The Coverity capture/analysis Docker image name format is sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-\<cov-version>:version.
+
+You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'cnc-cov-capture-linux64-2023.6.1:2023.6.1',
+'cnc-cov-analysis-linux64-2023.6.1:2023.6.1' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
+
+### SRM Scan Farm SCA Docker images
 
 The SRM Scan Farm SCA feature requires this Docker image:
 
-- cnc-synopsys-detect-\<detect-version>:version
+- sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-8.9.0:2023.6.1
 
->Note: Replace the Detect version placeholder (e.g. 8.9.0).
+>Note: The Detect Docker image name format is sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-\<detect-version>:version.
+
+You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'cnc-synopsys-detect-8.9.0:2023.6.1' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
 
 ### SRM Tool Orchestration Docker images
 
@@ -110,17 +214,88 @@ If you are not using the SRM Tool Orchestration feature, skip this section.
 
 The SRM Tool Orchestration feature requires these Docker images:
 
-- codedx/codedx-tools:v2023.8.0
-- codedx/codedx-toolsmono:v2023.8.0
-- codedx/codedx-prepare:v1.26.0
-- codedx/codedx-newanalysis:v1.26.0
-- codedx/codedx-results:v1.26.0
-- codedx/codedx-error-results:v1.26.0
-- codedx/codedx-tool-service:v1.26.0
-- codedx/codedx-cleanup:v1.26.0
-- codedx/codedx-workflow-controller:v2.17.0
-- codedx/codedx-argoexec:v2.17.0
-- bitnami/minio:2021.4.6-debian-10-r11 (when not using external workflow storage)
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2023.8.1
+- sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2023.8.1
+- sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v1.26.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v1.26.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-results:v1.26.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-error-results:v1.26.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v1.26.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v1.26.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-workflow-controller:v2.17.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-argoexec:v2.17.0
+- sig-repo.synopsys.com/synopsys/bitnami/minio:2021.4.6-debian-10-r11 (when not using external workflow storage)
+
+You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'codedx/codedx-tools:v2023.8.1',
+'codedx/codedx-toolsmono:v2023.8.1',
+'codedx/codedx-prepare:v1.26.0',
+'codedx/codedx-newanalysis:v1.26.0',
+'codedx/codedx-results:v1.26.0',
+'codedx/codedx-error-results:v1.26.0',
+'codedx/codedx-tool-service:v1.26.0',
+'codedx/codedx-cleanup:v1.26.0',
+'bitnami/minio:2021.4.6-debian-10-r11',
+'codedx/codedx-workflow-controller:v2.17.0',
+'codedx/codedx-argoexec:v2.17.0' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
+
+### Powershell Core Docker Pull/Tag/Push All Example
+
+If you are logged in to the Synopsys SIG Docker registry and your private registry, you can use the script below to pull, tag, and push all Synopsys Docker images; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash).
+
+```
+$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
+if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
+
+'codedx/codedx-tomcat:v2023.8.1',
+'codedx/codedx-tools:v2023.8.1',
+'codedx/codedx-toolsmono:v2023.8.1',
+'codedx/codedx-prepare:v1.26.0',
+'codedx/codedx-newanalysis:v1.26.0',
+'codedx/codedx-results:v1.26.0',
+'codedx/codedx-error-results:v1.26.0',
+'codedx/codedx-tool-service:v1.26.0',
+'codedx/codedx-cleanup:v1.26.0',
+'codedx/codedx-mariadb:v1.24.0',
+'bitnami/minio:2021.4.6-debian-10-r11',
+'codedx/codedx-workflow-controller:v2.17.0',
+'codedx/codedx-argoexec:v2.17.0',
+'cnc-cache-service:2023.6.1',
+'cnc-common-infra:2023.6.1',
+'cnc-scan-service:2023.6.1',
+'cnc-scan-service-migration:2023.6.1',
+'cnc-storage-service:2023.6.1',
+'cnc-storage-service-migration:2023.6.1',
+'cnc-cov-capture-linux64-2023.6.1:2023.6.1',
+'cnc-cov-analysis-linux64-2023.6.1:2023.6.1',
+'cnc-synopsys-detect-8.9.0:2023.6.1' | ForEach-Object {
+
+   docker pull "sig-repo.synopsys.com/synopsys/$_"
+   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
+
+   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
+
+   docker push "$myPrivateRegistryPrefix$_"
+   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
+}
+```
 
 ## Docker Registry Logout
 

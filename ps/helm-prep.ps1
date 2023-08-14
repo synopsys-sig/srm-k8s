@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.1.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -186,10 +186,7 @@ try {
 	$chartFullPath = [IO.Path]::GetFullPath($chartPath)
 	Write-Host "`n----------------------`nRequired Helm Commands`n----------------------"
 	Write-Host "helm repo add codedx https://codedx.github.io/codedx-kubernetes"
-
-	# This is a temporary change designed to support initial release
-	# Write-Host "helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative"
-
+	Write-Host "helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative"
 	Write-Host "helm repo update"
 	Write-Host "helm dependency update ""$chartFullPath"""
 	Write-Host "helm -n $($config.namespace) upgrade --reset-values --install $($config.releaseName)" -NoNewline
