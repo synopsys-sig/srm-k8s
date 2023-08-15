@@ -26,7 +26,7 @@ $ helm repo add codedx https://codedx.github.io/codedx-kubernetes
 $ helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
 $ helm repo update
 $ helm dependency update srm-k8s/chart
-$ helm -n srm upgrade --install --create-namespace srm srm-k8s/chart # --set openshift.createSCC=true
+$ helm -n srm upgrade --reset-values --install --create-namespace srm srm-k8s/chart # --set openshift.createSCC=true
 ```
 
 >Note: If you are using OpenShift, remove `#` when running the last command.
@@ -42,7 +42,7 @@ $ helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
 $ helm repo update
 $ helm dependency update srm-k8s/chart
 $ kubectl apply -f srm-k8s/crds/v1
-$ helm -n srm upgrade --install --create-namespace -f srm-k8s/chart/values/values-to.yaml srm srm-k8s/chart # --set openshift.createSCC=true
+$ helm -n srm upgrade --reset-values --install --create-namespace -f srm-k8s/chart/values/values-to.yaml srm srm-k8s/chart # --set openshift.createSCC=true
 ```
 
 >Note: If you are using OpenShift, remove `#` when running the last command.
