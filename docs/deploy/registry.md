@@ -25,7 +25,7 @@ Obtain SIG docker registry credentials to provide access to download Synopsys SI
 Log on to the Synopsys SIG Docker registry and your private Docker registry with these steps:
 
 1. Login to Synopsys SIG Community at https://community.synopsys.com/s/.
-2. Navigate to Licenses > SRM.
+2. Navigate to Licenses > SRM Integrated.
 3. Click on View/Request Docker Registry Credential to open the license pop-up. This pop-up contains
 copy buttons to copy the credentials.
 4. Log on to the Synopsys SIG registry using the following command, specifying the username and password you copied:
