@@ -16,7 +16,7 @@ If you are new to Synopsys SIG, request access to Synopsys SIG Community:
 Obtain SIG docker registry credentials to provide access to download Synopsys SIG images:
 
 1. Login to Synopsys SIG Community at https://community.synopsys.com/s/.
-2. Navigate to Licenses > SRM.
+2. Navigate to Licenses > SRM Integrated.
 3. Click View/Request Docker Registry Credential.
 4. When access to the Synopsys SIG private repository is granted, continue with the next section.
 
