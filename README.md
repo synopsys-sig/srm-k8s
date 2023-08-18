@@ -98,7 +98,7 @@ On Windows, make sure that you can run PowerShell Core scripts by switching your
 This GitHub repository contains what you need to start your SRM K8s deployment. Clone this repository to a stable directory on your system. You will use your cloned repository for both your initial deployment and for deploying future SRM software upgrades.
 
 ```
-$ git clone https://github.com/synopsys-sig/srm-ks8
+$ git clone https://github.com/synopsys-sig/srm-k8s
 ```
 
 ## Helm Prep Wizard
