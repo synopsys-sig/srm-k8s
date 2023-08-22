@@ -1,0 +1,60 @@
+apiVersion: v1
+entries:
+  srm:
+  - apiVersion: v2
+    appVersion: 2023.8.1
+    created: "2023-08-22T05:36:39.8660343-04:00"
+    dependencies:
+    - condition: features.mariadb
+      name: mariadb
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 7.4.4
+    - condition: features.scanfarm
+      name: cnc
+      repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
+      version: 2023.6.1
+    - condition: features.to
+      name: argo
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 0.14.5
+    - condition: features.minio
+      name: minio
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 3.2.1
+    description: Software Risk Manager
+    digest: dc21d3dbfb8fe0d56c28d10f9be9c03514d1ec6628dcb6c6042a4274ec280775
+    icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
+    name: srm
+    type: application
+    urls:
+    - https://synopsys-sig.github.io/srm-k8s/srm-1.2.0.tgz
+    version: 1.2.0
+  - apiVersion: v2
+    appVersion: 2023.8.1
+    created: "2023-08-22T05:36:39.8756672-04:00"
+    dependencies:
+    - condition: features.mariadb
+      name: mariadb
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 7.4.4
+    - condition: features.scanfarm
+      name: cnc
+      repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
+      version: 2023.6.1
+    - condition: features.to
+      name: argo
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 0.14.5
+    - condition: features.minio
+      name: minio
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 3.2.1
+    description: Software Risk Manager
+    digest: dc21d3dbfb8fe0d56c28d10f9be9c03514d1ec6628dcb6c6042a4274ec280775
+    icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
+    name: srm
+    type: application
+    urls:
+    - https://synopsys-sig.github.io/srm-k8s/chart/srm-1.2.0.tgz
+    version: 1.2.0
+generated: "2023-08-22T05:36:39.8565854-04:00"
