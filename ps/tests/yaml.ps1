@@ -280,5 +280,31 @@ foo: >
 bar: test
 
 '@ -eq $yaml.ToYamlString() | Should -BeTrue
-    }    
+    }
+
+    It 'should combine arrays that do not overlap' {
+
+      @'
+root:
+  - foo1:
+    foo2: foo2
+'@ | Out-File 'TestDrive:\left.yaml'
+
+      @'
+root:
+  - bar1:
+    bar2: bar2
+'@ | Out-File 'TestDrive:\right.yaml'
+
+      $yaml = Merge-YamlFiles @('TestDrive:\left.yaml','TestDrive:\right.yaml')
+
+      @'
+root: 
+  - foo1: 
+    foo2: foo2
+  - bar1: 
+    bar2: bar2
+
+'@ -eq $yaml.ToYamlString() | Should -BeTrue
+    }
 }

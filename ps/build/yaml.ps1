@@ -115,7 +115,7 @@ function Get-Yaml([string] $file) {
 			$parsingCollectionIndent = $indent
 		}
 
-		$isTag = $_ -match '(?<indent>\s*)(?<key>[^\s]+):\s*(?<keyValue>.+)?'
+		$isTag = $_ -match '(?<indent>\s*)(?<key>-?\s*[^\s]+):\s*(?<keyValue>.+)?'
 		$key = $matches.key
 		$keyValue = $matches.keyValue
 
