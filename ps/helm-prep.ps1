@@ -1,12 +1,14 @@
 <#PSScriptInfo
-.VERSION 1.1.0
+.VERSION 1.3.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
 
 using module @{ModuleName='guided-setup'; RequiredVersion='1.15.0' }
 param (
-	[Parameter(Mandatory=$true)][string] $configPath
+	[Parameter(Mandatory=$true)][string] $configPath,
+	[string] $configFilePwd,
+	[switch] $skipYamlMerge
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,6 +17,7 @@ Set-PSDebug -Strict
 
 Write-Host 'Loading...' -NoNewline
 
+'./external/powershell-algorithms/data-structures.ps1',
 './keyvalue.ps1',
 './config.ps1',
 './build/component.ps1',
@@ -29,6 +32,7 @@ Write-Host 'Loading...' -NoNewline
 './build/memory.ps1',
 './build/netpol.ps1',
 './build/paths.ps1',
+'./build/protect.ps1',
 './build/provider.ps1',
 './build/reg.ps1',
 './build/scanfarm.ps1',
@@ -38,11 +42,12 @@ Write-Host 'Loading...' -NoNewline
 './build/schedule.ps1',
 './build/to.ps1',
 './build/volume.ps1',
-'./build/web.ps1' | ForEach-Object {
+'./build/web.ps1',
+'./build/yaml.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {
-		Write-Error "Unable to find file script dependency at $path. Please download the entire srm-kubernetes GitHub repository and rerun the downloaded copy of this script."
+		Write-Error "Unable to find file script dependency at $path. Please download the entire srm-k8s GitHub repository and rerun the downloaded copy of this script."
 	}
 	. $path | out-null
 }
@@ -53,8 +58,19 @@ try {
 		Write-ErrorMessageAndExit "Unable to find config file at $configPath"
 	}
 
-	$configJson = Get-Content $configPath | ConvertFrom-Json
-	$config = [Config]::FromJson($configJson)
+	$config = [Config]::FromJsonFile($configPath)
+
+	if ($config.isLocked) {
+
+		if ($configFilePwd -eq '') {
+			$configFilePwd = $Env:HELM_PREP_CONFIGFILEPWD
+
+			if ([string]::IsNullOrEmpty($configFilePwd)) {
+				$configFilePwd = Read-HostSecureText -Prompt "`nEnter config file password"
+			}
+		}
+		$config.Unlock($configFilePwd)	
+	}
 
 	# Check for kubectl (required to create YAML resources)
 	if ($null -eq (Get-AppCommandPath kubectl)) {
@@ -69,7 +85,7 @@ try {
 	}
 
 	# Reset work directory
-	$config.GetValuesWorkDir(),$config.GetK8sWorkDir(),$config.GetTempWorkDir() | ForEach-Object {
+	$config.GetValuesWorkDir(),$config.GetK8sWorkDir(),$config.GetTempWorkDir(),$config.GetValuesCombinedWorkDir() | ForEach-Object {
 		if (Test-Path $_ -PathType Container) {
 			Remove-Item $_ -Force -Confirm:$false -Recurse
 		}
@@ -190,7 +206,31 @@ try {
 	Write-Host "helm repo update"
 	Write-Host "helm dependency update ""$chartFullPath"""
 	Write-Host "helm -n $($config.namespace) upgrade --reset-values --install $($config.releaseName)" -NoNewline
-	$builtInValues + (Get-ChildItem $config.GetValuesWorkDir()) | ForEach-Object {
+
+	$allValuesFiles = $builtInValues
+
+	$postscript = @()
+	$generatedValuesFiles = Get-ChildItem $config.GetValuesWorkDir()
+	if ($generatedValuesFiles.Length -gt 0) {
+
+		if ($skipYamlMerge) {
+			$allValuesFiles += $generatedValuesFiles
+		} else {
+			try {
+				$mergedYaml = Merge-YamlFiles $generatedValuesFiles
+
+				$mergedValuesPath = Join-Path ($config.GetValuesCombinedWorkDir()) 'values-combined.yaml'
+				$mergedYaml.ToYamlString() | Out-File $mergedValuesPath -NoNewline
+
+				$allValuesFiles += $mergedValuesPath
+			} catch {
+				$postscript += "Warning: YAML merge failed with error '$_' - your helm command references generated values files instead.`n"
+				$allValuesFiles += $generatedValuesFiles
+			}
+		}
+	}
+
+	$allValuesFiles | ForEach-Object {
 		Write-Host " -f ""$_""" -NoNewline
 	}
 
@@ -199,6 +239,10 @@ try {
 		Write-Host " --timeout 30m0s" -NoNewline
 	}
 	Write-Host " ""$chartFullPath""`n`n"
+
+	$postscript | ForEach-Object {
+		Write-Host "$_`n"
+	}
 } catch {
 	Write-Host "`n`nAn unexpected error occurred: $_`n"
 	Write-Host $_.ScriptStackTrace

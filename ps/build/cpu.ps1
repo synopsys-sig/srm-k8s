@@ -1,6 +1,9 @@
 function New-WebCPUConfig($config) {
 
 	$cpuCount = Get-VirtualCpuCountFromReservation $config.webCPUReservation
+  if ($cpuCount -lt 2) {
+    throw "Unable to continue with the CPU reservation $($config.webCPUReservation) because the web component's CPU reservation must be >= 2 vCPUs"
+  }
 	
 	# https://community.synopsys.com/s/article/Code-Dx-Hikari-connection-pooling-settings-and-connection-timeout
 	$poolSize = $cpuCount * 3

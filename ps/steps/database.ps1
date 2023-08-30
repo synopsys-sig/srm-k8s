@@ -148,7 +148,7 @@ class ExternalDatabaseName : Step {
 
 	static [string] hidden $description = @'
 Specify the name of the SRM database you previously created on your 
-external database server. For example, enter codedxdb if you previously ran 
+external database server. For example, enter srmdb if you previously ran 
 a CREATE DATABASE statement with that name during the SRM external 
 database setup instructions.
 '@
@@ -158,7 +158,7 @@ database setup instructions.
 		$config,
 		'External Database Name',
 		[ExternalDatabaseName]::description,
-		'Enter the name of your SRM database or press Enter to accept the default (codedxdb)') {}
+		'Enter the name of your SRM database or press Enter to accept the default (srmdb)') {}
 
 	[IQuestion] MakeQuestion([string] $prompt) {
 		$question = new-object Question($prompt)
@@ -168,7 +168,7 @@ database setup instructions.
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$q = [Question]$question
-		$this.config.externalDatabaseName = $q.isResponseEmpty ? 'codedxdb' : $q.response
+		$this.config.externalDatabaseName = $q.isResponseEmpty ? 'srmdb' : $q.response
 		return $true
 	}
 
@@ -185,7 +185,7 @@ class ExternalDatabaseUser : Step {
 
 	static [string] hidden $description = @'
 Specify the username for the user with access to your SRM database. For 
-example, enter codedx if you previously ran a CREATE USER statement with that 
+example, enter srm if you previously ran a CREATE USER statement with that 
 name during the SRM external database setup instructions.
 '@
 
@@ -194,7 +194,7 @@ name during the SRM external database setup instructions.
 		$config,
 		'External Database Username',
 		[ExternalDatabaseUser]::description,
-		'Enter the SRM database username or press Enter to accept the default (codedx)') {}
+		'Enter the SRM database username or press Enter to accept the default (srm)') {}
 
 	[IQuestion] MakeQuestion([string] $prompt) {
 		$question = new-object Question($prompt)
@@ -204,7 +204,7 @@ name during the SRM external database setup instructions.
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$q = [Question]$question
-		$this.config.externalDatabaseUser = $q.isResponseEmpty ? 'codedx' : $q.response
+		$this.config.externalDatabaseUser = $q.isResponseEmpty ? 'srm' : $q.response
 		return $true
 	}
 

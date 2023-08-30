@@ -46,6 +46,40 @@ class Config {
 	static [int]   $volumeSizeGiBDefault = 64
 	static [int]   $externalDatabasePortDefault = 3306
 
+	static [int]   $thisVersion = "1.1"
+
+	static [string[]] $protectedFields = @(
+		'sigRepoUsername',
+		'sigRepoPwd',
+		'scanFarmDatabaseUser',
+		'scanFarmDatabasePwd',
+		'scanFarmRedisPwd',
+		'scanFarmS3AccessKey',
+		'scanFarmS3SecretKey',
+		'scanFarmS3ServiceAccountName',
+		'scanFarmGcsSvcAccountKey',
+		'scanFarmAzureStorageAccountKey',
+		'scanFarmAzureClientId',
+		'scanFarmAzureClientSecret',
+		'scanFarmMinIORootUsername',
+		'scanFarmMinIORootPwd',
+		'mariadbRootPwd',
+		'mariadbReplicatorPwd',
+		'srmDatabaseUserPwd',
+		'adminPwd',
+		'toolServiceApiKey',
+		'minioAdminPwd',
+		'externalDatabaseUser',
+		'externalDatabasePwd',
+		'externalWorkflowStorageUsername',
+		'externalWorkflowStoragePwd',
+		'samlKeystorePwd',
+		'samlPrivateKeyPwd',
+		'dockerRegistryUser',
+		'dockerRegistryPwd',
+		'caCertsFilePwd'
+	)
+
 	[string]       $configVersion
 
 	[string]       $namespace                                # formerly namespaceCodeDx
@@ -253,11 +287,14 @@ class Config {
 	[KeyValue]     $toolNoScheduleExecuteToleration
 
 	[KeyValue[]]  $notes = @()
-	
+
+	[KeyValue[]]  $salts
+	[bool]        $isLocked
+
 	[string] $scanFarmScaApiUrlOverride # used for dev/test/support only
 
 	Config() {
-		$this.configVersion = "1.0"
+		$this.configVersion = [Config]::thisVersion
 		$this.toolServiceReplicas = [Config]::toolServiceReplicasDefault
 		$this.kubeApiTargetPort = [Config]::kubeApiTargetPortDefault
 		$this.webVolumeSizeGiB = [Config]::volumeSizeGiBDefault
@@ -269,11 +306,25 @@ class Config {
 		$this.useDefaultDockerImages = $true
 		$this.skipTls = $true
 		$this.webServicePortNumber = 9090
+
+		# v1.1 fields
+		$this.salts = @()
+		$this.isLocked = $false
 	}
 
-	static [Config] FromJson($configJson) {
+	static [Config] FromJsonFile($configJsonFile) {
 
-		if (-not ($null -eq $configJson.configVersion -or $configJson.configVersion -eq "1.0")) {
+		$configJson = Get-Content $configJsonFile | ConvertFrom-Json
+
+		$configJsonVersion = '1.0'
+		if ($null -ne $configJson.configVersion) {
+			$configJsonVersion = $configJson.configVersion
+		}
+
+		$version = new-object Management.Automation.SemanticVersion($configJsonVersion)
+		$currentVersion = new-object Management.Automation.SemanticVersion([Config]::thisVersion)
+
+		if ($version -gt $currentVersion) {
 			throw "Unable to handle config version: $($configJson.configVersion)"
 		}
 		return [Config]$configJson
@@ -366,6 +417,10 @@ class Config {
 		return Join-Path $this.workDir 'chart-values'
 	}
 
+	[string]GetValuesCombinedWorkDir() {
+		return Join-Path $this.workDir 'chart-values-combined'
+	}
+
 	[string]GetK8sWorkDir() {
 		return Join-Path $this.workDir 'chart-resources'
 	}
@@ -388,5 +443,62 @@ class Config {
 			}
 		}
 		return $table
+	}
+
+	[bool] ShouldLock() {
+
+		$protectedFieldsWithValues = [Config]::protectedFields | Where-Object {
+			$value = $this.$_
+			-not [string]::IsNullOrEmpty($value)
+		}
+		return $protectedFieldsWithValues.Length -gt 0
+	}
+
+	[void] Lock([string] $configPwd) {
+
+		if ($this.isLocked) {
+			throw 'Unable to lock config because it''s already locked'
+		}
+
+		$this.salts = @()
+
+		try {
+			[Config]::protectedFields | ForEach-Object {
+				
+				$value = $this.$_
+				if (-not [string]::IsNullOrEmpty($value)) {
+					$protectedValue = Protect-StringValue $configPwd $value
+					$this.salts += [KeyValue]::New($_, $protectedValue[0])
+					$this.$_ = $protectedValue[1]
+				}
+			}
+			$this.isLocked = $true
+			$this.SetNote($this.GetType().Name, 'Specify your config.json password using either the helm-prep.ps1 script''s -configFilePwd parameter, the HELM_PREP_CONFIGFILEPWD environment variable, or by entering your password when prompted.')
+		} catch {
+			throw "Unable to lock config file. The error was: $_"
+		}
+	}
+
+	[void] Unlock([string] $configPwd) {
+
+		if (-not $this.isLocked) {
+			throw 'Unable to unlock config because it''s already unlocked'
+		}
+
+		try {
+			[Config]::protectedFields | ForEach-Object {
+
+				$field = $_
+				if (-not [string]::IsNullOrEmpty($this.$_)) {
+					$salt = $this.salts | Where-Object { $_.key -eq $field } | ForEach-Object { $_.value }
+					$this.$_ = Unprotect-StringValue $configPwd $salt $this.$_
+				}
+			}
+			$this.isLocked = $false
+			$this.salts = @()
+			$this.RemoveNote($this.GetType().Name)
+		} catch {
+			throw "Unable to unlock config file. Is the password correct? The error was: $_"
+		}
 	}
 }

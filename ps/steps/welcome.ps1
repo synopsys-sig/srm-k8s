@@ -8,15 +8,25 @@ class Welcome : Step {
 		'') {}
 
 	[bool]Run() {
-        Write-Host '  ______   _______     ____    ____  '
-        Write-Host '.'' ____ \ |_   __ \   |_   \  /   _|'
-        Write-Host '| (___ \_|  | |__) |    |   \/   |   '
-        Write-Host ' _.____`.   |  __ /     | |\  /| |   '
-        Write-Host '| \____) | _| |  \ \_  _| |_\/_| |_  '
-        Write-Host ' \______.''|____| |___||_____||_____|'
-		Write-Host "`nWelcome to the Software Risk Manager Helm Prep Wizard!`n"
-		Write-Host 'This tool will help you specify the helm chart configuration'
-		Write-Host "suitable for your deployment.`n"
+        Write-Host '  ______       _______         ____    ____  '
+        Write-Host '.'' ____ \     |_   __ \       |_   \  /   _|'
+        Write-Host '| (___ \_|      | |__) |        |   \/   |   '
+        Write-Host ' _.____`.       |  __ /         | |\  /| |   '
+        Write-Host '| \____) |     _| |  \ \_      _| |_\/_| |_  '
+        Write-Host ' \______.''    |____| |___|    |_____||_____|'
+		Write-Host @'
+
+Welcome to the Software Risk Manager Helm Prep Wizard! 
+
+You will use Helm to deploy SRM. This wizard helps you
+specify your desired SRM deployment configuration by
+generating a config.json file that you can use with
+the helm prep script to stage your helm deployment.
+
+Note: Once you have your config.json file, you will
+not need to rerun this wizard.
+
+'@
 		Read-HostEnter
 		return $true
 	}

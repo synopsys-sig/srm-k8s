@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.2.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
@@ -14,6 +14,7 @@ Set-PSDebug -Strict
 Write-Host 'Loading...' -NoNewline
 
 'ps/keyvalue.ps1',
+'ps/build/protect.ps1',
 'ps/config.ps1',
 'ps/steps/step.ps1',
 'ps/steps/auth.ps1',
@@ -43,7 +44,7 @@ Write-Host 'Loading...' -NoNewline
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {
-		Write-Error "Unable to find file script dependency at $path. Please download the entire srm-kubernetes GitHub repository and rerun the downloaded copy of this script."
+		Write-Error "Unable to find file script dependency at $path. Please download the entire srm-k8s GitHub repository and rerun the downloaded copy of this script."
 	}
 	. $path | out-null
 }
@@ -102,6 +103,7 @@ $s = @{}
 [IngressTLS],
 [IngressTLSSecretName],
 [LdapInstructions],
+[Lock],
 [MariaDBDockerImageVersion],
 [MasterDatabaseCPU],
 [MasterDatabaseEphemeralStorage],
@@ -274,7 +276,9 @@ Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[DefaultVolumeSize]],$s[[WebVolumeSize]],$s[[MasterDatabaseVolumeSize]],$s[[SubordinateDatabaseVolumeSize]],$s[[SubordinateDatabaseBackupVolumeSize]],$s[[MinIOVolumeSize]],$s[[StorageClassName]],
 	$s[[UseNodeSelectors]],$s[[WebNodeSelector]],$s[[MasterDatabaseNodeSelector]],$s[[SubordinateDatabaseNodeSelector]],$s[[ToolServiceNodeSelector]],$s[[MinIONodeSelector]],$s[[WorkflowControllerNodeSelector]],$s[[ToolNodeSelector]],$s[[UseTolerations]],
 	$s[[WebTolerations]],$s[[MasterDatabaseTolerations]],$s[[SubordinateDatabaseTolerations]],$s[[ToolServiceTolerations]],$s[[MinIOTolerations]],$s[[WorkflowControllerTolerations]],$s[[ToolTolerations]],
-	$s[[Finish]]
+	$s[[Lock]],$s[[Finish]]
+
+Add-StepTransitions $graph $s[[ToolTolerations]] $s[[Finish]]
 
 Add-StepTransitions $graph $s[[AuthenticationType]] $s[[LdapInstructions]],$s[[IngressKind]]
 Add-StepTransitions $graph $s[[AuthenticationType]] $s[[IngressKind]]
@@ -367,6 +371,7 @@ Add-StepTransitions $graph $s[[SubordinateDatabaseBackupVolumeSize]] $s[[Storage
 Add-StepTransitions $graph $s[[DefaultVolumeSize]] $s[[StorageClassName]]
 
 Add-StepTransitions $graph $s[[StorageClassName]] $s[[UseNodeSelectors]]
+Add-StepTransitions $graph $s[[StorageClassName]] $s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[StorageClassName]] $s[[Finish]]
 
 Add-StepTransitions $graph $s[[WebNodeSelector]] $s[[ToolServiceNodeSelector]]
@@ -378,12 +383,16 @@ Add-StepTransitions $graph $s[[ToolServiceNodeSelector]] $s[[WorkflowControllerN
 Add-StepTransitions $graph $s[[UseNodeSelectors]] $s[[UseTolerations]]
 
 Add-StepTransitions $graph $s[[WebTolerations]] $s[[ToolServiceTolerations]]
+Add-StepTransitions $graph $s[[WebTolerations]] $s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[WebTolerations]] $s[[Finish]]
 Add-StepTransitions $graph $s[[MasterDatabaseTolerations]] $s[[ToolServiceTolerations]]
+Add-StepTransitions $graph $s[[MasterDatabaseTolerations]] $s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[MasterDatabaseTolerations]] $s[[Finish]]
+Add-StepTransitions $graph $s[[SubordinateDatabaseTolerations]] $s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[SubordinateDatabaseTolerations]] $s[[Finish]]
 Add-StepTransitions $graph $s[[ToolServiceTolerations]] $s[[WorkflowControllerTolerations]]
 
+Add-StepTransitions $graph $s[[UseTolerations]] $s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[UseTolerations]] $s[[Finish]]
 
 if ($DebugPreference -eq 'Continue') {
