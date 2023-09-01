@@ -50,7 +50,7 @@ function New-WebVolumeStorageClassConfig($config) {
 	@"
 web:
   persistence:
-      storageClass: $($config.storageClassName)
+    storageClass: $($config.storageClassName)
 "@ | Out-File (Get-WebVolumeStorageClassValuesPath $config)
 }
 
