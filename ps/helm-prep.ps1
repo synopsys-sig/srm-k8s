@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.3.0
+.VERSION 1.4.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -82,6 +82,33 @@ try {
 	# Check for keytool (required for updating cacerts)
 	if ($useCustomCacerts -and $null -eq (Get-AppCommandPath keytool)) {
 		Write-ErrorMessageAndExit "Restart this script after adding Java JRE (specifically Java's keytool program) to your PATH environment variable."
+	}
+
+	# Validate work directory
+	if (-not (Test-Path $config.workDir -PathType Container)) {
+		Write-ErrorMessageAndExit "Unable to find work directory at $($config.workDir). Does the work directory exist?"
+	}
+
+	# Validate files
+	'clusterCertificateAuthorityCertPath',
+	'externalWorkflowStorageCertChainPath',
+	'samlIdentityProviderMetadataPath',
+	'caCertsFilePath',
+	'srmLicenseFile',
+	'scanFarmSastLicenseFile',
+	'scanFarmScaLicenseFile',
+	'caCertsFilePath' | ForEach-Object {
+		$fileValue = $config.$_
+		if ((-not ([String]::IsNullOrEmpty($fileValue))) -and 
+			(-not (Test-Path $fileValue -PathType Leaf))) {
+			Write-ErrorMessageAndExit "Unable to find file '$fileValue' for '$_' config parameter. Does the file exist?"
+		}
+	}
+	$config.extraTrustedCaCertPaths | ForEach-Object {
+		if ((-not ([String]::IsNullOrEmpty($_))) -and 
+			(-not (Test-Path $_ -PathType Leaf))) {
+			Write-ErrorMessageAndExit "Unable to find file '$_' in the 'extraTrustedCaCertPaths' config parameter. Does the file exist?"
+		}
 	}
 
 	# Reset work directory
