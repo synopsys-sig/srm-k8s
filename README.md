@@ -93,6 +93,10 @@ Below are the default CPU, memory, ephemeral storage, and volume requirements fo
 
 On Windows, make sure that you can run PowerShell Core scripts by switching your PowerShell Execution Policy to RemoteSigned (recommended) or Unrestricted. You must run the Set-ExecutionPolicy -ExecutionPolicy RemoteSigned command from an elevated/administrator Command Prompt.
 
+## Scan Farm Nodes
+
+The SRM software supports a separately licensed Scan Farm feature, which includes built-in SAST and SCA scanning powered by Coverity and Black Duck. Instances of the Coverity Scan Job and the SCA Scan Job will only run on tainted nodes (NodeType=ScannerNode:NoSchedule) with a specific label (pool-type=small). Each SAST scan requires two Coverity Scan Job instances that run consecutively, and scan farm nodes can support only one Coverity Scan Job pod at a time, so you should plan your node pool size and elasticity configuration accordingly.
+
 ## Clone GitHub Repository
 
 This GitHub repository contains what you need to start your SRM K8s deployment. Clone this repository to a stable directory on your system. You will use your cloned repository for both your initial deployment and for deploying future SRM software upgrades.
