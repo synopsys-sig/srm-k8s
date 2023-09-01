@@ -43,7 +43,7 @@ Specify the hostname for your Docker registry.
 
 	static [string] hidden $pullPushInstructionLink = 'https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md'
 
-	static [string] hidden $notes = "- Follow instructions at $([DockerRegistryHost]::pullPushInstructionLink) to pull/push SynopsysDocker images to your private registry."
+	static [string] hidden $notes = "- Follow instructions at $([DockerRegistryHost]::pullPushInstructionLink) to pull/push Synopsys Docker images to your private registry."
 
 	static [string] hidden $scanFarmDescription = @"
 Your SRM configuration requires you to pull SRM Docker images from the

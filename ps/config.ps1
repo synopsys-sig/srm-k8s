@@ -473,7 +473,7 @@ class Config {
 				}
 			}
 			$this.isLocked = $true
-			$this.SetNote($this.GetType().Name, 'Specify your config.json password using either the helm-prep.ps1 script''s -configFilePwd parameter, the HELM_PREP_CONFIGFILEPWD environment variable, or by entering your password when prompted.')
+			$this.SetNote($this.GetType().Name, '- Specify your config.json password using either the helm-prep.ps1 script''s -configFilePwd parameter, the HELM_PREP_CONFIGFILEPWD environment variable, or by entering your password when prompted.')
 		} catch {
 			throw "Unable to lock config file. The error was: $_"
 		}
