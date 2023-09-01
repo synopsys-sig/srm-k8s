@@ -116,7 +116,11 @@ Note: The default port for Redis is 6379.
 class ScanFarmRedisDatabase : Step {
 
 	static [string] hidden $description = @'
-Specify the logical Redis database name (e.g. "1") for the Scan Farm to use.
+Specify the zero-based numeric index of your Redis logical database (e.g., 1)
+that the Scan Farm will use.
+
+Note: For more information, visit https://redis.io/commands/select/.
+
 '@
 	
 	ScanFarmRedisDatabase([Config] $config) : base(
@@ -124,10 +128,14 @@ Specify the logical Redis database name (e.g. "1") for the Scan Farm to use.
 		$config,
 		'Scan Farm Redis Database',
 		[ScanFarmRedisDatabase]::description,
-		'Enter the name of your Redis database') {}
+		'Enter your Redis logical database index') {}
+
+	[IQuestion]MakeQuestion([string] $prompt) {
+		return new-object IntegerQuestion($prompt, 0, 65535, $false)
+	}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.scanFarmRedisDatabase = ([Question]$question).response
+		$this.config.scanFarmRedisDatabase = ([IntegerQuestion]$question).response
 		return $true
 	}
 
