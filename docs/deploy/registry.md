@@ -53,6 +53,8 @@ $ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.3 id.dk
 $ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.3
 ```
 
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
+
 The following example stores Synopsys Docker images under "my-srm" in your private registry. In this scenario, you must enter "my-srm" as your private registry repository prefix in the Guided Setup:
 
 ```
@@ -60,6 +62,8 @@ $ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.3
 $ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.3 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.3
 $ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.3
 ```
+
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
 
 See the following sections for the Docker images you must obtain via docker pull/tag/push commands. Pattern your commands after the above examples and run pull/tag/push for each Docker image your SRM deployment requires.
 
@@ -88,6 +92,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 }
 ```
 
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
+
 ### SRM Database Docker images
 
 If you are using an external SRM database, skip this section.
@@ -114,6 +120,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
    if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
 }
 ```
+
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
 
 ### SRM Scan Farm Common Docker images
 
@@ -152,6 +160,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 }
 ```
 
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
+
 ### SRM Scan Farm SAST Docker images
 
 The SRM Scan Farm SAST feature requires these Docker images:
@@ -181,6 +191,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 }
 ```
 
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
+
 ### SRM Scan Farm SCA Docker images
 
 The SRM Scan Farm SCA feature requires this Docker image:
@@ -207,6 +219,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
    if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
 }
 ```
+
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
 
 ### SRM Tool Orchestration Docker images
 
@@ -255,6 +269,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 }
 ```
 
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
+
 ### Powershell Core Docker Pull/Tag/Push All Example
 
 If you are logged in to the Synopsys SIG Docker registry and your private registry, you can use the script below to pull, tag, and push all Synopsys Docker images; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash).
@@ -296,6 +312,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
    if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
 }
 ```
+
+>Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
 
 ## Docker Registry Logout
 
