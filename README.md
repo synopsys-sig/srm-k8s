@@ -82,9 +82,9 @@ Below are the default CPU, memory, ephemeral storage, and volume requirements fo
 | Storage Service   | 100m  | 128Mi   | -                 | -           | Scan Farm          |
 | Coverity Scan Job | 6500m | 26000Mi | -                 | -           | Scan Farm          |
 | SCA Scan Job      | 1500m | 1500Mi  | -                 | -           | Scan Farm          |
-| Tool Service      | -     | 500Mi   | -                 | -           | Tool Orchestration |
+| Tool Service      | 1000m | 1024Mi  | -                 | -           | Tool Orchestration |
 | MinIO             | 2000m | 500Mi   | -                 | 64Gi        | Tool Orchestration |
-| Workflow          | -     | 500Mi   | -                 | -           | Tool Orchestration |
+| Workflow          | 500m  | 500Mi   | -                 | -           | Tool Orchestration |
 | Tools             | 500m  | 500Mi   | -                 | -           | Tool Orchestration |
 
 >Note: You may have more than one Tool Service pod, and orchestrated analyses can run multiple tools concurrently.
