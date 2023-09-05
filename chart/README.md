@@ -5,7 +5,7 @@
 ## Requirements
 
 | Repository | Name | Version |
-|------------|------|---------|
+|:---|:---|:---|
 | https://codedx.github.io/codedx-kubernetes | argo | 0.14.5 |
 | https://codedx.github.io/codedx-kubernetes | mariadb | 7.4.4 |
 | https://codedx.github.io/codedx-kubernetes | minio | 3.2.1 |
@@ -14,9 +14,9 @@
 ## Values
 
 | Key | Type | Default | Description |
-|-----|------|---------|-------------|
+|:---|:---|:---|:---|
 | argo.controller.containerRuntimeExecutor | string | `"pns"` | the runtime executor for the Argo workflow |
-| argo.controller.extraEnv[0] | object | `{"name":"RECENTLY_STARTED_POD_DURATION","value":"10s"}` | the list of extra environment variables for the Argo workflow controller |
+| argo.controller.extraEnv[0] | object | `{ "name" : "RECENTLY_STARTED_POD_DURATION" , "value" : "10s" }` | the list of extra environment variables for the Argo workflow controller |
 | argo.controller.instanceID.enabled | bool | `true` | whether the Argo workflow controller uses an instance ID |
 | argo.controller.instanceID.useReleaseName | bool | `true` | whether the Argo workflow controller instance ID uses the release name |
 | argo.controller.nodeSelector | object | `{}` | the node selector for the Argo workflow controller |
@@ -38,12 +38,12 @@
 | features.scanfarm | bool | `false` | whether to enable the Scan Farm feature, which requires an SRM Scan Farm license |
 | features.to | bool | `false` | whether to enable the Tool Orchestration feature, which requires an SRM Tool Orchestration license |
 | imagePullSecrets | list | `[]` | the K8s image pull secret to use for SRM Docker images Command: kubectl create secret docker-registry private-registry --docker-server=your-registry-server --docker-username=your-username --docker-password=your-password --docker-email=your-email |
-| ingress.annotations.scanfarm.cache."nginx.ingress.kubernetes.io/backend-protocol" | string | `"HTTPS"` | the protocol for the K8s cache service |
-| ingress.annotations.scanfarm.cache."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"500m"` | the max proxy body size for the cache service ingress (no max when 0) |
-| ingress.annotations.scanfarm.scan."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"500m"` | the max proxy body size for the scan service ingress (no max when 0) |
-| ingress.annotations.scanfarm.storage."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"500m"` | the max proxy body size for the storage service ingress (no max when 0) |
-| ingress.annotations.web."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"0"` | the max proxy body size for the web component ingress (no max when 0) |
-| ingress.annotations.web."nginx.ingress.kubernetes.io/proxy-read-timeout" | string | `"3600"` | the proxy read timeout for the web component ingress |
+| ingress.annotations.scanfarm.cache "nginx.ingress.kubernetes.io/backend-protocol" | string | `"HTTPS"` | the protocol for the K8s cache service |
+| ingress.annotations.scanfarm.cache "nginx.ingress.kubernetes.io/proxy-body-size" | string | `"500m"` | the max proxy body size for the cache service ingress (no max when 0) |
+| ingress.annotations.scanfarm.scan "nginx.ingress.kubernetes.io/proxy-body-size" | string | `"500m"` | the max proxy body size for the scan service ingress (no max when 0) |
+| ingress.annotations.scanfarm.storage "nginx.ingress.kubernetes.io/proxy-body-size" | string | `"500m"` | the max proxy body size for the storage service ingress (no max when 0) |
+| ingress.annotations.web "nginx.ingress.kubernetes.io/proxy-body-size" | string | `"0"` | the max proxy body size for the web component ingress (no max when 0) |
+| ingress.annotations.web "nginx.ingress.kubernetes.io/proxy-read-timeout" | string | `"3600"` | the proxy read timeout for the web component ingress |
 | ingress.className | string | `"nginx"` | the class name for the SRM ingress |
 | ingress.enabled | bool | `false` | whether to enable an SRM ingress (required for the Scan Farm feature) |
 | ingress.hosts[0] | object | `{"host":"chart-example.local"}` | the host to associate with the SRM ingress |
