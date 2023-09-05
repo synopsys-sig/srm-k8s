@@ -1,169 +1,248 @@
 features:
+  # @ignore (refer to main values file for details)
   minio: true
+  # @ignore (refer to main values file for details)
   to: true
 
 web:
   podDisruptionBudget:
+    # @ignore (refer to main values file for details)
     enabled: true
   priorityClass:
+    # @ignore (refer to main values file for details)
     create: true
+  # @ignore (refer to main values file for details)
   toSecret:
 
 mariadb:
   master:
     podDisruptionBudget:
+      # @ignore (refer to main values file for details)
       enabled: true
     priorityClass:
+      # @ignore (refer to main values file for details)
       create: true
   slave:
     podDisruptionBudget:
+      # @ignore (refer to main values file for details)
       enabled: true
     priorityClass:
+      # @ignore (refer to main values file for details)
       create: true
 
 to:
+  # -- the configmap name containing the CA cert with required field ca.crt
   caConfigMap:
-  # toSecret required fields:
-  # - api-key
+  # -- the K8s secret name containing the API key for the tool service with required field api-key
+  # Command:
   # kubectl -n srm create secret generic tool-service-pd --from-literal api-key=password
   toSecret:
   image:
+    # -- the registry name and optional registry suffix for the SRM Tool Orchestration Docker images
     registry: docker.io
     repository:
+      # -- the Docker image repository name for the SRM tools workload
       tools: 'codedx/codedx-tools'
+      # -- the Docker image repository name for the SRM toolsmono workload
       toolsMono: 'codedx/codedx-toolsmono'
+      # -- the Docker image repository name for the SRM cleanup workload
       helmPreDelete: 'codedx/codedx-cleanup'
+      # -- the Docker image repository name for the SRM prepare workload
       prepare: 'codedx/codedx-prepare'
+      # -- the Docker image repository name for the SRM new-analysis workload
       newAnalysis: 'codedx/codedx-newanalysis'
+      # -- the Docker image repository name for the SRM send-error-results workload
       sendErrorResults: 'codedx/codedx-error-results'
+      # -- the Docker image repository name for the SRM send-results workload
       sendResults: 'codedx/codedx-results'
+      # -- the Docker image repository name for the SRM tool service workload
       toolService: 'codedx/codedx-tool-service'
+    # -- the Docker image version for the SRM Tool Orchestration workloads
     tag: v1.26.0
   logs:
+    # -- the maximum size of a tool service log file
     maxSizeMB: 10
+    # -- the maximum number of tool service log files to retain
     maxBackups: 20
+  # -- the minimum seconds for an orchestrated analysis workflow step
   minimumWorkflowStepRunTimeSeconds: 3
   service:
+    # -- the number of tool service replicas
     numReplicas: 1
+    # -- the K8s service type for the tool service
     type: ClusterIP
+    # -- the tool service port number
     toolServicePort: 3333
   serviceAccount:
+    # -- whether to create a service account for the tool service
     create: true
+    # -- the annotations to apply to the SRM tool service account
     annotations: {}
+    # -- the name of the service account to use; a name is generated using the fullname template when unset and create is true
     name:
-  name:
+  # -- the node selector to use for the tool service
   nodeSelector: {}
   podDisruptionBudget:
+    # -- whether to create a pod disruption budget for the tool service
     enabled: true
+    # -- the minimum number of available instances of the tool service
     minAvailable: 1
   priorityClass:
+    # -- the tool workflow priority value, which must be set relative to other Tool Orchestration component priority values
     workflowValue: 10000
+    # -- the tool service priority value, which must be set relative to other Tool Orchestration component priority values
     serviceValue: 10100
   resources:
     limits:
+      # -- the required CPU for the tool service workload
       cpu: 1000m
+      # -- the required memory for the tool service workload
       memory: 1024Mi
   tools:
+    # -- the node selector key to use for tool pods
     nodeSelectorKey:
+    # -- the node selector key value to use for tool pods
     nodeSelectorValue:
+    # -- the pod toleration key to use for tool pods
     podTolerationKey:
+    # -- the pod toleration key value to use for tool pods
     podTolerationValue:
     requests:
       tool:
+        # -- the default CPU request for the tool workloads
         cpu: '500m'
+        # -- the default memory request for the tool workloads
         memory: '500Mi'
     limits:
       tool:
+        # -- the default CPU limit for the tool workloads
         cpu: '2'
+        # -- the default memory limit for the tool workloads
         memory: '2G'
+  # -- the pod tolerations for the tool service component
   tolerations: []
+  # -- the port number for the tool service
   toolServicePort: 3333
-  # tlsSecret required fields:
-  # - tls.crt
-  # - tls.key
+  # -- the K8s secret name for tool service TLS with required fields tls.crt and tls.key
+  # Command:
   # kubectl -n srm create secret tls to-tls-secret --cert=path/to/cert-file --key=path/to/key-file
   tlsSecret:
   workflowStorage:
-    # Workflow storage endpoint to use, either an external endpoint (e.g., AWS, GCP) or the older, bundled MinIO instance. Specify the
+    # -- the workflow storage endpoint to use, either an external endpoint (e.g., AWS, GCP) or the older, bundled MinIO instance. Specify the
     # hostname and port (e.g., hostname:port).
     endpoint:
-    # Whether the endpoint is secured with HTTPS.
+    # -- whether the endpoint is secured with HTTPS.
     endpointSecure:
-    # Name of workflow storage bucket that will store workflow files. This should be an existing bucket when the account associated 
+    # -- the name of workflow storage bucket that will store workflow files. This should be an existing bucket when the account associated 
     # with the storage credentials cannot create the bucket on its own.
     bucketName: code-dx-storage
-    # Use an existing secret, with fields access-key and secret-key, for the storage credential. The credential must be able
+    # -- whether to use an existing secret, with fields access-key and secret-key, for the storage credential. The credential must be able
     # to create and delete objects in the bucket given by the 'bucketName' parameter.
     existingSecret:
-    # Specifies a ConfigMap name that contains certificate data that should be explicitly trusted when connecting to
+    # -- the K8s configmap name that contains certificate data that should be explicitly trusted when connecting to
     # workflow storage. Use configMapName when the workflow storage server's certificate was not issued by a well known CA.
     configMapName: ""
-    # Specifies the key name in the configMapName ConfigMap containing the certificate data.
+    # -- the key name in the configMapName ConfigMap containing the certificate data.
     configMapPublicCertKeyName: ""
 
 minio:
+  # -- whether to enable the on-cluster MinIO component
   enabled: true
   global:
     minio:
-      # existingSecret required fields:
-      # - access-key
-      # - secret-key
+      # -- the K8s secret name with the MinIO access and secret key with required fields access-key and secret-key
+      # Command:
       # kubectl -n srm create secret generic minio-secret --from-literal=access-key=admin --from-literal=secret-key=password
       existingSecret:
   image:
+    # -- the registry name and optional registry suffix for the MinIO Docker image
     registry: docker.io
+    # -- the Docker image repository name for the MinIO workload
     repository: bitnami/minio
-    # Note: Tag '2021.4.6-debian-10-r11' predates license change
+    # -- the Docker image version for the MinIO workload (tag '2021.4.6-debian-10-r11' predates license change)
     tag: 2021.4.6-debian-10-r11
+    # -- the K8s Docker image pull policy for the MinIO workload
     pullSecrets: []
     #  - private-registry
+  # -- the node selector to use for the MinIO workload
   nodeSelector: {}
+  # -- the pod annotations to use for the MinIO pod
   podAnnotations: {}
   persistence:
+    # -- the size of the MinIO persistent volume 
     size: 64Gi
+    # -- the existing claim to use for the MinIO persistent volume; a new persistent volume is generated when unset
     existingClaim:
+    # -- the storage class name for the MinIO persistent volume; the default storage class used when unset
     storageClass:
   podDisruptionBudget:
+    # -- whether to create a pod disruption budget for the MinIO component
     enabled: true
+    # -- the maximum number of unavailable instances of the MinIO component
     maxUnavailable: 0
+  # -- the MinIO component priority value, which must be set relative to other Tool Orchestration component priority values
   priorityClassValue: 10100
   resources:
     limits:
+      # -- the required CPU for the MinIO workload
       cpu: 2000m
+      # -- the required memory for the MinIO workload
       memory: 500Mi
+  # -- the K8s secret name for web component TLS with required fields tls.crt and tls.key
   tlsSecret:
+  # -- the pod tolerations for the MinIO component
   tolerations: []
 
 argo:
   # depends on https://github.com/codedx/codedx-kubernetes/tree/master/setup/core/crds/v1
   controller:
+    # -- the runtime executor for the Argo workflow
     containerRuntimeExecutor: pns
     extraEnv:
+    # -- the list of extra environment variables for the Argo workflow controller
     - name: 'RECENTLY_STARTED_POD_DURATION'
       value: '10s'
     instanceID:
+      # -- whether the Argo workflow controller uses an instance ID
       enabled: true
+      # -- whether the Argo workflow controller instance ID uses the release name
       useReleaseName: true
+    # -- the node selector for the Argo workflow controller
     nodeSelector: {}
     pdb:
-      # workflow controller can tolerate occasional downtime
+      # -- whether to create a pod disruption budget for the Argo component (a workflow controller can tolerate occasional downtime)
       enabled: false
+    # -- the Argo priority value, which must be set relative to other Tool Orchestration component priority values
     priorityClassValue: 10100
     resources:
       limits:
+        # -- the required CPU for the Argo workload
         cpu: 500m
+        # -- the required memory for the Argo workload
         memory: 500Mi
+    # -- the pod tolerations for the Argo component
     tolerations: []
   images:
+    # -- the Docker image repository name for the Argo controller
     controller: codedx-workflow-controller
+    # -- the Docker image repository name for the Argo executor
     executor: codedx-argoexec
+    # -- the Docker image repository prefix for the Argo Docker images
     namespace: codedx
+    # -- the K8s image pull secret to use for Argo Docker images
     pullSecrets: []
     #  - name: private-registry
+    # -- the Docker image version for the Argo workload
     tag: v2.17.0
+  # @ignore
   minio:
+    # @ignore
     install: false
+  # @ignore
   server:
+    # @ignore
     enabled: false
+  # @ignore
   ui:
+    # @ignore
     enabled: false

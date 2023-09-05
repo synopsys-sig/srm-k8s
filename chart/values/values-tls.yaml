@@ -60,8 +60,12 @@
 
 mariadb:
   master:
+    # @ignore (refer to main values file for details)
     masterCaConfigMap: srm-ca-configmap
+    # @ignore (refer to main values file for details)
     masterTlsSecret: srm-db-tls-secret
+    # @ignore
+    # the TLS-based mysql configuration for the primary database
     config: |-
       [mysqld]
       skip-name-resolve
@@ -92,6 +96,8 @@ mariadb:
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
   slave:
+    # @ignore
+    # the TLS-based mysql configuration for the primary database
     config: |-
       [mysqld]
       skip-name-resolve
@@ -123,15 +129,22 @@ mariadb:
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
 
 minio:
+  # @ignore (refer to values-to.yaml file for details)
   tlsSecret: srm-minio-tls-secret
 
 to:
+  # @ignore (refer to values-to.yaml file for details)
   caConfigMap: srm-ca-configmap
+  # @ignore (refer to values-to.yaml file for details)
   tlsSecret: srm-to-tls-secret
   workflowStorage:
+    # @ignore (refer to values-to.yaml file for details)
     configMapName: srm-ca-configmap
+    # @ignore (refer to values-to.yaml file for details)
     configMapPublicCertKeyName: ca.crt
 
 web:
+  # @ignore (refer to main values file for details)
   cacertsSecret: srm-web-cacerts-secret
+  # @ignore (refer to main values file for details)
   tlsSecret: srm-web-tls-secret

@@ -1,7 +1,10 @@
 web:
   props:
     extra:
+    # -- the key used to mount property data in the AppData persistent volume
     - key:  codedx-public-props
+      # -- the type of property data
       type: values
+      # -- the list of SRM props associated with this props key
       values:
       - "project.default-branch-name = default"

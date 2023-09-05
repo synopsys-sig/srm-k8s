@@ -1,244 +1,335 @@
-# kubectl create secret docker-registry private-registry \
-#   --docker-server=<your-registry-server> \
-#   --docker-username=<your-username> \
-#   --docker-password=<your-password> \
-#   --docker-email=<your-email>
+# -- the K8s image pull secret to use for SRM Docker images
+# Command: kubectl create secret docker-registry private-registry --docker-server=your-registry-server --docker-username=your-username --docker-password=your-password --docker-email=your-email
 imagePullSecrets: []
 #  - name: private-registry
 
 features:
+  # -- whether to enable the Scan Farm feature, which requires an SRM Scan Farm license
   scanfarm: false
+  # -- whether to enable the on-cluster MariaDB; an external database must be used otherwise
   mariadb: true
+  # -- whether to enable the on-cluster MinIO for the SRM Tool Orchestration feature; an external object storage system must be used otherwise
   minio: false
+  # -- whether to enable the Tool Orchestration feature, which requires an SRM Tool Orchestration license
   to: false
 
 ingress:
+  # -- whether to enable an SRM ingress (required for the Scan Farm feature)
   enabled: false
+  # -- the class name for the SRM ingress
   className: "nginx"
   annotations:
     web:
+      # -- the proxy read timeout for the web component ingress
       nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      # -- the max proxy body size for the web component ingress (no max when 0)
       nginx.ingress.kubernetes.io/proxy-body-size: "0"
     scanfarm:
       scan:
+        # -- the max proxy body size for the scan service ingress (no max when 0)
         nginx.ingress.kubernetes.io/proxy-body-size: "500m"
       storage:
+        # -- the max proxy body size for the storage service ingress (no max when 0)
         nginx.ingress.kubernetes.io/proxy-body-size: "500m"
       cache:
+        # -- the max proxy body size for the cache service ingress (no max when 0)
         nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+        # -- the protocol for the K8s cache service
         nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
   hosts:
+    # -- the host to associate with the SRM ingress
     - host: chart-example.local
+  # -- the TLS configuration for the SRM ingress
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
 networkPolicy:
+  # -- whether to enable network policies for SRM components that support network policy
   enabled: false
+  # -- the port for the K8s API, required when using the Tool Orchestration feature
   k8sApiPort: 443
   web:
     egress:
       extraPorts:
+        # -- the TCP ports allowed for egress from the web component
         tcp: [22, 53, 80, 389, 443, 636, 7990, 7999]
+        # -- the UDP ports allowed for egress from the web component
         udp: [53, 389, 636, 3269]
 
 openshift:
+  # -- whether to create SecurityContextConstraint resources, which is required when using OpenShift
   createSCC: false
 
 web:
+  # @ignore
   affinity: {}
 
   authentication:
     saml:
+      # -- whether to use SAML authentication
       enabled: false
+      # -- the application/client name for the SRM SAML registration
       appName:
+      # -- the host base path for the SRM SAML registration (https://mysrmhost/srm)
       hostBasePath:
-      # samlIdpXmlFileConfigMap required fields:
-      # - saml-idp.xml
+      # -- the configmap name containing the IdP metadata file with required field saml-idp.xml
       samlIdpXmlFileConfigMap:
-      # samlSecret required field:
-      # saml-keystore.props (where the saml-keystore.props key value refers to a file with the following HOCON format)
+      # -- the K8s secret name containing the SAML keystore passwords with required field saml-keystore.props
+      # that contains a HOCON-formatted file with SRM props auth.saml2.keystorePassword and auth.saml2.privateKeyPassword
+      # File:
       # auth.saml2.keystorePassword = """keystore-password"""
       # auth.saml2.privateKeyPassword = """private-key-password"""
       samlSecret: ""
 
-  # cacertsSecret required fields:
-  # - cacerts (must trust database cert when using 'REQUIRE SSL' with an external database)
-  # - cacerts-password (the default Java cacerts password is 'changeit')
-  # kubectl -n srm create secret generic srm-web-cacerts-secret --from-file cacerts=./cacerts --from-literal cacerts-password=changeit
+  # -- the K8s secret name containing the Java keystore contents and its password with required fields cacerts and cacerts-password
+  # Note: cacerts must trust the database cert when using 'REQUIRE SSL' with an external database
+  # Command: kubectl -n srm create secret generic srm-web-cacerts-secret --from-file cacerts=./cacerts --from-literal cacerts-password=changeit
   cacertsSecret: ""
 
   database:
-    # credentialSecret required field:
-    # - db.props (where the db.props key value refers to a file with the following HOCON format)
-    #
+    # -- the K8s secret name containing the database connection properties with required field db.props that
+    # contains a HOCON-formatted file with SRM props swa.db.user and swa.db.password
+    # File: 
     # swa.db.user = """username"""
     # swa.db.password = """password"""
+    # Command:
     # kubectl -n srm create secret generic srm-web-db-cred-secret --from-file db.props=./db.props
     credentialSecret: ""
+    # -- the URL for the external SRM web database (jdbc:mysql://my-srm-web-db-host:3306/my-srm-web-db-name?useSSL=true&requireSSL=true)
     externalDbUrl:
 
   image:
+    # -- the registry name and optional registry suffix for the SRM web Docker image
     registry: docker.io
+    # -- the Docker image repository name for the SRM web workload
     repository: codedx/codedx-tomcat
+    # -- the Docker image version for the SRM web workload
     tag: v2023.8.3
+    # -- the K8s Docker image pull policy for the SRM web workload
     pullPolicy: IfNotPresent
 
+  # -- the Java options for the SRM web workload
   javaOpts: "-XX:MaxRAMPercentage=90.0"
 
-  # licenseSecret required fields:
-  # - license.lic
+  # -- the K8s secret name containing the SRM license password with required field license.lic
+  # Command:
   # kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic
   licenseSecret: ""
 
-  # loggingConfigMap required field:
-  # - logback.xml
+  # -- the K8s configmap containing the logging configuration file with required field logback.xml
+  # Command:
   # kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml
   loggingConfigMap: ""
 
+  # -- the node selector to use for the SRM web workload
   nodeSelector: {}
 
+  # -- the pod annotations to use for the SRM web pod
   podAnnotations: {}
 
   podDisruptionBudget:
+    # -- whether to create a pod disruption budget for the web component
     enabled: false
 
   podSecurityContext:
+    # -- the fsGroup for the SRM web pod
     fsGroup: 1000
+    # -- the gid for the SRM web pod
     runAsGroup: 1000
+    # -- the uid for the SRM web pod
     runAsUser: 1000
 
   props:
     limits:
       analysis:
+        # -- the value of the SRM prop analysis.concurrent-analysis-limit, which determines the maximum number of analyses to run concurrently
         concurrent: 2
       database:
+        # -- the size of the database connection pool
         poolSize: 5
+        # -- the maximum milliseconds that a client will wait for a database connection from the pool
         timeout: 60000
       jobs:
+        # -- the value of the SRM prop swa.jobs.cpu-limit, which determines the maximum available CPU
         cpu: 2000
+        # -- the value of the SRM prop swa.jobs.memory-limit, which determines the maximum available memory
         memory: 2000
+        # -- the value of the SRM prop swa.jobs.database-limit, which determines the maximum available database I/O
         database: 2000
+        # -- the value of the SRM prop swa.jobs.disk-limit, which determins the maximum available disk I/O
         disk: 2000
+    # -- the list of extra resources containing SRM prop settings
     extra: []
 
   resources:
     limits:
+      # -- the required CPU for the web workload (must be >= 2 vCPUs and >= 4 vCPUs when using Triage Assistant)
       cpu: 2000m
+      # -- the required memory for the web workload (must be >= 8192Mi and >= 16384Mi when using Triage Assistant)
       memory: 8192Mi
+      # -- the ephemeral storage for the web workload
       ephemeral-storage: 2868Mi
 
   persistence:
+    # -- the access mode for the AppData persistent volume
     accessMode: ReadWriteOnce
+    # -- the existing claim to use for the AppData persistent volume; a new persistent volume is generated when unset
     existingClaim: ""
+    # -- the size of the AppData persistent volume 
     size: 64Gi
+    # -- the storage class name for the AppData persistent volume; the default storage class used when unset
     storageClass:
 
   priorityClass:
+    # -- whether to create a PriorityClass resource for the web component
     create: false
+    # -- the web component priority value, which must be set relative to other Tool Orchestration component priority values
     value: 10100
 
   scanfarm:
     sast:
+      # -- the SAST component version to use for build-less scans
       version: 2023.6.1
     sca:
+      # -- the SCA component version to use for build-less scans
       version: 8.9.0
 
   securityContext:
+    # -- whether the SRM web workload uses a read-only filesystem
     readOnlyRootFilesystem: true
 
   service:
+    # -- the annotations to apply to the SRM web service
     annotations: {}
+    # -- the service type of the SRM web service
     type: ClusterIP
+    # -- the port number of the SRM web service
     port: 9090
 
   serviceAccount:
+    # -- whether to create a service account for the SRM web service
     create: true
+    # -- the annotations to apply to the SRM service account
     annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
+    # -- the name of the service account to use; a name is generated using the fullname template when unset and create is true
     name: ""
 
-  # tlsSecret required fields:
-  # - tls.crt
-  # - tls.key
+  # -- the K8s secret name for web component TLS with required fields tls.crt and tls.key
+  # Command:
   # kubectl -n srm create secret tls web-tls-secret --cert=path/to/cert-file --key=path/to/key-file
   tlsSecret:
 
+  # -- the pod tolerations for the web component
   tolerations: []
 
-  # toSecret required field:
-  # - to-key.props (where the to-key.props key value refers to a file with the following HOCON format)
-  #
+  # -- the K8s secret name containing the API key for the Tool Orchestration tool service with required field to-key.props that
+  # contains a HOCON-formatted file with SRM prop tws.api-key
+  # File:
   # tws.api-key = """password"""
+  # Command:
   # kubectl -n srm create secret generic to-key-secret --from-file to-key.props=./to-key.props
   toSecret:
 
-  # webSecret required fields:
-  # - admin-password
+  # -- the K8s secret name containing the administrator password with required field admin-password
+  # Command:
   # kubectl -n srm create secret generic srm-web-secret --from-literal admin-password=password
   webSecret: ""
 
 
 cnc:
+  # -- the image pull policy for scan farm components
   imagePullPolicy: "Always"
 
   cim:
+    # @ignore
     cimtools:
+      # @ignore
+      # must be set to false
       enabled: false
+    # @ignore
     cimweb:
+      # @ignore
+      # must be set to false
       enabled: false
+    # @ignore
     ingress:
+      # @ignore
+      # must be set to false
       enabled: false
+    # @ignore
     setupJob:
+      # @ignore
+      # must be set to false
       enabled: false
 
   cnc-common-infra:
+    # -- the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob
     cleanupSchedule: '*/55 * * * *'
 
+  # @ignore
   cnc-db-admin:
+    # @ignore
     enabled: false
 
   cnc-scan-service:
+    # @ignore
     syncJob:
+      # @ignore
       enabled: false
+    # @ignore
     retention:
+      # @ignore
       enabled: false
 
+  # @ignore
   cnc-cache-service:
+    # @ignore
     enabled: true
 
   scanfarm:
+    # @ignore
     enabled: true
     srm:
+      # @ignore
       enabled: true
+      # -- the port number of the SRM web service
       port: "9090"
 
+  # @ignore
   trust-stores:
+    # @ignore
     enabled: false
 
 mariadb:
   db:
-    # user must be codedx
+    # -- the on-cluster database username for SRM web (must be codedx)
     user: codedx
-    # name must be codedx
+    # -- the on-cluster database catalog name for SRM web (must be codedx)
     name: codedx
-  # existingSecret required fields:
-  # - mariadb-root-password
-  # - mariadb-password
+  # -- the K8s secret name containing the on-cluster MariaDB root and user passwords with required fields mariadb-root-password and mariadb-password
+  # Command:
   # kubectl -n srm create secret generic srm-mariadb-secret --from-literal mariadb-root-password=password --from-literal mariadb-password=password
   existingSecret: ""
   image:
+    # -- the registry name and optional registry suffix for the MariaDB Docker image
     registry: docker.io
+    # -- the Docker image repository name for the MariaDB workload
     repository: codedx/codedx-mariadb
+    # -- the Docker image version for the MariaDB workload
     tag: v1.24.0
+    # -- the K8s Docker image pull policy for the MariaDB workload
     pullPolicy: IfNotPresent
+    # -- the K8s image pull secret to use for MariaDB Docker images
     pullSecrets: []
     #  - private-registry
   serviceAccount:
+    # -- whether to create a service account for the MariaDB service
     create: true
   master:
+    # @ignore
+    # the mysql configuration for the primary database
     config: |-
       [mysqld]
       skip-name-resolve
@@ -265,36 +356,50 @@ mariadb:
       port=3306
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
-    # masterCaConfigMap required field:
-    # - ca.crt
+    # -- the configmap name containing the CA cert with required field ca.crt
+    # Command:
     # kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt
     masterCaConfigMap:
-    # masterTlsSecret required fields:
-    # - tls.crt
-    # - tls.key
+    # -- the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key
+    # Command:
     # kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file
     masterTlsSecret:
+    # -- the node selector to use for the MariaDB primary database workload
     nodeSelector: {}
     persistence:
+      # -- the existing claim to use for the MariaDB primary persistent volume; a new persistent volume is generated when unset
       existingClaim:
+      # -- the storage class name for the MariaDB primary persistent volume; the default storage class used when unset
       storageClass:
+      # -- the size of the MariaDB persistent volume 
       size: 64Gi
     podDisruptionBudget:
+      # -- whether to create a pod disruption budget for the MariaDB primary database component
       enabled: false
+      # -- the maximum number of unavailable instances of the MariaDB primary database component
       maxUnavailable: 0
     priorityClass:
+      # -- whether to create a PriorityClass resource for the MariaDB primary database component
       create: false
+      # -- the MariaDB primary database component priority value, which must be set relative to other Tool Orchestration component priority values
       value: 10200
     resources:
       limits:
+        # -- the required CPU for the MariaDB primary database workload
         cpu: 1000m
+        # -- the required memory for the MariaDB primary database workload
         memory: 8192Mi
+    # -- the pod tolerations for the MariaDB primary database component
     tolerations: []
   replication:
+    # -- whether to enable MariaDB replication
     enabled: false
   slave:
     annotations:
+      # -- the annotations for the MariaDB replica database component
       backup.codedx.io/type: none
+    # @ignore
+    # the mysql configuration for the replica database
     config: |-
       [mysqld]
       skip-name-resolve
@@ -323,23 +428,37 @@ mariadb:
       port=3306
       socket=/opt/bitnami/mariadb/tmp/mysql.sock
       pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+    # -- the node selector to use for the MariaDB replica database workload
     nodeSelector: {}
     persistence:
       backup:
+        # -- the size of the backup persistent volume
         size: 64Gi
+      # -- the size of the MariaDB replica database persistent volume
       size: 64Gi
+      # -- the storage class name for the MariaDB replica persistent volume; the default storage class used when unset
       storageClass:
     podDisruptionBudget:
+      # -- whether to create a pod disruption budget for the MariaDB replica database component
       enabled: false
+      # -- the minimum number of available instances of the MariaDB replica database component
       minAvailable: 1
     priorityClass:
+      # -- whether to create a PriorityClass resource for the MariaDB replica database component
       create: false
+      # -- the MariaDB replica database component priority value, which must be set relative to other Tool Orchestration component priority values
       value: 10200
+    # -- the number of replica database workloads
     replicas: 1
     resources:
       limits:
+        # -- the required CPU for the MariaDB replica database workload
         cpu: 1000m
+        # -- the required memory for the MariaDB replica database workload
         memory: 8192Mi
+    # -- the pod tolerations for the MariaDB replica database component
     tolerations: []
+  # @ignore
   tests:
+    # @ignore
     enabled: false
