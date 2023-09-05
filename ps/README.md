@@ -24,7 +24,7 @@ The Feature column indicates the feature associated with the parameter. The Helm
 |scanFarmDatabasePort|Scan Farm|port number of the scan farm PostgreSQL database||1.0|
 |scanFarmDatabaseUser|Scan Farm|username for the scan farm PostgreSQL database||1.0|
 |scanFarmDatabasePwd|Scan Farm|password for the scan farm PostgreSQL database||1.0|
-|scanFarmDatabaseSslMode|Scan Farm|type of SSL config|disable;verify-ca;verify-full|1.0|
+|scanFarmDatabaseSslMode|Scan Farm|type of SSL config|disable; verify-ca; verify-full|1.0|
 |scanFarmDatabaseServerCert|Scan Farm|path to PostgreSQL database certificate||1.0|
 |scanFarmScanDatabaseCatalog|Scan Farm|scan svc PostgreSQL catalog name||1.0|
 |scanFarmStorageDatabaseCatalog|Scan Farm|storage svc PostgreSQL catalog name||1.0|
@@ -38,7 +38,7 @@ The Feature column indicates the feature associated with the parameter. The Helm
 |scanFarmRedisVerifyHostname|Scan Farm|whether the redis hostname is validated|"true"|1.0|
 |scanFarmRedisServerCert|Scan Farm|path to Redis server cert||1.0|
 ||||||
-|scanFarmStorageType|Scan Farm|type of scan farm object storage|AwsS3;MinIO;Gcs;Azure|1.0|
+|scanFarmStorageType|Scan Farm|type of scan farm object storage|AwsS3; MinIO; Gcs; Azure|1.0|
 |scanFarmStorageBucketName|Scan Farm|object storage bucket/container for storage svc||1.0|
 |scanFarmCacheBucketName|Scan Farm|object storage bucket/container for cache svc||1.0|
 ||||||
@@ -56,7 +56,7 @@ The Feature column indicates the feature associated with the parameter. The Helm
 |scanFarmAzureSubscriptionId|Scan Farm Blob Storage|identifier of Azure subscription|"c4dcc882-b83d-47cf-8f9e-234b963736a2"|1.0|
 |scanFarmAzureTenantId|Scan Farm Blob Storage|identifier of Azure AD tenant|"6315cfb3-02f0-4651-828f-06a3ac065b32"|1.0|
 |scanFarmAzureResourceGroup|Scan Farm Blob Storage|resource group containing Azure storage account|"srmresourcegroup"|1.0|
-|scanFarmAzureEndpoint|Scan Farm Blob Storage|blob service URL for Azure storage account|https://srmstoragetest.blob.core.|windows.net/1.0|
+|scanFarmAzureEndpoint|Scan Farm Blob Storage|blob service URL for Azure storage account|https://\<?>.blob.core.windows.net/1.0|
 |scanFarmAzureClientId|Scan Farm Blob Storage|client identifier of Azure AD app|"9b1f8b8d-db8f-4683-8023-2dd7962b1e96"|1.0|
 |scanFarmAzureClientSecret|Scan Farm Blob Storage|client secret for Azure AD app|"S.68Q~"|1.0|
 ||||||
@@ -87,7 +87,7 @@ The Feature column indicates the feature associated with the parameter. The Helm
 ||||||
 |createSCCs|OpenShift|whether to create Security Context Constraints (OpenShift)||1.0|
 ||||||
-|scanFarmType|Scan Farm|type of Scan Farm deployment|None;Sast;Sca;All|1.0|
+|scanFarmType|Scan Farm|type of Scan Farm deployment|None; Sast; Sca; All|1.0|
 ||||||
 |skipDatabase|Core|whether to use the on-cluster database||1.0|
 |useTriageAssistant|ML|whether to use the SRM ML feature||1.0|
@@ -131,11 +131,11 @@ The Feature column indicates the feature associated with the parameter. The Helm
 |ingressAnnotations|Ingress|annotations for SRM ingress||1.0|
 |ingressHostname|Ingress|hostname associated with SRM ingress||1.0|
 |ingressTlsSecretName|Ingress|name of K8s secret containing ingress TLS configuration||1.0|
-|ingressTlsType|Ingress|type of TLS ingress configuration|None;CertManagerIssuer;CertManagerClusterIssuer;ExternalSecret|1.0|
+|ingressTlsType|Ingress|type of TLS ingress configuration|None; CertManagerIssuer; CertManagerClusterIssuer; ExternalSecret|1.0|
 ||||||
 |useSaml|SAML|whether to use SAML||1.0|
 |useLdap|LDAP|whether to use LDAP||1.0|
-|samlHostBasePath|SAML|base HTTP path for SRM web|https://www.codedx.io/srm|1.0|
+|samlHostBasePath|SAML|base HTTP path for SRM web|https://\<?>/srm|1.0|
 |samlIdentityProviderMetadataPath|SAML|path to the SAML IdP||1.0|
 |samlAppName|SAML|name of SAML app/entity||1.0|
 |samlKeystorePwd|SAML|password to protect SAML-related Java keystore||1.0|
