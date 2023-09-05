@@ -1,6 +1,6 @@
 # SRM Helm Prep Script
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square)
+![config.json version: 1.1.0](https://img.shields.io/badge/config.json%20version-1.1.0-informational?style=flat-square)
 
 The Helm Prep Wizard generates a config.json file used as input to the Helm Prep script. This page documents the fields of the JSON file and can give you a sense of the types of parameter values you may be asked to provide based on how you choose to install SRM.
 
