@@ -137,9 +137,11 @@ K8s Installation Notes
 ----------------------
 - Your deployment includes the scan farm feature. Remember to complete the following tasks:
   * Configure external dependencies (PostgreSQL, Redis, Object Storage)
-  * Assign a pool-type label (pool-type=small) to analysis node(s).
-  * Assign a ScannerNode pod toleration (NodeType=ScannerNode:NoSchedule) to analysis node(s).
-- Follow instructions at https://github.com/synopsys-sig/srm-ks8/blob/main/docs/deploy/registry.md to pull/push Synopsys Docker images to your private registry.
+  * Define your "small" scan job node pool:
+  *   Assign a pool-type label (pool-type=small) to analysis node(s).
+  *   Assign a ScannerNode pod toleration (NodeType=ScannerNode:NoSchedule) to analysis node(s).
+  *   NOTE: A "small" pool-type requires one or more nodes with 6.5 vCPUs and 26 GB of memory
+- Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Synopsys Docker images to your private registry.
 
 
 ----------------------
@@ -150,7 +152,7 @@ kubectl create namespace srm
 ----------------------
 Required K8s Resources
 ----------------------
-kubectl apply -f ".k8s-srm/chart-resources"
+kubectl apply -f "/path/to/.k8s-srm/chart-resources"
 
 ----------------------
 Required Helm Commands
@@ -158,8 +160,8 @@ Required Helm Commands
 helm repo add codedx https://codedx.github.io/codedx-kubernetes
 helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
 helm repo update
-helm dependency update /path/to/git/srm/chart
-helm -n srm upgrade --reset-values --install srm-test -f ".k8s-srm/chart-values/db-cpu.values.yaml" -f ".k8s-srm/chart-values/db-docker-image-location.values.yaml" -f ".k8s-srm/chart-values/db-memory.values.yaml" -f ".k8s-srm/chart-values/db-replication.values.yaml" -f ".k8s-srm/chart-values/db-volume-size.values.yaml" -f ".k8s-srm/chart-values/ingress.values.yaml" -f ".k8s-srm/chart-values/scan-farm-aws-storage.values.yaml" -f ".k8s-srm/chart-values/scan-farm-cache-auth.values.yaml" -f ".k8s-srm/chart-values/scan-farm-cache-tls.values.yaml" -f ".k8s-srm/chart-values/scan-farm-cache.values.yaml" -f ".k8s-srm/chart-values/scan-farm-database.values.yaml" -f ".k8s-srm/chart-values/scan-farm-docker-image-location.values.yaml" -f ".k8s-srm/chart-values/scan-farm-lic.values.yaml" -f ".k8s-srm/chart-values/scan-farm.values.yaml" -f ".k8s-srm/chart-values/srm-lic.values.yaml" -f ".k8s-srm/chart-values/web-cpu.values.yaml" -f ".k8s-srm/chart-values/web-docker-image-location.values.yaml" -f ".k8s-srm/chart-values/web-ephemeral-storage.values.yaml" -f ".k8s-srm/chart-values/web-memory.values.yaml" -f ".k8s-srm/chart-values/web-svc.values.yaml" -f ".k8s-srm/chart-values/web-volume-size.values.yaml" --timeout 30m0s /path/to/git/srm/chart
+helm dependency update /path/to/git/srm-k8s/chart
+helm -n srm upgrade --reset-values --install srm -f "/path/to/.k8s-srm/chart-values-combined/values-combined.yaml" --timeout 30m0s /path/to/git/srm-k8s/chart
 ```
 
 - The optional `K8s Installation Notes` section will include steps you should take before creating K8s resources and running helm.
