@@ -90,6 +90,10 @@ function Get-NetworkPolicyValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'netpol.values.yaml'
 }
 
+function Get-NetworkPolicyEgressValuesPath($config) {
+	Join-Path $config.GetValuesWorkDir() 'netpol.egress.values.yaml'
+}
+
 function Get-OpenShiftValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'openshift.values.yaml'
 }
