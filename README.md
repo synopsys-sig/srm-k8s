@@ -139,7 +139,7 @@ K8s Installation Notes
   * Configure external dependencies (PostgreSQL, Redis, Object Storage)
   * Define your "small" scan job node pool:
   *   Assign a pool-type label (pool-type=small) to analysis node(s).
-  *   Assign a ScannerNode pod toleration (NodeType=ScannerNode:NoSchedule) to analysis node(s).
+  *   Assign a scanner node taint (NodeType=ScannerNode:NoSchedule) to analysis node(s).
   *   NOTE: A "small" pool-type requires one or more nodes with 6.5 vCPUs and 26 GB of memory
 - Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Synopsys Docker images to your private registry.
 
