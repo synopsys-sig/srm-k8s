@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.2.0
+.VERSION 1.3.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
@@ -170,6 +170,9 @@ $s = @{}
 [ScanFarmS3AccessMethod],
 [ScanFarmS3IamRoleServiceAccount],
 [ScanFarmS3SecretKey],
+[ScanFarmS3StorageContextPath],
+[ScanFarmS3StorageExternalURL],
+[ScanFarmS3StorageProxy],
 [ScanFarmS3Region],
 [ScanFarmScanServiceDatabaseName],
 [ScanFarmStorage],
@@ -238,7 +241,8 @@ Add-StepTransitions $graph $s[[UseScanFarm]] $s[[SigRepoUsername]],$s[[SigRepoPa
 Add-StepTransitions $graph $s[[ScanFarmType]] $s[[ScanFarmScaLicense]]
 Add-StepTransitions $graph $s[[ScanFarmSastLicense]] $s[[ScanFarmDatabaseHost]]
 
-Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmMinIOHostname]],$s[[ScanFarmMinIOPort]],$s[[ScanFarmMinIORootUsername]],$s[[ScanFarmMinIORootPwd]],$s[[ScanFarmInClusterStorage]],$s[[ScanFarmInClusterStorageUrl]],$s[[ScanFarmMinIOTLS]],$s[[ScanFarmMinIOCert]],$s[[DockerRegistryHost]]
+Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmMinIOHostname]],$s[[ScanFarmMinIOPort]],$s[[ScanFarmMinIORootUsername]],$s[[ScanFarmMinIORootPwd]],$s[[ScanFarmS3StorageProxy]],$s[[ScanFarmS3StorageContextPath]],$s[[ScanFarmInClusterStorage]],$s[[ScanFarmInClusterStorageUrl]],$s[[ScanFarmMinIOTLS]],$s[[ScanFarmMinIOCert]],$s[[DockerRegistryHost]]
+Add-StepTransitions $graph $s[[ScanFarmS3StorageProxy]] $s[[ScanFarmS3StorageExternalURL]],$s[[ScanFarmInClusterStorage]]
 Add-StepTransitions $graph $s[[ScanFarmInClusterStorage]] $s[[ScanFarmMinIOTLS]]
 Add-StepTransitions $graph $s[[ScanFarmMinIOTLS]] $s[[DockerRegistryHost]]
 Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmS3AccessMethod]],$s[[ScanFarmS3AccessKey]],$s[[ScanFarmS3SecretKey]],$s[[ScanFarmS3Region]],$s[[DockerRegistryHost]]

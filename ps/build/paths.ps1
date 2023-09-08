@@ -350,7 +350,11 @@ function Get-ScanFarmInternalUrlValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'scan-farm-storage-internal.values.yaml'
 }
 
-function Get-ScanFarmExternalUrlValuesPath($config) {
+function Get-ScanFarmStorageExternalProxiedUrlValuesPath($config) {
+	Join-Path $config.GetValuesWorkDir() 'scan-farm-storage-proxy.values.yaml'
+}
+
+function Get-ScanFarmStorageExternalUrlValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'scan-farm-storage-external.values.yaml'
 }
 

@@ -217,8 +217,11 @@ Refer to the [lock/unlock scripts](../admin/config) to edit protected config.jso
 |notes|Core|notes associated with deployment||1.0|
 ||||||
 |scanFarmScaApiUrlOverride|Core (Dev/Test Only)|override for SCA scan farm endpoint||1.0|
+||||||
 |configVersion|Config|config.json file format version||1.1|
 |isLocked|Config|whether some config.json field values are encrypted||1.1|
 |salts|Config|salts used to encrypt specific config.json field values||1.1|
-
-
+||||||
+|scanFarmStorageIsProxied|Scan Farm|whether to proxy object storage by using SRM's hostname|false|1.2|
+|scanFarmStorageContextPath|Scan Farm|optional context path for proxied object storage|upload|1.2|
+|scanFarmStorageExternalUrl|Scan Farm|non-proxied object storage URL||1.2|

@@ -98,7 +98,11 @@ cnc:
         name: $credentialSecretName
 "@ | Out-File (Get-ScanFarmMinIOValuesPath $config)
 
-  New-ScanFarmExternalProxiedStorageConfig $config
+	if ($config.scanFarmStorageIsProxied) {
+		New-ScanFarmExternalProxiedStorageConfig $config
+	} else {
+		New-ScanFarmExternalStorageConfig $config
+	}
 	if ($config.scanFarmMinIOSecure) {
 		New-ScanFarmMinIOTlsConfig $config
 	}

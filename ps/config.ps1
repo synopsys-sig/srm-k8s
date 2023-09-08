@@ -46,7 +46,7 @@ class Config {
 	static [int]   $volumeSizeGiBDefault = 64
 	static [int]   $externalDatabasePortDefault = 3306
 
-	static [int]   $thisVersion = "1.1"
+	static [string]   $thisVersion = "1.2"
 
 	static [string[]] $protectedFields = @(
 		'sigRepoUsername',
@@ -144,6 +144,9 @@ class Config {
 
 	[bool]         $scanFarmStorageHasInClusterUrl
 	[string]       $scanFarmStorageInClusterUrl
+	[bool]         $scanFarmStorageIsProxied
+	[string]       $scanFarmStorageContextPath
+	[string]       $scanFarmStorageExternalUrl
 
 	[bool]         $useGeneratedPwds
 	[string]       $mariadbRootPwd
@@ -310,6 +313,10 @@ class Config {
 		# v1.1 fields
 		$this.salts = @()
 		$this.isLocked = $false
+		# v1.2 fields
+		$this.scanFarmStorageIsProxied = $true      # < v1.2 assumed proxy
+		$this.scanFarmStorageContextPath = 'upload' # < v1.2 assumed upload
+		$this.scanFarmStorageExternalUrl = ''       # redundantly initialized for readability
 	}
 
 	static [Config] FromJsonFile($configJsonFile) {

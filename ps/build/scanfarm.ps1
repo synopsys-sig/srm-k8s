@@ -29,12 +29,6 @@ function New-ScanFarmExternalProxiedStorageConfig($config) {
 	}
   $externalWebSvcUrl = "$externalWebSvcProtocol`://$($config.ingressHostname)"
 
-  # The following MinIO configuration support currently limited to MinIO proxied behind the
-  # SRM ingress via the "upload" path
-  # 
-  # Note: A non-proxied MinIO can be configured by using external configuration to "erase"
-  # the proxyPath and set cnc.cnc-storage-service.endpoint.external.url to the MinIO 
-  # endpoint (e.g. https://my.minio.domain.name:9000)
 	@"
 cnc:
   cnc-storage-service:
@@ -42,7 +36,18 @@ cnc:
       external:
         proxyPath: upload
         url: $externalWebSvcUrl
-"@ | Out-File (Get-ScanFarmExternalUrlValuesPath $config)
+"@ | Out-File (Get-ScanFarmStorageExternalProxiedUrlValuesPath $config)
+}
+
+function New-ScanFarmExternalStorageConfig($config) {
+
+	@"
+cnc:
+  cnc-storage-service:
+    endpoint:
+      external:
+        url: $($config.scanFarmStorageExternalUrl)
+"@ | Out-File (Get-ScanFarmStorageExternalUrlValuesPath $config)
 }
 
 function New-ScanFarmConfig($config) {

@@ -721,6 +721,122 @@ changed MinIO's configuration.
 	}
 }
 
+class ScanFarmS3StorageProxy : Step {
+
+	static [string] hidden $description = @'
+You can proxy MinIO by using the same hostname for both SRM and MinIO.
+For example, if your SRM hostname is srm.local, you can make MinIO available
+at https://srm.local/upload/.
+
+Alternatively, you can make MinIO available at a different URL. For example,
+if your SRM hostname is srm.local, you can make MinIO available at a different
+URL like https://minio.local:9000/.
+
+'@
+
+	ScanFarmS3StorageProxy([Config] $config) : base(
+		[ScanFarmS3StorageProxy].Name, 
+		$config,
+		'Scan Farm MinIO Proxy',
+		[ScanFarmS3StorageProxy]::description,
+		'Do you plan to proxy MinIO using your SRM hostname?') {}
+
+	[IQuestion] MakeQuestion([string] $prompt) {
+		return new-object YesNoQuestion($prompt, 
+			'Yes, I want to proxy MinIO using my SRM hostname', 
+			'No, MinIO will use a separate URL', 1)
+	}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.scanFarmStorageIsProxied = ([YesNoQuestion]$question).choice -eq 0
+		return $true
+	}
+
+	[void]Reset(){
+		$this.config.scanFarmStorageIsProxied = $false
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.skipScanFarm -and 
+			$this.config.scanFarmStorageType -eq [ScanFarmStorageType]::MinIO
+	}
+}
+
+class ScanFarmS3StorageContextPath : Step {
+
+	static [string] hidden $description = @'
+Making MinIO available with your SRM hostname requires a proxy/context
+path.
+
+For example, if your SRM hostname is srm.local, making MinIO available
+at https://srm.local/upload/ would mean specifying "upload" for your
+context path.
+
+Note: You can find an example NGINX Community ingress resource at this URL:
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/sf/proxy-minio.md
+
+'@
+
+	ScanFarmS3StorageContextPath([Config] $config) : base(
+		[ScanFarmS3StorageContextPath].Name, 
+		$config,
+		'Scan Farm MinIO Context Path',
+		[ScanFarmS3StorageContextPath]::description,
+		'Enter your context path') {}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.scanFarmStorageContextPath = $question.response
+		return $true
+	}
+
+	[void]Reset(){
+		$this.config.scanFarmStorageContextPath = ''
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.skipScanFarm -and 
+			$this.config.scanFarmStorageType -eq [ScanFarmStorageType]::MinIO -and
+			$this.config.scanFarmStorageIsProxied
+	}
+}
+
+class ScanFarmS3StorageExternalURL : Step {
+
+	static [string] hidden $description = @'
+Your external MinIO URL is the URL that you can use to access MinIO from
+outside your cluster. You should enter your MinIO URL, port, and any
+context path that's required. 
+
+For example, if your MinIO instance uses hostname my-minio with HTTPS, 
+port 9000, and no context path, enter https://my-minio:9000. If your
+MinIO instance uses an "upload" context path, include the context path
+by specifying https://my-minio:9000/upload/.
+
+'@
+
+	ScanFarmS3StorageExternalURL([Config] $config) : base(
+		[ScanFarmS3StorageExternalURL].Name, 
+		$config,
+		'Scan Farm MinIO External URL',
+		[ScanFarmS3StorageExternalURL]::description,
+		'Enter your external MinIO URL') {}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.scanFarmStorageExternalUrl = $question.response
+		return $true
+	}
+
+	[void]Reset(){
+		$this.config.scanFarmStorageExternalUrl = ''
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.skipScanFarm -and 
+			$this.config.scanFarmStorageType -eq [ScanFarmStorageType]::MinIO -and
+			-not $this.config.scanFarmStorageIsProxied
+	}
+}
+
 class ScanFarmMinIORootUsername : Step {
 
 	static [string] hidden $description = @'
