@@ -6,8 +6,8 @@ if (-not $?) {
 	exit 1
 }
 
-. (Join-Path $PSScriptRoot '../external/powershell-algorithms/data-structures.ps1')
-. (Join-Path $PSScriptRoot '../build/yaml.ps1')
+. (Join-Path $PSScriptRoot '../../external/powershell-algorithms/data-structures.ps1')
+. (Join-Path $PSScriptRoot '../../build/yaml.ps1')
 
 Describe 'Merge YAML files' -Tag 'YAML' {
 
