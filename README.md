@@ -4,7 +4,7 @@ This is the place to start if you are installing SRM for the very first time.
 
 The SRM software uses a new deployment model that supports a separately licensed Scan Farm feature, which includes built-in SAST and SCA scanning powered by Coverity and Black Duck.
 
-If you previously installed Code Dx, the SRM predecessor, you should upgrade your Code Dx instance using the deprecated deployment model available in the [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) repository. Code Dx customers should plan to migrate to the new deployment model by 11/14/2023 (stay tuned for more information).
+If you previously installed Code Dx, the SRM predecessor, you should upgrade your Code Dx instance using the deprecated deployment model available in the [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) repository. Code Dx customers should plan to [migrate](admin/migrate) to the new deployment model by 11/14/2023.
 
 # Deploying SRM on Kubernetes
 
