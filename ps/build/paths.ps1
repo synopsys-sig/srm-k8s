@@ -106,8 +106,12 @@ function Get-RegistryValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'reg.values.yaml'
 }
 
-function Get-ToExternalWorkflowStorageSecretK8sPath($config) {
+function Get-ToWorkflowStorageSecretK8sPath($config) {
 	Join-Path $config.GetK8sWorkDir() 'wf-storage-secret.k8s.yaml'
+}
+
+function Get-ToWorkflowStoragePath($config) {
+	Join-Path $config.GetValuesWorkDir()  'to.workflow-storage.values.yaml'
 }
 
 function Get-ToExternalWorkflowStorageCertK8sPath($config) {

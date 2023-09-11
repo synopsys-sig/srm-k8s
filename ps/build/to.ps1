@@ -42,20 +42,24 @@ web:
 "@ | Out-File (Get-ToCredentialValuesPath $config)
 }
 
+function New-ToStorageSecret($config, $storageUsername, $storagePwd) {
+
+	New-GenericSecret $config.namespace (Get-ToStorageSecretName $config) -keyValues @{
+		"access-key"=$storageUsername
+		"secret-key"=$storagePwd
+	} -dryRun | Out-File (Get-ToWorkflowStorageSecretK8sPath $config)
+}
+
 function New-ExternalWorkflowStorage($config) {
 
-	$wfSecretName = Get-ToStorageSecretName $config
-	New-GenericSecret $config.namespace $wfSecretName -keyValues @{
-		"access-key"=$config.externalWorkflowStorageUsername
-		"secret-key"=$config.externalWorkflowStoragePwd
-	} -dryRun | Out-File (Get-ToExternalWorkflowStorageSecretK8sPath $config)
+	New-ToStorageSecret $config $config.externalWorkflowStorageUsername $config.externalWorkflowStoragePwd
 
 	$yaml = @"
 to:
   workflowStorage:
     endpoint: $($config.externalWorkflowStorageEndpoint)
     endpointSecure: $(ConvertTo-Json $config.externalWorkflowStorageEndpointSecure)
-    existingSecret: $wfSecretName
+    existingSecret: $(Get-ToStorageSecretName $config)
     bucketName: $($config.externalWorkflowStorageBucketName)
 "@ | Out-File (Get-ToExternalWorkflowStoragePath $config)
 	
@@ -84,6 +88,14 @@ function New-InternalWorkflowStorage($config) {
 
 	New-ToKeyPropsSecret $config
 	New-ToKeySecret $config
+
+	New-ToStorageSecret $config 'admin' $config.minioAdminPwd
+	$yaml += @"
+minio:
+  global:
+    minio:
+      existingSecret: $(Get-ToStorageSecretName $config)
+"@ | Out-File (Get-ToWorkflowStoragePath $config)
 }
 
 function New-ToolOrchestrationConfig($config) {
