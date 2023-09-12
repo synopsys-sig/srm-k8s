@@ -322,7 +322,7 @@ $config.webServicePortNumber = $skipServiceTLS ? $codeDxServicePortNumber : $cod
 $config.webServiceAnnotations = Get-KeyValuesFromTable $serviceAnnotationsCodeDx
 
 $config.skipIngressEnabled = $skipIngressEnabled
-$config.ingressType = "NginxIngress"
+$config.ingressType = "NginxIngressCommunity"
 $config.ingressClassName = $ingressClassNameCodeDx
 $config.ingressAnnotations = Get-KeyValuesFromTable $ingressAnnotationsCodeDx
 $config.ingressHostname = $codeDxDnsName
