@@ -311,8 +311,11 @@ Run a mysql command similiar to the following to import your logical backup, rep
 $ mysql -h 127.0.0.1 -uadmin -p srmdb < dump-codedx.sql
 ```
 
->Note: If you see the "Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation" error message, run this command: 
-sed 's/\sDEFINER=\`[^\`]\*\`@\`[^\`]\*`//g' -i dump-codedx.sql
+If you see the `Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation` error message, run the following command:
+
+```
+sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump-codedx.sql
+```
 
 ## Copy Code Dx MinIO Files Locally (if installed)
 
