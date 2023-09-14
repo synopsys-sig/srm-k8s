@@ -31,7 +31,7 @@ Before you get started, make sure that you have satisified the SRM deployment [p
 
 Back up your Code Dx system now so that you can restore its state should something go wrong with your data migration.
 
->Note: Data migration for external components, like an external database or workflow storage, is unnecessary because they will be upgraded during your SRM deployment. Contact Synopsys if you would like guidance on how to avoid in-place upgrades for external components.
+>Note: Data migration for external workflow storage is unsupported because it will be reused with your SRM deployment. Contact Synopsys if you would like guidance on how to avoid reuse for external workflow storage.
 
 ## Clone this GitHub Repository
 
@@ -249,9 +249,11 @@ $ kubectl delete -f /path/to/local/work/directory/host-srm-appdata-volume.yaml
 
 ## Backup Code Dx Database
 
-Skip this section if you are using an external database.
+You must create a database backup from either your on-cluster MariaDB database or your external database.
 
-You must create a database backup from your on-cluster MariaDB database:
+### Backup On-Cluster MariaDB Database
+
+Skip this section if you are using an external database.
 
 1) Run the following commands to create a logical backup, replacing the `cdx-app` namespace and `codedx-mariadb-master-0` pod name as necessary:
 
@@ -263,14 +265,30 @@ $ exit # bash
 
 >Note: The above command assumes you have adequate space at /bitnami/mariadb to store your database backup; expand your data volume if you need more disk capacity.
 
-2) Copy backup.tgz to your local work directory with the following commands, replacing the `cdx-app` namespace and `codedx-mariadb-master-0` pod name as necessary:
+2) Copy dump-codedx.sql to your local work directory with the following commands, replacing the `cdx-app` namespace and `codedx-mariadb-master-0` pod name as necessary:
 
 ```
 $ cd /path/to/local/work/directory
 $ kubectl -n cdx-app cp codedx-mariadb-master-0:/bitnami/mariadb/dump-codedx.sql dump-codedx.sql
 ```
 
+### Backup External Database
+
+Skip this section if you are using an on-cluster MariaDB database.
+
+1) Log on to your external database host and use mysqldump to create a logical backup, replacing the host, port, user, and database parameters as necessary.
+
+```
+$ mysqldump --host=127.0.0.1 --port=3306 --user=admin -p codedxdb > dump-codedx.sql
+```
+
+2) Copy dump-codedx.sql to your local work directory.
+
 ## Restore Code Dx Database
+
+You must restore a database backup to either your on-cluster MariaDB database or your external database.
+
+### Restore On-Cluster MariaDB Database
 
 Skip this section if you are using an external database.
 
@@ -282,6 +300,19 @@ Restore the database backup from your local system by running the restore-db.ps1
 $ cd /path/to/local/work/directory
 $ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.sql' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -skipWebRestart
 ```
+
+### Restore External Database
+
+Skip this section if you are using an on-cluster MariaDB database.
+
+Run a mysql command similiar to the following to import your logical backup, replacing the `admin` username, hostname, and `srmdb` database placeholders as necessary:
+
+```
+$ mysql -h 127.0.0.1 -uadmin -p srmdb < dump-codedx.sql
+```
+
+>Note: If you see the "Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation" error message, run this command: 
+sed 's/\sDEFINER=\`[^\`]\*\`@\`[^\`]\*`//g' -i dump-codedx.sql
 
 ## Copy Code Dx MinIO Files Locally (if installed)
 

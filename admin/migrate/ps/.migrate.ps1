@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.0.1
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
@@ -234,9 +234,10 @@ function Get-DirectoryPath([string] $prompt) {
 	$q.Response
 }
 
-function Get-QuestionResponse([string] $prompt, [string[]] $blockedList) {
+function Get-QuestionResponse([string] $prompt, [string[]] $blockedList, [switch] $isSecure) {
 	$q = new-object Question($prompt)
 	$q.blacklist = $blockedList
+	$q.isSecure = $isSecure
 	$q.Prompt()
 	$q.Response
 }
@@ -268,6 +269,25 @@ $config = new-object Config
 
 $config.namespace = Get-QuestionResponse "Enter your SRM namespace (do not reuse your Code Dx namespace)" @($namespaceCodeDx,$namespaceToolOrchestration)
 $config.releaseName = Get-QuestionResponse "Enter your SRM release (do not reuse your Code Dx release name)" @($releaseNameCodeDx,$releaseNameToolOrchestration)
+
+if ($skipDatabase) {
+
+	$config.externalDatabaseHost = Get-QuestionResponse 'Enter the name of your external database host' @($externalDatabaseHost)
+	$config.externalDatabaseName = Get-QuestionResponse 'Enter the name of your SRM database (e.g., srmdb)' @($externalDatabaseName)
+	$config.externalDatabaseUser = Get-QuestionResponse 'Enter the SRM database username (e.g., srm)' @($externalDatabaseUser)
+	$config.externalDatabasePwd = Get-QuestionResponse 'Enter the SRM database password' @() -isSecure
+
+	Read-Host @"
+---
+Before invoking helm to install SRM, you must provision your external database by following the
+guidance at https://github.com/synopsys-sig/srm-k8s/tree/main/docs/db. Your SRM deployment will
+fail if your $($config.externalDatabaseHost) host does not have an 
+empty '$($config.externalDatabaseName)' database that the user '$($config.externalDatabaseUser)' can access.
+---
+Press Enter to continue...
+"@ | Out-Null
+}
+
 $config.workDir = $workDir
 
 $config.srmLicenseFile = Get-FilePath 'Enter the path to your SRM license file'
@@ -297,11 +317,7 @@ $config.toolServiceReplicas = $toolServiceReplicas
 
 $config.dbSlaveReplicaCount = $dbSlaveReplicaCount
 
-$config.externalDatabaseHost = $externalDatabaseHost
 $config.externalDatabasePort = $externalDatabasePort
-$config.externalDatabaseName = $externalDatabaseName
-$config.externalDatabaseUser = $externalDatabaseUser
-$config.externalDatabasePwd = $externalDatabasePwd
 $config.externalDatabaseSkipTls = $externalDatabaseSkipTls
 $config.externalDatabaseTrustCert = -not [string]::IsNullOrEmpty($externalDatabaseServerCert)
 $config.externalDatabaseServerCert = $externalDatabaseServerCert
