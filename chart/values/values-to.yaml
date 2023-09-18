@@ -58,7 +58,7 @@ to:
       # -- the Docker image repository name for the SRM tool service workload
       toolService: 'codedx/codedx-tool-service'
     # -- the Docker image version for the SRM Tool Orchestration workloads
-    tag: v1.26.0
+    tag: v1.27.0
   logs:
     # -- the maximum size of a tool service log file
     maxSizeMB: 10

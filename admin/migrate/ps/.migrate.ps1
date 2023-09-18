@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.1
+.VERSION 1.0.2
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
@@ -48,23 +48,6 @@ param (
 	[string]                 $toolServiceEphemeralStorageReservation,
 	[string]                 $minioEphemeralStorageReservation,
 	[string]                 $workflowEphemeralStorageReservation,
-
-	[string]                 $imageCodeDxTomcat       = 'codedx/codedx-tomcat:v2023.4.8',
-	[string]                 $imageCodeDxTools        = 'codedx/codedx-tools:v2023.4.8',
-	[string]                 $imageCodeDxToolsMono    = 'codedx/codedx-toolsmono:v2023.4.8',
-
-	[string]                 $imagePrepare            = 'codedx/codedx-prepare:v1.25.0',
-	[string]                 $imageNewAnalysis        = 'codedx/codedx-newanalysis:v1.25.0',
-	[string]                 $imageSendResults        = 'codedx/codedx-results:v1.25.0',
-	[string]                 $imageSendErrorResults   = 'codedx/codedx-error-results:v1.25.0',
-	[string]                 $imageToolService        = 'codedx/codedx-tool-service:v1.25.0',
-	[string]                 $imagePreDelete          = 'codedx/codedx-cleanup:v1.25.0',
-
-	[string]                 $imageCodeDxTomcatInit   = 'codedx/codedx-tomcat:v2023.4.8',
-	[string]                 $imageMariaDB            = 'codedx/codedx-mariadb:v1.23.0',
-	[string]                 $imageMinio              = 'bitnami/minio:2021.4.6-debian-10-r11',
-	[string]                 $imageWorkflowController = 'codedx/codedx-workflow-controller:v2.17.0',
-	[string]                 $imageWorkflowExecutor   = 'codedx/codedx-argoexec:v2.17.0',
 
 	[int]                    $toolServiceReplicas = 3,
 
