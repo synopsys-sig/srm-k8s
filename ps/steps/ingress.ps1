@@ -119,7 +119,11 @@ resource from which you can pattern a path-based route definition.
 class IngressClassName : Step {
 
 	static [string] hidden $description = @'
-Specify the ingress class name for your ingress controller.
+Specify the ingress class name for your ingress controller. For example,
+'nginx' is the default NGINX Community ingress class name.
+
+Note: Your ingress controller must support multiple ingress
+resources referencing the same hostname.
 '@
 
 	IngressClassName([Config] $config) : base(
