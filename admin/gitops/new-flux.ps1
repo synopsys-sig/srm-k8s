@@ -205,19 +205,19 @@ spec:
 # values:
 #   web:
 #     image:
-#      tag: web-tag
+#       tag: web-tag
 #   mariadb:
 #     image:
-#     tag: db-tag
+#       tag: db-tag
 #   to:
 #     image:
-#     tag: tool-orchestration-tag
+#       tag: tool-orchestration-tag
 #   minio:
 #     image:
-#     tag: minio-tag
+#       tag: minio-tag
 #   argo:
 #     images:
-#     tag: workflow-tag
+#       tag: workflow-tag
 "@ | Out-File (Join-Path (New-ResourceDirectory $fluxDir 'HelmRelease') 'release.yaml') -NoNewline
 
 @"
