@@ -115,8 +115,7 @@ class ExternalDatabasePort : Step {
 Specify the port that your external database host is listening to for incoming 
 connections. 
 
-Note: The default port for MariaDB is 3306, so enter that value if you haven't 
-changed MariaDB's configuration.
+Note: The default port for MariaDB is 3306.
 '@
 
 	ExternalDatabasePort([Config] $config) : base(
@@ -124,14 +123,17 @@ changed MariaDB's configuration.
 		$config,
 		'External Database Port',
 		[ExternalDatabasePort]::description,
-		'Enter the port number for your external database host') {}
+		'Enter your database port or press Enter to accept the default (3306)') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
-		return new-object IntegerQuestion($prompt, 0, 65535, $false)
+		$question = new-object IntegerQuestion($prompt, 0, 65535, $false)
+		$question.allowEmptyResponse = $true
+		return $question
 	}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.externalDatabasePort = ([IntegerQuestion]$question).intResponse
+		$q = [IntegerQuestion]$question
+		$this.config.externalDatabasePort = $q.isResponseEmpty ? 3306 : $q.intResponse
 		return $true
 	}
 
