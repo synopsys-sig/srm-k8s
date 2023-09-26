@@ -260,16 +260,23 @@ Skip this section if you are using an external database.
 ```
 $ kubectl -n cdx-app exec -it codedx-mariadb-master-0 -- bash
 $ mysqldump --host=127.0.0.1 --port=3306 --user=root -p codedx > /bitnami/mariadb/dump-codedx.sql
+$ # verify "Dump completed" message (see Note 2)
+$ tail -n 1 /bitnami/mariadb/dump-codedx.sql
+$ cd /bitnami/mariadb
+$ tar -cvzf dump-codedx.tgz dump-codedx.sql
+$ rm dump-codedx.sql
 $ exit # bash
 ```
 
->Note: The above command assumes you have adequate space at /bitnami/mariadb to store your database backup; expand your data volume if you need more disk capacity.
+>Note 1: The above command assumes you have adequate space at /bitnami/mariadb to store your database backup; expand your data volume if you need more disk capacity.
+
+>Note 2: Confirm that your dump file ends with a "Dump completed" message (e.g., tail -n 1 /bitnami/mariadb/dump-codedx.sql), and consider performing a restore test to another catalog on the same database instance where you can compare tables/data.
 
 2) Copy dump-codedx.sql to your local work directory with the following commands, replacing the `cdx-app` namespace and `codedx-mariadb-master-0` pod name as necessary:
 
 ```
 $ cd /path/to/local/work/directory
-$ kubectl -n cdx-app cp codedx-mariadb-master-0:/bitnami/mariadb/dump-codedx.sql dump-codedx.sql
+$ kubectl -n cdx-app cp codedx-mariadb-master-0:/bitnami/mariadb/dump-codedx.tgz dump-codedx.tgz
 ```
 
 ### Backup External Database
@@ -281,6 +288,8 @@ Skip this section if you are using an on-cluster MariaDB database.
 ```
 $ mysqldump --host=127.0.0.1 --port=3306 --user=admin -p codedxdb > dump-codedx.sql
 ```
+
+>Note: Confirm that your dump file ends with a "Dump completed" message (e.g., tail -n 1 dump-codedx.sql), and consider performing a restore test to another catalog on the same database instance where you can compare tables/data.
 
 2) Copy dump-codedx.sql to your local work directory.
 
@@ -298,7 +307,7 @@ Restore the database backup from your local system by running the restore-db.ps1
 
 ```
 $ cd /path/to/local/work/directory
-$ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.sql' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -skipWebRestart
+$ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.tgz' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -skipWebRestart
 ```
 
 ### Restore External Database

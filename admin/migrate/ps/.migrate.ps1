@@ -1,11 +1,11 @@
 <#PSScriptInfo
-.VERSION 1.0.2
+.VERSION 1.1.0
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
 #>
 
-using module @{ModuleName='guided-setup'; RequiredVersion='1.15.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
 
 param (
 	[string]                 $workDir = "$HOME/.k8s-codedx",
@@ -294,6 +294,12 @@ $config.skipToolOrchestration = $skipToolOrchestration
 $config.skipMinIO = $skipMinIO
 $config.skipNetworkPolicies = $skipNetworkPolicies
 $config.skipTls = $skipTls
+
+if (-not $config.skipTLS) {
+	$valuesTlsFilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../chart/values/values-tls.yaml'))
+	$config.SetNote('tls-prework', "You must do the prework in the comments at the top of '$valuesTlsFilePath' before invoking helm")
+}
+
 $config.skipScanFarm = $true
 
 $config.toolServiceReplicas = $toolServiceReplicas
@@ -324,7 +330,9 @@ $config.skipIngressEnabled = $skipIngressEnabled
 $config.ingressType = "NginxIngressCommunity"
 $config.ingressClassName = $ingressClassNameCodeDx
 $config.ingressAnnotations = Get-KeyValuesFromTable $ingressAnnotationsCodeDx
-$config.ingressHostname = $codeDxDnsName
+if (-not $config.skipIngressEnabled) {
+	$config.ingressHostname = Get-QuestionResponse "Enter your SRM DNS name (do not reuse your Code Dx hostname - you can switch back post-migration)" @($codeDxDnsName)
+}
 $config.ingressTlsSecretName = $ingressTlsSecretNameCodeDx
 
 $config.useSaml = $useSaml
@@ -432,5 +440,14 @@ Write-Host "Writing $helmPrepSetup..."
 
 $setupScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../ps/helm-prep.ps1'))
 "$setupScript -configPath '$configJson'" | Out-File $helmPrepSetup
+
+$extraValuesFiles = $extraCodeDxValuesPaths + $extraToolOrchestrationValuesPath
+if ($extraValuesFiles.Length -gt 0) {
+	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/synopsys-sig/srm-k8s/blob/main/docs/config/srm-props.md for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/synopsys-sig/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Synopsys for help with this task.`n"
+	$extraValuesFiles | ForEach-Object {
+		Write-Host "  - $_"
+	}
+	Write-Host "---"
+}
 
 Write-Host "Run the following to generate K8s/helm resources: pwsh $helmPrepSetup"

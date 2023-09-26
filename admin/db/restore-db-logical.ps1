@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.1.0
 .GUID b6b17e02-ecb1-4780-afbc-2128026b7464
 .AUTHOR Synopsys
 #>
@@ -15,7 +15,7 @@ Note: This does not work with a physical backup generated with mariabackup.
 #>
 
 param (
-	[string] $backupToRestore, # logical backup file
+	[string] $backupToRestore, # logical backup file (dump.sql) or tar gzipped file (dump.tgz containing a dump.sql file)
 	[string] $rootPwd,
 	[string] $replicationPwd,
 	[string] $namespace = 'srm',
@@ -39,11 +39,57 @@ $global:PSNativeCommandArgumentPassing='Legacy'
 	. $path
 }
 
+function New-DatabaseFromLogicalBackup([string] $namespace, 
+	[string] $podName,
+	[string] $containerName,
+	[string] $rootPwd,
+	[string] $databaseName,
+	[string] $databaseDump,
+	[switch] $skipDropDatabase) {
+
+	if (-not $skipDropDatabase) {
+		Remove-Database $namespace $podName $containerName $rootPwd $databaseName 
+	}
+
+	$cmd = "CREATE DATABASE $databaseName"
+
+	kubectl -n $namespace exec -c $containerName $podName -- mysql -uroot --password=$rootPwd -e $cmd
+	if (0 -ne $LASTEXITCODE) {
+		Write-Error "Unable to create database, kubectl exited with exit code $LASTEXITCODE."
+	}
+
+	if (-not (Test-Path $databaseDump -PathType Leaf)) {
+		Write-Error "Unable to find database dump file at $databaseDump."
+	}
+
+	$databaseDumpFilename = Split-Path $databaseDump -Leaf
+
+	$importPath = "/bitnami/mariadb/$databaseDumpFilename"
+	Copy-K8sItem $namespace $databaseDump $podName $containerName $importPath
+
+	$databaseDumpFileExtension = [IO.Path]::GetExtension($databaseDumpFilename)
+	if ($databaseDumpFileExtension -eq '.tgz') {
+
+		# a tar gzip file should expand to a file of the same name with a .sql extension
+		# for example, tar cvzf dump.tgz dump.sql
+		kubectl -n $namespace exec -c $containerName $podName -- tar xvf $importPath -C '/bitnami/mariadb'
+		if (0 -ne $LASTEXITCODE) {
+			Write-Error "Unable to extract $importPath, kubectl exited with exit code $LASTEXITCODE."
+		}
+		$importPath = [IO.Path]::ChangeExtension($importPath, '.sql')
+	}
+
+	kubectl -n $namespace exec -c $containerName $podName -- bash -c "mysql -uroot --password=""$rootPwd"" $databaseName < $importPath"
+	if (0 -ne $LASTEXITCODE) {
+		Write-Error "Unable to import database dump, kubectl exited with exit code $LASTEXITCODE."
+	}
+}
+
 if (-not (Test-HelmRelease $namespace $releaseName)) {
 	Write-Error "Unable to find Helm release named $releaseName in namespace $namespace."
 }
 
-$deploymentSRM = "$(Get-HelmChartFullname $releaseName 'srm')-web"
+$deployment = "$(Get-HelmChartFullname $releaseName 'srm')-web"
 $statefulSetMariaDBMaster = "$releaseName-mariadb-master"
 $statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
 
@@ -56,8 +102,8 @@ if ($statefulSetMariaDBSlaveCount -eq 0) {
 $mariaDbSecretName = "$releaseName-db-cred-secret"
 $mariaDbMasterServiceName = "$releaseName-mariadb"
 
-if (-not (Test-Deployment $namespace $deploymentSRM)) {
-	Write-Error "Unable to find Deployment named $deploymentSRM in namespace $namespace."
+if (-not (Test-Deployment $namespace $deployment)) {
+	Write-Error "Unable to find Deployment named $deployment in namespace $namespace."
 }
 
 if (-not (Test-StatefulSet $namespace $statefulSetMariaDBMaster)) {
@@ -83,7 +129,7 @@ Write-Host @"
 
 Using the following configuration:
 
-SRM Deployment Name: $deploymentSRM
+Deployment Name: $deployment
 MariaDB Master StatefulSet Name: $statefulSetMariaDBMaster
 MariaDB Slave StatefulSet Name: $statefulSetMariaDBSlave
 MariaDB Slave Replica Count: $statefulSetMariaDBSlaveCount
@@ -99,8 +145,8 @@ if ($backupToRestore -eq '') {
 if (-not (Test-Path $backupToRestore -PathType Leaf)) {
 	Write-Error "The '$backupToRestore' file does not exist."
 }
-if (-not ([io.path]::GetExtension($backupToRestore) -eq '.sql')) {
-	Write-Error "The '$backupToRestore' file does not have a .sql file extensions."
+if ('.sql','.tgz' -notcontains ([io.path]::GetExtension($backupToRestore))) {
+	Write-Error "The '$backupToRestore' file does not have a .sql or .tgz file extension."
 }
 if ($backupToRestore.Contains(":")) {
 	Write-Error "Unable to continue because the '$backupToRestore' path contains a colon that will disrupt a required kubectl cp command - specify an alternate, relative path instead."
@@ -130,10 +176,10 @@ $podFullNamesSlaves | ForEach-Object {
 	$podNamesSlaves = $podNamesSlaves + $podName
 }
 
-Write-Verbose 'Searching for SRM pods...'
+Write-Verbose 'Searching for web pod...'
 $podName = kubectl -n $namespace get pod -l component=web -o name
 if (0 -ne $LASTEXITCODE) {
-	Write-Error "Unable to find SRM pod, kubectl exited with exit code $LASTEXITCODE."
+	Write-Error "Unable to find web pod, kubectl exited with exit code $LASTEXITCODE."
 }
 $podName = $podName -replace 'pod/',''
 
@@ -148,8 +194,8 @@ if ([string]::IsNullOrEmpty($podNameMaster)) {
 }
 $podNameMaster = $podNameMaster -replace 'pod/',''
 
-Write-Verbose "Stopping SRM deployment named $deploymentSRM..."
-Set-DeploymentReplicas  $namespace $deploymentSRM 0 $waitSeconds
+Write-Verbose "Stopping deployment named $deployment..."
+Set-DeploymentReplicas  $namespace $deployment 0 $waitSeconds
 
 Write-Verbose 'Stopping slave database instances...'
 $podNamesSlaves | ForEach-Object {
@@ -158,10 +204,10 @@ $podNamesSlaves | ForEach-Object {
 }
 
 Write-Verbose "Restoring database backup on pod $podNameMaster..."
-New-Database $namespace $podNameMaster 'mariadb' $rootPwd 'codedx' $backupToRestore
+New-DatabaseFromLogicalBackup $namespace $podNameMaster 'mariadb' $rootPwd 'codedx' $backupToRestore
 $podNamesSlaves | ForEach-Object {
 	Write-Verbose "Restoring database backup on pod $_..."
-	New-Database $namespace $_ 'mariadb' $rootPwd 'codedx' $backupToRestore
+	New-DatabaseFromLogicalBackup $namespace $_ 'mariadb' $rootPwd 'codedx' $backupToRestore
 }
 
 Write-Verbose "Starting $statefulSetMariaDBMaster statefulset replica..."
@@ -184,11 +230,11 @@ if ($statefulSetMariaDBSlaveCount -ne 0) {
 }
 
 if ($skipWebRestart) {
-	Write-Verbose "Skipping SRM Restart..."
-	Write-Verbose " To restart SRM, run: kubectl -n $namespace scale --replicas=1 deployment/$deploymentSRM"
+	Write-Verbose "Skipping Restart..."
+	Write-Verbose " To restart, run: kubectl -n $namespace scale --replicas=1 deployment/$deployment"
 } else {
-	Write-Verbose "Starting SRM deployment named $deploymentSRM..."
-	Set-DeploymentReplicas  $namespace $deploymentSRM 1 $waitSeconds
+	Write-Verbose "Starting deployment named $deployment..."
+	Set-DeploymentReplicas  $namespace $deployment 1 $waitSeconds
 }
 
 Write-Host 'Done'

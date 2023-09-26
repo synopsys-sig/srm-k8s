@@ -1,10 +1,10 @@
 <#PSScriptInfo
-.VERSION 1.4.0
+.VERSION 1.5.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
 
-using module @{ModuleName='guided-setup'; RequiredVersion='1.15.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
 param (
 	[Parameter(Mandatory=$true)][string] $configPath,
 	[string] $configFilePwd,

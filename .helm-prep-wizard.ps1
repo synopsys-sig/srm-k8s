@@ -1,10 +1,10 @@
 <#PSScriptInfo
-.VERSION 1.3.0
+.VERSION 1.4.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
 
-using module @{ModuleName='guided-setup'; RequiredVersion='1.15.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'

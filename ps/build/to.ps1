@@ -90,7 +90,7 @@ function New-InternalWorkflowStorage($config) {
 	New-ToKeySecret $config
 
 	New-ToStorageSecret $config 'admin' $config.minioAdminPwd
-	$yaml += @"
+	@"
 minio:
   global:
     minio:
