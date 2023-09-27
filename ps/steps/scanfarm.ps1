@@ -129,3 +129,52 @@ the Synopsys Docker registry to your private Docker registry.
 		return -not $this.config.skipScanFarm
 	}
 }
+
+class WelcomeScanFarm : Step {
+
+	WelcomeScanFarm([Config] $config) : base(
+		[WelcomeScanFarm].Name,
+		$config,
+		'',
+		'',
+		'') {}
+
+	[bool]Run() {
+        Write-Host '  ______       _______         ____    ____  '
+        Write-Host '.'' ____ \     |_   __ \       |_   \  /   _|'
+        Write-Host '| (___ \_|      | |__) |        |   \/   |   '
+        Write-Host ' _.____`.       |  __ /         | |\  /| |   '
+        Write-Host '| \____) |     _| |  \ \_      _| |_\/_| |_  '
+        Write-Host ' \______.''    |____| |___|    |_____||_____|'
+		Write-Host @'
+
+Welcome to the Software Risk Manager Add Scan Farm Wizard!
+
+This wizard helps you specify your SRM scan farm configuration
+by updating the config.json file that you use with the Helm
+Prep script to stage your helm deployment.
+
+'@
+		Read-HostEnter
+		return $true
+	}
+}
+
+class AbortScanFarm : Step {
+
+	AbortScanFarm([Config] $config) : base(
+		[AbortScanFarm].Name,
+		$config,
+		'',
+		'',
+		'') {}
+
+	[bool]Run() {
+		Write-Host 'Setup aborted'
+		return $true
+	}
+
+	[bool]CanRun() {
+		return $this.config.skipScanFarm
+	}
+}

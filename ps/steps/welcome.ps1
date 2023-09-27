@@ -1,10 +1,10 @@
 class Welcome : Step {
 
 	Welcome([Config] $config) : base(
-		[Welcome].Name, 
-		$config, 
-		'', 
-		'', 
+		[Welcome].Name,
+		$config,
+		'',
+		'',
 		'') {}
 
 	[bool]Run() {
@@ -16,12 +16,12 @@ class Welcome : Step {
         Write-Host ' \______.''    |____| |___|    |_____||_____|'
 		Write-Host @'
 
-Welcome to the Software Risk Manager Helm Prep Wizard! 
+Welcome to the Software Risk Manager Helm Prep Wizard!
 
 You will use Helm to deploy SRM. This wizard helps you
 specify your desired SRM deployment configuration by
 generating a config.json file that you can use with
-the helm prep script to stage your helm deployment.
+the Helm Prep script to stage your helm deployment.
 
 Note: Once you have your config.json file, you will
 not need to rerun this wizard.
@@ -48,7 +48,7 @@ press Enter to reveal the "Back to Previous Step" choice.
 '@
 
 	About([Config] $config) : base(
-		[About].Name, 
+		[About].Name,
 		$config, 
 		'About', 
 		[About]::description, 

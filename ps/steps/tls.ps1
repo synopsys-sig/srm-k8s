@@ -26,7 +26,7 @@ Specify whether you want to enable TLS between communications that support TLS.
 			$this.config.webServicePortNumber = 9443
 
 			$valuesTlsFilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../chart/values/values-tls.yaml'))
-			$this.config.SetNote($this.GetType().Name, "You must do the prework in the comments at the top of '$valuesTlsFilePath' before invoking helm")
+			$this.config.SetNote($this.GetType().Name, "- You must do the prework in the comments at the top of '$valuesTlsFilePath' before invoking helm")
 		}
 		return $true
 	}
