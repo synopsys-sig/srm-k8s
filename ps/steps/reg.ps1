@@ -38,7 +38,13 @@ on Docker Hub.
 class DockerRegistryHost  : Step {
 
 	static [string] hidden $description = @'
-Specify the hostname for your Docker registry.
+Specify the hostname for your Docker registry. These are examples of
+private Docker registry hosts:
+
+  - gcr.io (GCP Container Registry)
+  - us-central1-docker.pkg.dev (GCP Artifact Registry)
+  - name-placeholder.azurecr.io (Azure Container Registry)
+  - id-placeholder.dkr.ecr.us-east-2.amazonaws.com (AWS Elastic Container Registry)
 '@
 
 	static [string] hidden $pullPushInstructionLink = 'https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md'
@@ -53,6 +59,7 @@ by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own.
 
 Visit the following links for Docker image pull/tag/push instructions:
 $([DockerRegistryHost]::pullPushInstructionLink)
+
 "@
 
 	DockerRegistryHost([Config] $config) : base(
@@ -60,7 +67,7 @@ $([DockerRegistryHost]::pullPushInstructionLink)
 		$config,
 		'Docker Registry',
 		[DockerRegistryHost]::description,
-		'Enter your Docker registry host (e.g., id.dkr.ecr.us-east-2.amazonaws.com, gcr.io, etc.)') {}
+		'Enter your private Docker registry host') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		$question = new-object Question($prompt)
@@ -71,7 +78,7 @@ $([DockerRegistryHost]::pullPushInstructionLink)
 	[string]GetMessage() {
 
 		if (-not $this.config.skipScanFarm) {
-			return [DockerRegistryHost]::scanFarmDescription
+			return "$([DockerRegistryHost]::scanFarmDescription)`n$($this.message)"
 		}
 		return $this.message
 	}

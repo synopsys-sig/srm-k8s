@@ -52,6 +52,9 @@ if ($config.isLocked) {
 	$config.Unlock($configFilePwd)
 }
 
+# make a backup copy of the config file
+Copy-Item $configPath ([IO.Path]::ChangeExtension($configPath, '.json.bak')) -Force
+
 $graph = New-Object Graph($true)
 
 $s = @{}
@@ -117,6 +120,7 @@ $s = @{}
 [ScanFarmScanServiceDatabaseName],
 [ScanFarmStorage],
 [ScanFarmStorageBucketName],
+[ScanFarmTlsRemoval],
 [ScanFarmType],
 [SigRepoUsername],
 [SigRepoPassword],
@@ -166,7 +170,9 @@ Add-StepTransitions $graph $s[[IngressKind]] $s[[IngressClassName]],$s[[IngressT
 Add-StepTransitions $graph $s[[IngressTLS]] $s[[IngressTLSSecretName]],$s[[IngressHostname]]
 Add-StepTransitions $graph $s[[IngressTLS]] $s[[IngressHostname]]
 
+Add-StepTransitions $graph $s[[IngressHostname]] $s[[ScanFarmTlsRemoval]],$s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[IngressHostname]] $s[[Lock]],$s[[Finish]]
+Add-StepTransitions $graph $s[[ScanFarmTlsRemoval]] $s[[Finish]]
 Add-StepTransitions $graph $s[[IngressHostname]] $s[[Finish]]
 
 if ($DebugPreference -eq 'Continue') {

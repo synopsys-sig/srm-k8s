@@ -21,7 +21,7 @@ must separately provision/configure:
   *   NOTE: A "small" pool-type requires one or more nodes with 6.5 vCPUs and 26 GB of memory
 '@
 
-UseScanFarm([Config] $config) : base(
+	UseScanFarm([Config] $config) : base(
 		[UseScanFarm].Name, 
 		$config,
 		'Scan Farm',
@@ -47,6 +47,54 @@ UseScanFarm([Config] $config) : base(
 	[void]Reset(){
 		$this.config.skipScanFarm = $false
 		$this.config.RemoveNote($this.GetType().Name)
+	}
+}
+
+class ScanFarmTlsRemoval : Step {
+
+	static [string] hidden $description = @'
+You cannot use TLS between SRM components when using the scan farm
+feature. Your component TLS configuration must be removed. 
+'@
+
+	ScanFarmTlsRemoval([Config] $config) : base(
+		[ScanFarmTlsRemoval].Name, 
+		$config,
+		'Scan Farm TLS Removal',
+		[ScanFarmTlsRemoval]::description,
+		'Do you want to continue?') {}
+
+	[IQuestion]MakeQuestion([string] $prompt) {
+		return new-object MultipleChoiceQuestion($prompt, 
+			[tuple]::create('&Yes', 'Yes, I want to remove my TLS config'),
+			-1)
+	}
+
+	[bool]HandleResponse([IQuestion] $question) {
+
+		# override TLS settings to support add-scanfarm use case
+		$this.config.skipTls = $true
+		$this.config.webServicePortNumber = 9090
+		$this.config.clusterCertificateAuthorityCertPath = ''
+		$this.config.csrSignerName = ''
+
+		$annotations = $this.config.GetIngressAnnotations()
+
+		$nginxBackend = $annotations['nginx.ingress.kubernetes.io/backend-protocol']
+		if ($null -ne $nginxBackend) {
+			$this.config.SetIngressAnnotation('nginx.ingress.kubernetes.io/backend-protocol', 'HTTP')
+		}
+		
+		$awsBackend = $annotations['service.beta.kubernetes.io/aws-load-balancer-backend-protocol']
+		if ($null -ne $awsBackend) {
+			$this.config.SetIngressAnnotation('service.beta.kubernetes.io/aws-load-balancer-backend-protocol', 'HTTP')
+		}
+
+		return $true
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.skipScanFarm -and -not $this.config.skipTls
 	}
 }
 
