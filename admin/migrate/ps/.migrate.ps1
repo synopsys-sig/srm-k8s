@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.2.0
+.VERSION 1.3.0
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
@@ -440,6 +440,10 @@ Write-Host "Writing $helmPrepSetup..."
 
 $setupScript = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../ps/helm-prep.ps1'))
 "$setupScript -configPath '$configJson'" | Out-File $helmPrepSetup
+
+if ('' -ne $backupType) {
+	Write-Host "`n---`nWARNING: Your backup configuration cannot be migrated automatically.`n"
+}
 
 $extraValuesFiles = $extraCodeDxValuesPaths + $extraToolOrchestrationValuesPath
 if ($extraValuesFiles.Length -gt 0) {
