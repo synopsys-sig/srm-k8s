@@ -83,13 +83,15 @@ Edit run-migrate.ps1 by replacing /path/to/git/codedx-kubernetes/setup/steps/../
 /path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' ...
 ```
 
-Invoke your run-migrate.ps1 script to generate a config.json file and run-helm-prep.ps1 file for your SRM deployment. 
+Invoke your run-migrate.ps1 script to generate a config.json file.
 
 ```
 $ pwsh /path/to/run-migrate.ps1
 ```
 
 >Note: You should specify a new, unique namespace and release name to avoid conflating legacy Code Dx K8s resources with SRM ones. You can reuse your Code Dx license when prompted for an SRM Web license.
+
+Address any warnings or instructions printed by the migration script. When complete, invoke the generated run-helm-prep.ps1 file to stage the resources required for your SRM deployment.
 
 ## Install SRM
 

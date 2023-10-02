@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.3.0
+.VERSION 1.4.0
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
@@ -297,7 +297,7 @@ $config.skipTls = $skipTls
 
 if (-not $config.skipTLS) {
 	$valuesTlsFilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../chart/values/values-tls.yaml'))
-	$config.SetNote('tls-prework', "- You must do the prework in the comments at the top of '$valuesTlsFilePath' before invoking helm")
+	$config.SetNote('UseTlsOption', "- You must do the prework in the comments at the top of '$valuesTlsFilePath' before invoking helm")
 }
 
 $config.skipScanFarm = $true

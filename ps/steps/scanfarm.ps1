@@ -90,6 +90,9 @@ feature. Your component TLS configuration must be removed.
 			$this.config.SetIngressAnnotation('service.beta.kubernetes.io/aws-load-balancer-backend-protocol', 'HTTP')
 		}
 
+		# remove installation note related to TLS
+		$this.config.RemoveNote('UseTlsOption')
+
 		return $true
 	}
 

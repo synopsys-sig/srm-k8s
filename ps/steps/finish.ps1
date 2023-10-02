@@ -103,6 +103,6 @@ SRM using the deployment configuration you specified.
 		$allNotes | Sort-Object | ForEach-Object {
 			Write-Host $_
 		}
-		Write-Host "---`n"
+		Write-Host "`n---`n"
 	}
 }
