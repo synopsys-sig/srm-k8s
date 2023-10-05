@@ -91,7 +91,7 @@ web:
   database:
     # -- the K8s secret name containing the database connection properties with required field db.props that
     # contains a HOCON-formatted file with SRM props swa.db.user and swa.db.password
-    # File: 
+    # File:
     # swa.db.user = """username"""
     # swa.db.password = """password"""
     # Command:
@@ -177,7 +177,7 @@ web:
     accessMode: ReadWriteOnce
     # -- the existing claim to use for the AppData persistent volume; a new persistent volume is generated when unset
     existingClaim: ""
-    # -- the size of the AppData persistent volume 
+    # -- the size of the AppData persistent volume
     size: 64Gi
     # -- the storage class name for the AppData persistent volume; the default storage class used when unset
     storageClass:
@@ -371,7 +371,7 @@ mariadb:
       existingClaim:
       # -- the storage class name for the MariaDB primary persistent volume; the default storage class used when unset
       storageClass:
-      # -- the size of the MariaDB persistent volume 
+      # -- the size of the MariaDB persistent volume
       size: 64Gi
     podDisruptionBudget:
       # -- whether to create a pod disruption budget for the MariaDB primary database component
