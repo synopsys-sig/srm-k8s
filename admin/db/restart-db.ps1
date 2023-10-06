@@ -39,7 +39,15 @@ $deploymentSRM = "$(Get-HelmChartFullname $releaseName 'srm')-web"
 $statefulSetMariaDBMaster = "$releaseName-mariadb-master"
 $statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
 
-$statefulSetMariaDBSlaveCount = (Get-HelmValues $namespace $releaseName).mariadb.slave.replicas
+# identify the number of replicas
+$statefulSetMariaDBSlaveCount = 0
+if ($values.mariadb.replication.enabled) {
+	$statefulSetMariaDBSlaveCount = $values.mariadb.slave.replicas
+	if ($null -eq $statefulSetMariaDBSlaveCount) {
+		$statefulSetMariaDBSlaveCount = 1 # 1 is the default value
+	}
+}
+
 if ($statefulSetMariaDBSlaveCount -eq 0) {
 	$statefulSetMariaDBMaster = "$releaseName-mariadb"
 	$statefulSetMariaDBSlave = ''

@@ -308,9 +308,9 @@ mariadb:
     user: codedx
     # -- the on-cluster database catalog name for SRM web (must be codedx)
     name: codedx
-  # -- the K8s secret name containing the on-cluster MariaDB root and user passwords with required fields mariadb-root-password and mariadb-password
+  # -- the K8s secret name containing the on-cluster MariaDB root and user passwords with required fields mariadb-root-password and mariadb-password, optionally mariadb-replication-password when using replication
   # Command:
-  # kubectl -n srm create secret generic srm-mariadb-secret --from-literal mariadb-root-password=password --from-literal mariadb-password=password
+  # kubectl -n srm create secret generic srm-mariadb-secret --from-literal mariadb-root-password=password --from-literal mariadb-password=password --from-literal mariadb-replication-password=password
   existingSecret: ""
   image:
     # -- the registry name and optional registry suffix for the MariaDB Docker image
