@@ -48,9 +48,9 @@ The following example commands use a fictitious private registry hosted in AWS a
 The first example stores Synopsys Docker images at the root of your private registry:
 
 ```
-$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.4
-$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.4 id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.4
-$ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.4
+$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.5
+$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.5 id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.5
+$ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.5
 ```
 
 >Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
@@ -58,9 +58,9 @@ $ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.4
 The following example stores Synopsys Docker images under "my-srm" in your private registry. In this scenario, you must enter "my-srm" as your private registry repository prefix in the Guided Setup:
 
 ```
-$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.4
-$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.4 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.4
-$ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.4
+$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.5
+$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.5 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.5
+$ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.5
 ```
 
 >Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
@@ -71,7 +71,7 @@ See the following sections for the Docker images you must obtain via docker pull
 
 The SRM Web pod requires this Docker image:
 
-- sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.4
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.5
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
 
@@ -79,7 +79,7 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-tomcat:v2023.8.4' | ForEach-Object {
+'codedx/codedx-tomcat:v2023.8.5' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -100,7 +100,7 @@ If you are using an external SRM database, skip this section.
 
 The SRM Database pod requires this Docker image:
 
-- sig-repo.synopsys.com/synopsys/codedx/codedx-mariadb:v1.25.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-mariadb:v1.26.0
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
 
@@ -108,7 +108,7 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-mariadb:v1.25.0' | ForEach-Object {
+'codedx/codedx-mariadb:v1.26.0' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -228,14 +228,14 @@ If you are not using the SRM Tool Orchestration feature, skip this section.
 
 The SRM Tool Orchestration feature requires these Docker images:
 
-- sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2023.8.4
-- sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2023.8.4
-- sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v1.27.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v1.27.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-results:v1.27.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-error-results:v1.27.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v1.27.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v1.27.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2023.8.5
+- sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2023.8.5
+- sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v1.28.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v1.28.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-results:v1.28.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-error-results:v1.28.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v1.28.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v1.28.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-workflow-controller:v2.17.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-argoexec:v2.17.0
 - sig-repo.synopsys.com/synopsys/bitnami/minio:2021.4.6-debian-10-r11 (when not using external workflow storage)
@@ -246,14 +246,14 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-tools:v2023.8.4',
-'codedx/codedx-toolsmono:v2023.8.4',
-'codedx/codedx-prepare:v1.27.0',
-'codedx/codedx-newanalysis:v1.27.0',
-'codedx/codedx-results:v1.27.0',
-'codedx/codedx-error-results:v1.27.0',
-'codedx/codedx-tool-service:v1.27.0',
-'codedx/codedx-cleanup:v1.27.0',
+'codedx/codedx-tools:v2023.8.5',
+'codedx/codedx-toolsmono:v2023.8.5',
+'codedx/codedx-prepare:v1.28.0',
+'codedx/codedx-newanalysis:v1.28.0',
+'codedx/codedx-results:v1.28.0',
+'codedx/codedx-error-results:v1.28.0',
+'codedx/codedx-tool-service:v1.28.0',
+'codedx/codedx-cleanup:v1.28.0',
 'bitnami/minio:2021.4.6-debian-10-r11',
 'codedx/codedx-workflow-controller:v2.17.0',
 'codedx/codedx-argoexec:v2.17.0' | ForEach-Object {
@@ -279,16 +279,16 @@ If you are logged in to the Synopsys SIG Docker registry and your private regist
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-tomcat:v2023.8.4',
-'codedx/codedx-tools:v2023.8.4',
-'codedx/codedx-toolsmono:v2023.8.4',
-'codedx/codedx-prepare:v1.27.0',
-'codedx/codedx-newanalysis:v1.27.0',
-'codedx/codedx-results:v1.27.0',
-'codedx/codedx-error-results:v1.27.0',
-'codedx/codedx-tool-service:v1.27.0',
-'codedx/codedx-cleanup:v1.27.0',
-'codedx/codedx-mariadb:v1.25.0',
+'codedx/codedx-tomcat:v2023.8.5',
+'codedx/codedx-tools:v2023.8.5',
+'codedx/codedx-toolsmono:v2023.8.5',
+'codedx/codedx-prepare:v1.28.0',
+'codedx/codedx-newanalysis:v1.28.0',
+'codedx/codedx-results:v1.28.0',
+'codedx/codedx-error-results:v1.28.0',
+'codedx/codedx-tool-service:v1.28.0',
+'codedx/codedx-cleanup:v1.28.0',
+'codedx/codedx-mariadb:v1.26.0',
 'bitnami/minio:2021.4.6-debian-10-r11',
 'codedx/codedx-workflow-controller:v2.17.0',
 'codedx/codedx-argoexec:v2.17.0',
