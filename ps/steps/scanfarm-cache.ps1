@@ -82,7 +82,8 @@ class ScanFarmRedisPort : Step {
 Specify the port that your external Redis host is listening to for
 incoming connections.
 
-Note: The default port for Redis is 6379.
+Note: The default port for Redis is 6379. A GCP Redis instance will
+use port 6378 for the primary endpoint.
 '@
 
 	ScanFarmRedisPort([Config] $config) : base(

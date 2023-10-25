@@ -36,10 +36,11 @@ class About : Step {
 
 	static [string] hidden $description = @'
 This wizard will ask you a series of questions based on the SRM features
-you plan to deploy. Follow this link for the type of information you will
-be expected to provide:
+you plan to deploy. Follow this link to read the SRM Deployment Guide:
 
-https://github.com/synopsys-sig/srm-ks8/blob/dev/ps/README.md
+https://github.com/synopsys-sig/srm-k8s/blob/docs/deploy/docs/DeploymentGuide.md
+
+You should complete any required pre-work before continuing.
 
 Note: If you need to return to a previous screen to correct an error or 
 revisit a question, enter 'B' to choose the "Back to Previous Step"

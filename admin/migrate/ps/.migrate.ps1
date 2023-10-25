@@ -447,7 +447,7 @@ if ('' -ne $backupType) {
 
 $extraValuesFiles = $extraCodeDxValuesPaths + $extraToolOrchestrationValuesPath
 if ($extraValuesFiles.Length -gt 0) {
-	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/synopsys-sig/srm-k8s/blob/main/docs/config/srm-props.md for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/synopsys-sig/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Synopsys for help with this task.`n"
+	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/synopsys-sig/srm-k8s/blob/docs/deploy/docs/DeploymentGuide.md#customizing-software-risk-manager-props for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/synopsys-sig/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Synopsys for help with this task.`n"
 	$extraValuesFiles | ForEach-Object {
 		Write-Host "  - $_"
 	}

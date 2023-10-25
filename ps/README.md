@@ -56,16 +56,16 @@ Refer to the [lock/unlock scripts](../admin/config) to edit protected config.jso
 |scanFarmAzureStorageAccount|Scan Farm Blob Storage|name of storage account containing Azure blobs|"srmstoragetest"|1.0|
 |scanFarmAzureStorageAccountKey|Scan Farm Blob Storage|name of key for access to Azure storage account|"EjZdxX/H"|1.0|
 |scanFarmAzureSubscriptionId|Scan Farm Blob Storage|identifier of Azure subscription|"c4dcc882-b83d-47cf-8f9e-234b963736a2"|1.0|
-|scanFarmAzureTenantId|Scan Farm Blob Storage|identifier of Azure AD tenant|"6315cfb3-02f0-4651-828f-06a3ac065b32"|1.0|
+|scanFarmAzureTenantId|Scan Farm Blob Storage|identifier of Microsoft Entra ID tenant|"6315cfb3-02f0-4651-828f-06a3ac065b32"|1.0|
 |scanFarmAzureResourceGroup|Scan Farm Blob Storage|resource group containing Azure storage account|"srmresourcegroup"|1.0|
 |scanFarmAzureEndpoint|Scan Farm Blob Storage|blob service URL for Azure storage account|https://\<?>.blob.core.windows.net/1.0|
-|scanFarmAzureClientId|Scan Farm Blob Storage|client identifier of Azure AD app|"9b1f8b8d-db8f-4683-8023-2dd7962b1e96"|1.0|
-|scanFarmAzureClientSecret|Scan Farm Blob Storage|client secret for Azure AD app|"S.68Q~"|1.0|
+|scanFarmAzureClientId|Scan Farm Blob Storage|client identifier of Microsoft Entra ID app|"9b1f8b8d-db8f-4683-8023-2dd7962b1e96"|1.0|
+|scanFarmAzureClientSecret|Scan Farm Blob Storage|client secret for Microsoft Entra ID app|"S.68Q~"|1.0|
 ||||||
 |scanFarmMinIOHostname|Scan Farm MinIO Storage|hostname of MinIO server||1.0|
 |scanFarmMinIOPort|Scan Farm MinIO Storage|port of MinIO server||1.0|
-|scanFarmMinIORootUsername|Scan Farm MinIO Storage|root username of MinIO server||1.0|
-|scanFarmMinIORootPwd|Scan Farm MinIO Storage|root pwd of MinIO server||1.0|
+|scanFarmMinIORootUsername|Scan Farm MinIO Storage|username/access-key of server account with readwrite access||1.0|
+|scanFarmMinIORootPwd|Scan Farm MinIO Storage|password/secret-key of server account with readwrite access||1.0|
 |scanFarmMinIOSecure|Scan Farm MinIO Storage|whether the MinIO server connection is secure||1.0|
 |scanFarmMinIOVerifyHostname|Scan Farm MinIO Storage|whether to verify the MinIO hostname||1.0|
 |scanFarmMinIOServerCert|Scan Farm MinIO Storage|path to MinIO server certificate||1.0|

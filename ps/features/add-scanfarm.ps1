@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.1.0
 .GUID b89cccc3-6d33-4c1e-b78f-91b24d456d28
 .AUTHOR Synopsys
 #>
@@ -93,12 +93,12 @@ $s = @{}
 [ScanFarmGcsProjectName],
 [ScanFarmInClusterStorage],
 [ScanFarmInClusterStorageUrl],
-[ScanFarmMinIOCert],
-[ScanFarmMinIOHostname],
-[ScanFarmMinIOPort],
-[ScanFarmMinIORootPwd],
-[ScanFarmMinIORootUsername],
-[ScanFarmMinIOTLS],
+[ScanFarmObjectStorageCert],
+[ScanFarmObjectStorageHostname],
+[ScanFarmObjectStoragePort],
+[ScanFarmObjectStorageSecretKey],
+[ScanFarmObjectStorageAccessKey],
+[ScanFarmObjectStorageTLS],
 [ScanFarmRedisAuth],
 [ScanFarmRedisCert],
 [ScanFarmRedisDatabase],
@@ -150,10 +150,10 @@ Add-StepTransitions $graph $s[[ScanFarmRedisTls]] $s[[ScanFarmStorage]]
 Add-StepTransitions $graph $s[[ScanFarmType]] $s[[ScanFarmScaLicense]]
 Add-StepTransitions $graph $s[[ScanFarmSastLicense]] $s[[ScanFarmDatabaseHost]]
 
-Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmMinIOHostname]],$s[[ScanFarmMinIOPort]],$s[[ScanFarmMinIORootUsername]],$s[[ScanFarmMinIORootPwd]],$s[[ScanFarmS3StorageProxy]],$s[[ScanFarmS3StorageContextPath]],$s[[ScanFarmInClusterStorage]],$s[[ScanFarmInClusterStorageUrl]],$s[[ScanFarmMinIOTLS]],$s[[ScanFarmMinIOCert]],$s[[DockerRegistryHost]]
+Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmObjectStorageHostname]],$s[[ScanFarmObjectStoragePort]],$s[[ScanFarmObjectStorageAccessKey]],$s[[ScanFarmObjectStorageSecretKey]],$s[[ScanFarmS3StorageProxy]],$s[[ScanFarmS3StorageContextPath]],$s[[ScanFarmInClusterStorage]],$s[[ScanFarmInClusterStorageUrl]],$s[[ScanFarmObjectStorageTLS]],$s[[ScanFarmObjectStorageCert]],$s[[DockerRegistryHost]]
 Add-StepTransitions $graph $s[[ScanFarmS3StorageProxy]] $s[[ScanFarmS3StorageExternalURL]],$s[[ScanFarmInClusterStorage]]
-Add-StepTransitions $graph $s[[ScanFarmInClusterStorage]] $s[[ScanFarmMinIOTLS]]
-Add-StepTransitions $graph $s[[ScanFarmMinIOTLS]] $s[[DockerRegistryHost]]
+Add-StepTransitions $graph $s[[ScanFarmInClusterStorage]] $s[[ScanFarmObjectStorageTLS]]
+Add-StepTransitions $graph $s[[ScanFarmObjectStorageTLS]] $s[[DockerRegistryHost]]
 Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmS3AccessMethod]],$s[[ScanFarmS3AccessKey]],$s[[ScanFarmS3SecretKey]],$s[[ScanFarmS3Region]],$s[[DockerRegistryHost]]
 Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmS3AccessMethod]],$s[[ScanFarmS3IamRoleServiceAccount]],$s[[ScanFarmS3Region]],$s[[DockerRegistryHost]]
 Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmGcsProjectName]],$s[[ScanFarmGcsKey]],$s[[DockerRegistryHost]]

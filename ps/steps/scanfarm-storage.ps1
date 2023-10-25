@@ -8,7 +8,7 @@ You can use the following storage providers:
 - Amazon S3 (https://aws.amazon.com/s3/)
 - Azure Storage (https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction)
 - Google Cloud Storage (https://cloud.google.com/storage/docs/creating-buckets)
-- S3-compatible storage (e.g., OpenShift)
+- S3-compatible storage (must support GetBucketLifecycleConfiguration AWS S3 API)
 - MinIO (https://min.io/)
 '@
 
@@ -31,7 +31,7 @@ You can use the following storage providers:
 	[bool]HandleResponse([IQuestion] $question) {
 		switch (([MultipleChoiceQuestion]$question).choice) {
 			0 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::AwsS3 }
-			1 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::AwsS3 }
+			1 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::MinIO }
 			2 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::MinIO }
 			3 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::Gcs }
 			4 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::Azure }
@@ -173,8 +173,13 @@ define the policy using the last modified date (not the creation date).
 class ScanFarmS3AccessMethod : Step {
 
 	static [string] hidden $description = @'
-You can access your S3 buckets using either an access and secret key
-or an AWS IAM Role for Service Account (IRSA).
+You can access your S3 buckets using either an AWS account's access and
+secret key or you can configure AWS IAM Roles for Service Account (IRSA)
+to grant an IAM role to a Kubernetes service account that you will use for
+the Cache Service and Storage Service.
+
+Visit the following URL for IRSA configuration details:
+https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
 '@
 
 	ScanFarmS3AccessMethod([Config] $config) : base(
@@ -208,8 +213,14 @@ or an AWS IAM Role for Service Account (IRSA).
 class ScanFarmS3IamRoleServiceAccount : Step {
 
 	static [string] hidden $description = @'
-Using an AWS IAM Role for Service Account (IRSA) is an alternative to
-using an access and secret key.
+AWS IAM Role for Service Account (IRSA) is an alternative to using
+an AWS account's access and secret key. You must configure IRSA
+and create and configure the related Kubernetes service account you
+will use when accessing storage buckets from the Cache Service and
+Storage Service (both services require read/write access).
+
+Visit the following URL for IRSA configuration details:
+https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html
 '@
 
 	ScanFarmS3IamRoleServiceAccount([Config] $config) : base(
@@ -217,15 +228,16 @@ using an access and secret key.
 		$config,
 		'AWS IRSA Role',
 		[ScanFarmS3IamRoleServiceAccount]::description,
-		'Enter your service account name') {}
+		'Enter your preconfigured service account name') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$this.config.scanFarmS3ServiceAccountName = ([Question]$question).response
+		$this.config.SetNote($this.GetType().Name, "- You must configure AWS IAM Role for Service Account for your $($this.config.scanFarmS3ServiceAccountName) Kubernetes service account")
 		return $true
 	}
 
 	[void]Reset(){
-		$this.config.scanFarmS3ServiceAccountName = $false
+		$this.config.scanFarmS3ServiceAccountName = ''
 	}
 
 	[bool]CanRun() {
@@ -595,8 +607,8 @@ The Scan Farm depends on an Azure service account with access to your
 Azure storage container.
 
 You must provide the client identifier for your application registered 
-in Azure AD with access to your storage account. A client ID typically
-looks like this: 9b1f8b8d-db8f-4683-8023-2dd7962b1e96
+in Microsoft Entra ID with access to your storage account. A client ID
+typically looks like this: 9b1f8b8d-db8f-4683-8023-2dd7962b1e96
 '@
 	
 	ScanFarmAzureClientId([Config] $config) : base(
@@ -628,7 +640,7 @@ The Scan Farm depends on an Azure service account with access to your
 Azure storage container.
 
 You must provide the client secret for your application registered 
-in Azure AD with access to your storage account.
+in Microsoft Entra ID with access to your storage account.
 '@
 	
 	ScanFarmAzureClientSecret([Config] $config) : base(
@@ -659,18 +671,21 @@ in Azure AD with access to your storage account.
 	}
 }
 
-class ScanFarmMinIOHostname : Step {
+class ScanFarmObjectStorageHostname : Step {
 
 	static [string] hidden $description = @'
-The Scan Farm depends on an external MinIO instance when using MinIO storage.
+The Scan Farm depends on external object storage and can use any storage
+that is fully compatible with the AWS S3 API.
+
+Note: Do not enter a URL or port here; specify the storage hostname only.
 '@
 
-	ScanFarmMinIOHostname([Config] $config) : base(
-		[ScanFarmMinIOHostname].Name, 
+	ScanFarmObjectStorageHostname([Config] $config) : base(
+		[ScanFarmObjectStorageHostname].Name, 
 		$config,
-		'Scan Farm MinIO Hostname',
-		[ScanFarmMinIOHostname]::description,
-		'Enter your MinIO hostname') {}
+		'Scan Farm Object Storage Hostname',
+		[ScanFarmObjectStorageHostname]::description,
+		'Enter your storage hostname') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$this.config.scanFarmMinIOHostname = ([Question]$question).response
@@ -687,21 +702,21 @@ The Scan Farm depends on an external MinIO instance when using MinIO storage.
 	}
 }
 
-class ScanFarmMinIOPort : Step {
+class ScanFarmObjectStoragePort : Step {
 
 	static [string] hidden $description = @'
-The Scan Farm depends on an external MinIO instance when using MinIO storage.
+The Scan Farm depends on external object storage and can use any storage
+that is fully compatible with the AWS S3 API.
 
-Note: The default port for MinIO is 9000, so enter that value if you haven't 
-changed MinIO's configuration.
+Note: If you are using MinIO, its default port is 9000.
 '@
 
-	ScanFarmMinIOPort([Config] $config) : base(
-		[ScanFarmMinIOPort].Name, 
+	ScanFarmObjectStoragePort([Config] $config) : base(
+		[ScanFarmObjectStoragePort].Name, 
 		$config,
-		'Scan Farm MinIO Port',
-		[ScanFarmMinIOPort]::description,
-		'Enter your MinIO port') {}
+		'Scan Farm Object Storage Port',
+		[ScanFarmObjectStoragePort]::description,
+		'Enter your storage port') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		return new-object IntegerQuestion($prompt, 0, 65535, $false)
@@ -724,27 +739,29 @@ changed MinIO's configuration.
 class ScanFarmS3StorageProxy : Step {
 
 	static [string] hidden $description = @'
-You can proxy MinIO by using the same hostname for both SRM and MinIO.
-For example, if your SRM hostname is srm.local, you can make MinIO available
-at https://srm.local/upload/.
+If your object storage (e.g., MinIO) is running on the same cluster, you
+can proxy your storage by using the same hostname for both SRM and your
+object storage. For example, if your SRM hostname is srm.local, you can
+make your object storage available at https://srm.local/upload/.
 
-Alternatively, you can make MinIO available at a different URL. For example,
-if your SRM hostname is srm.local, you can make MinIO available at a different
-URL like https://minio.local:9000/.
+If your object storage is running external to your cluster (e.g., your
+SRM hostname is srm.local and your storage is available at a different
+URL like https://storage.local:9000/), then you cannot proxy access to
+your storage.
 
 '@
 
 	ScanFarmS3StorageProxy([Config] $config) : base(
 		[ScanFarmS3StorageProxy].Name, 
 		$config,
-		'Scan Farm MinIO Proxy',
+		'Scan Farm Object Storage Proxy',
 		[ScanFarmS3StorageProxy]::description,
-		'Do you plan to proxy MinIO using your SRM hostname?') {}
+		'Do you plan to proxy your storage using your SRM hostname?') {}
 
 	[IQuestion] MakeQuestion([string] $prompt) {
 		return new-object YesNoQuestion($prompt, 
-			'Yes, I want to proxy MinIO using my SRM hostname', 
-			'No, MinIO will use a separate URL', 1)
+			'Yes, I want to proxy my storage using my SRM hostname', 
+			'No, my storage will use a separate URL', 1)
 	}
 
 	[bool]HandleResponse([IQuestion] $question) {
@@ -765,24 +782,24 @@ URL like https://minio.local:9000/.
 class ScanFarmS3StorageContextPath : Step {
 
 	static [string] hidden $description = @'
-Making MinIO available with your SRM hostname requires a proxy/context
-path.
+Making your object storage available with your SRM hostname requires a
+proxy/context path.
 
-For example, if your SRM hostname is srm.local, making MinIO available
-at https://srm.local/upload/ would mean specifying "upload" for your
-context path.
+For example, if your SRM hostname is srm.local, making your object storage
+available at https://srm.local/upload/ would mean specifying "upload" for
+your context path.
 
 Note: You can find an example NGINX Community ingress resource at this URL:
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/sf/proxy-minio.md
+https://github.com/synopsys-sig/srm-k8s/blob/docs/deploy/docs/DeploymentGuide.md#bitnami-minio-chart-pre-work
 
 '@
 
 	ScanFarmS3StorageContextPath([Config] $config) : base(
 		[ScanFarmS3StorageContextPath].Name, 
 		$config,
-		'Scan Farm MinIO Context Path',
+		'Scan Farm Proxy Context Path',
 		[ScanFarmS3StorageContextPath]::description,
-		'Enter your context path') {}
+		'Enter your proxy context path') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$this.config.scanFarmStorageContextPath = $question.response
@@ -803,13 +820,13 @@ https://github.com/synopsys-sig/srm-k8s/blob/main/docs/sf/proxy-minio.md
 class ScanFarmS3StorageExternalURL : Step {
 
 	static [string] hidden $description = @'
-Your external MinIO URL is the URL that you can use to access MinIO from
-outside your cluster. You should enter your MinIO URL, port, and any
-context path that's required. 
+Your external storage URL is the URL that you can use to access object
+storage from outside your cluster. You should enter your URL, port, and
+any context path that's required. 
 
-For example, if your MinIO instance uses hostname my-minio with HTTPS, 
+For example, if your storage instance uses hostname my-minio with HTTPS, 
 port 9000, and no context path, enter https://my-minio:9000. If your
-MinIO instance uses an "upload" context path, include the context path
+storage instance uses an "upload" context path, include the context path
 by specifying https://my-minio:9000/upload/.
 
 '@
@@ -817,9 +834,9 @@ by specifying https://my-minio:9000/upload/.
 	ScanFarmS3StorageExternalURL([Config] $config) : base(
 		[ScanFarmS3StorageExternalURL].Name, 
 		$config,
-		'Scan Farm MinIO External URL',
+		'Scan Farm Object Storage External URL',
 		[ScanFarmS3StorageExternalURL]::description,
-		'Enter your external MinIO URL') {}
+		'Enter your external storage URL') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$this.config.scanFarmStorageExternalUrl = $question.response
@@ -837,19 +854,20 @@ by specifying https://my-minio:9000/upload/.
 	}
 }
 
-class ScanFarmMinIORootUsername : Step {
+class ScanFarmObjectStorageAccessKey : Step {
 
 	static [string] hidden $description = @'
-The Scan Farm depends on a root username for your external MinIO instance
-when using MinIO storage.
+The Scan Farm depends on a user access key with access to your storage
+bucket. If using MinIO, you can provide a MinIO username with read/write
+access and access to cache bucket lifecycle rules.
 '@
 
-	ScanFarmMinIORootUsername([Config] $config) : base(
-		[ScanFarmMinIORootUsername].Name, 
+	ScanFarmObjectStorageAccessKey([Config] $config) : base(
+		[ScanFarmObjectStorageAccessKey].Name, 
 		$config,
-		'Scan Farm MinIO Root Username',
-		[ScanFarmMinIORootUsername]::description,
-		'Enter your MinIO root username') {}
+		'Scan Farm Object Storage Access Key',
+		[ScanFarmObjectStorageAccessKey]::description,
+		'Enter your storage access key') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$this.config.scanFarmMinIORootUsername = ([Question]$question).response
@@ -866,19 +884,20 @@ when using MinIO storage.
 	}
 }
 
-class ScanFarmMinIORootPwd : Step {
+class ScanFarmObjectStorageSecretKey : Step {
 
 	static [string] hidden $description = @'
-The Scan Farm depends on a root password for your external MinIO instance
-when using MinIO storage.
+The Scan Farm depends on a user secret key with access to your storage
+bucket. If using MinIO, you can provide a MinIO username with read/write
+access and access to cache bucket lifecycle rules.
 '@
 
-	ScanFarmMinIORootPwd([Config] $config) : base(
-		[ScanFarmMinIORootPwd].Name, 
+	ScanFarmObjectStorageSecretKey([Config] $config) : base(
+		[ScanFarmObjectStorageSecretKey].Name, 
 		$config,
-		'Scan Farm MinIO Root Password',
-		[ScanFarmMinIORootPwd]::description,
-		'Enter your MinIO root password') {}
+		'Scan Farm Object Storage Secret Key',
+		[ScanFarmObjectStorageSecretKey]::description,
+		'Enter your storage secret key') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		$question = new-object ConfirmationQuestion($prompt)
@@ -976,22 +995,22 @@ specify a fully qualified URL that will resolve from SRM's namespace.
 }
 
 
-class ScanFarmMinIOTLS : Step {
+class ScanFarmObjectStorageTLS : Step {
 
 	static [string] hidden $description = @'
-Specify whether you want to enable TLS to protect the communicaitons 
-between the Scan Farm and your external MinIO server.
+Specify whether you want to enable TLS to protect the communications 
+between the Scan Farm and your external object storage.
 
 Note: To enable TLS, you must have access to the certificate associated
-with your MinIO CA.
+with your object storage's CA.
 '@
 
-	ScanFarmMinIOTLS([Config] $config) : base(
-		[ScanFarmMinIOTLS].Name, 
+	ScanFarmObjectStorageTLS([Config] $config) : base(
+		[ScanFarmObjectStorageTLS].Name, 
 		$config,
-		'Scan Farm MinIO TLS',
-		[ScanFarmMinIOTLS]::description,
-		'Specify the SSL/TLS mode for your MinIO connection') {}
+		'Scan Farm Object Storage TLS',
+		[ScanFarmObjectStorageTLS]::description,
+		'Specify the SSL/TLS mode for your storage connection') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		return new-object MultipleChoiceQuestion($prompt, @(
@@ -1017,18 +1036,18 @@ with your MinIO CA.
 	}
 }
 
-class ScanFarmMinIOCert : Step {
+class ScanFarmObjectStorageCert : Step {
 
 	static [string] hidden $description = @'
-Specify a file path to the CA file for your MinIO host.
+Specify a file path to the CA file for your object storage host.
 '@
 
-	ScanFarmMinIOCert([Config] $config) : base(
-		[ScanFarmMinIOCert].Name, 
+	ScanFarmObjectStorageCert([Config] $config) : base(
+		[ScanFarmObjectStorageCert].Name, 
 		$config,
-		'Scan Farm MinIO Cert',
-		[ScanFarmMinIOCert]::description,
-		'Enter the path to the certificate of your MinIO CA') {}
+		'Scan Farm Object Storage Cert',
+		[ScanFarmObjectStorageCert]::description,
+		'Enter the path to the certificate of your storage CA') {}
 	
 	[IQuestion]MakeQuestion([string] $prompt) {
 		return new-object CertificateFileQuestion($prompt, $false)
