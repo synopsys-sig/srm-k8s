@@ -266,6 +266,8 @@ The Scan Farm feature requires you to use an ingress controller, and your ingres
 
 SCA scanning depends on an external Black Duck system hosted by Synopsys at `https://codesight.synopsys.com`. SCA scans will fail if this endpoint is inaccessible from your cluster.
 
+The Scan Service also depends on the Synopsys SIG Repo hosted at sig-repo.synopsys.com. The service downloads Scan Farm components at boot time and will not work correctly without a SIG Repo connection.
+
 ### Default Pod Resources
 
 Below are the default CPU and memory assigned to Scan Farm pods.
