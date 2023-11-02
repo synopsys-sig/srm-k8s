@@ -9,20 +9,26 @@ Software Risk Manager Kubernetes Deployment Guide
 - [Requirements](#requirements)
   * [Kubernetes Requirements](#kubernetes-requirements)
   * [Core Feature Requirements](#core-feature-requirements)
-    + [Web Workload Requirements](#web-workload-requirements)
-    + [Web Database Workload Requirements](#web-database-workload-requirements)
+    + [Core Web Workload Requirements](#core-web-workload-requirements)
+    + [Core Web Database Workload Requirements](#core-web-database-workload-requirements)
+    + [Core Persistent Storage Requirements](#core-persistent-storage-requirements)
   * [Scan Farm Feature Requirements](#scan-farm-feature-requirements)
-    + [Database Requirements](#database-requirements)
-    + [Cache Requirements](#cache-requirements)
-    + [Object Storage Requirements](#object-storage-requirements)
-    + [Node Pool Requirements](#node-pool-requirements)
-    + [Private Registry](#private-registry)
-    + [Ingress Requirements](#ingress-requirements)
-    + [Network Requirements](#network-requirements)
-    + [Default Pod Resources](#default-pod-resources)
+    + [Scan Farm Database Requirements](#scan-farm-database-requirements)
+    + [Scan Farm Cache Requirements](#scan-farm-cache-requirements)
+    + [Scan Farm Object Storage Requirements](#scan-farm-object-storage-requirements)
+    + [Scan Farm Node Pool Requirements](#scan-farm-node-pool-requirements)
+    + [Scan Farm Private Registry](#scan-farm-private-registry)
+    + [Scan Farm Ingress Requirements](#scan-farm-ingress-requirements)
+    + [Scan Farm Network Requirements](#scan-farm-network-requirements)
+    + [Scan Farm Default Pod Resources](#scan-farm-default-pod-resources)
   * [Tool Orchestration Feature Requirements](#tool-orchestration-feature-requirements)
-    + [Default Pod Resources](#default-pod-resources-1)
+    + [Tool Orchestration Default Pod Resources](#tool-orchestration-default-pod-resources)
+    + [Tool Orchestration Persistent Storage Requirements](#tool-orchestration-persistent-storage-requirements)
 - [External Web Database Pre-work](#external-web-database-pre-work)
+- [Persistent Storage Pre-work](#persistent-storage-pre-work)
+  * [AWS Persistent Storage Pre-work](#aws-persistent-storage-pre-work)
+    + [AWS EBS Persistent Storage Pre-work](#aws-ebs-persistent-storage-pre-work)
+    + [AWS EFS Persistent Storage Pre-work](#aws-efs-persistent-storage-pre-work)
 - [Scan Farm Pre-work](#scan-farm-pre-work)
   * [Private Docker Registry](#private-docker-registry)
   * [AWS Scan Farm Pre-work](#aws-scan-farm-pre-work)
@@ -182,7 +188,7 @@ Although we often get asked what the hardware requirements are, there is no one 
 |Large|2,000 - 10,000|10,000|32|
 |Extra Large|10,000+|10,000+|64|
 
-### Web Workload Requirements
+### Core Web Workload Requirements
 
 | Size | CPU Cores | Memory | IOPs | Storage |
 |:-|-:|-:|-:|-:|
@@ -191,7 +197,7 @@ Although we often get asked what the hardware requirements are, there is no one 
 |Large|16|64 GB|8,000|256 GB|
 |Extra Large|32|128 GB|16,000|512 GB|
 
-### Web Database Workload Requirements
+### Core Web Database Workload Requirements
 
 | Size | CPU Cores | Memory | IOPs | Storage |
 |:-|-:|-:|-:|-:|
@@ -200,15 +206,26 @@ Although we often get asked what the hardware requirements are, there is no one 
 |Large|16|64 GB|8,000|768 GB|
 |Extra Large|32|128 GB|16,000|1536 GB|
 
+### Core Persistent Storage Requirements
+
+The Software Risk Manager web workload requires a Persistent Volume resource to store various files: the analysis inputs it receives, including the source code it uses to display in the Finding Details page, log files, and configuration files. By default, the volume will be provisioned dynamically at deployment time. The optional on-cluster MariaDB database usage determines whether additional, dynamically-provisioned Persistent Volume resources are needed.
+
+| Volume | Feature | Description |
+|:-|:-:|:-:|
+| Web AppData | Core | Required volume for web workload |
+| Primary DB Data | Core (w/ On-Cluster Database) | Database volume for primary database |
+| Replica DB Data | Core (w/ On-Cluster Database) | Database volume for replica database |
+| Replica DB Backup | Core (w/ On-Cluster Database) | Database volume for replica database backups |
+
 ## Scan Farm Feature Requirements
 
 This section covers the requirements you must satisfy with the external dependencies you provide for the database, cache, and object storage layers.
 
-### Database Requirements
+### Scan Farm Database Requirements
 
 The Scan Farm feature depends on a PostgreSQL database supporting versions 10.16–14.5. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM.
 
-### Cache Requirements
+### Scan Farm Cache Requirements
 
 Here are the requirements and recommendations for your Redis instance:
 
@@ -222,7 +239,7 @@ Here are the requirements and recommendations for your Redis instance:
 
 Synopsys recommends configuring your Redis instance with both authentication and TLS.
 
-### Object Storage Requirements
+### Scan Farm Object Storage Requirements
 
 The Scan Farm requires two buckets that must be created before deployment. A storage bucket would be considered a blob container when using Azure object storage.
 
@@ -250,25 +267,25 @@ You must configure your Cache Service bucket with an object expiration greater t
 
 Both buckets must support read/write access from the Cache Service and Storage Service. Additionally, the Cache Service must have permission to download the cache bucket's lifecycle policy. For example, with storage that supports the S3 API, the Cache Service will use the GetBucketLifecycleConfiguration API, which requires the s3:GetLifecycleConfiguration permission.
 
-### Node Pool Requirements
+### Scan Farm Node Pool Requirements
 
 The Scan Farm requires a separate node pool that supports nodes with 6.5 vCPUs and 26 GB of RAM. Meeting this requirement in your infrastructure might require a node pool of 8 vCPU and 32 GB RAM nodes. The nodes must include a Kubernetes taint for NodeType​=​​ScannerNode and a label of pool-type​=​small. An analysis will consume a single node, so you should configure your node pool to scale horizontally as your scanning workload requires.
 
-### Private Registry
+### Scan Farm Private Registry
 
 When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Synopsys SIG (Software Integrity Group) private Docker registry (SIG repo) and push them to your private registry. You can use a private registry hosted by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own (see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md for details).
 
-### Ingress Requirements
+### Scan Farm Ingress Requirements
 
 The Scan Farm feature requires you to use an ingress controller, and your ingress controller must support multiple ingress resources referencing the same hostname. Synopsys recommends the [NGINX Community](https://kubernetes.github.io/ingress-nginx/) ingress controller. You can find the Installation Guide [here](https://kubernetes.github.io/ingress-nginx/deploy/).
 
-### Network Requirements
+### Scan Farm Network Requirements
 
 SCA scanning depends on an external Black Duck system hosted by Synopsys at `https://codesight.synopsys.com`. SCA scans will fail if this endpoint is inaccessible from your cluster.
 
 The Scan Service also depends on the Synopsys SIG Repo hosted at sig-repo.synopsys.com. The service downloads Scan Farm components at boot time and will not work correctly without a SIG Repo connection.
 
-### Default Pod Resources
+### Scan Farm Default Pod Resources
 
 Below are the default CPU and memory assigned to Scan Farm pods.
 
@@ -284,7 +301,7 @@ Below are the default CPU and memory assigned to Scan Farm pods.
 
 The initial MinIO volume size should be 64 GB when not using external object storage. External object storage can be provided by any storage system that supports an AWS S3-compliant API (e.g., AWS, GCP, MinIO, etc.).
 
-### Default Pod Resources
+### Tool Orchestration Default Pod Resources
 
 Below are the default CPU and memory assigned to Tool Orchestration pods.
 
@@ -294,6 +311,10 @@ Below are the default CPU and memory assigned to Tool Orchestration pods.
 | MinIO | 2000m | 500Mi |
 | Workflow | 500m | 500Mi |
 | Tools | 500m | 500Mi |
+
+### Tool Orchestration Persistent Storage Requirements
+
+When using Tool Orchestration without external object storage, a single, dynamically-provisioned Persistent Volume resource is required for orchestrated analysis workflow storage.
 
 # External Web Database Pre-work
 
@@ -328,6 +349,153 @@ Refer to the Web Database Workload Requirements section for database instance co
    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, ALTER, REFERENCES, INDEX, DROP, TRIGGER ON srmdb.* to 'srm'@'%';
    FLUSH PRIVILEGES;
 
+# Persistent Storage Pre-work
+
+Software Risk Manager depends on one or more Persistent Volume resources, depending on the features you install and how you configure them. You will always have at least one volume for the Core feature's web component. Dynamic volume provisioning is required by default. Refer to the following sections for Kubernetes provider-specific instructions.
+
+## AWS Persistent Storage Pre-work
+
+Software Risk Manager supports EBS and EFS storage volumes for the web workload. Do not use AWS EFS for database-related volumes.
+
+### AWS EBS Persistent Storage Pre-work
+
+If you plan to use AWS EBS storage, install the [AWS EBS CSI Driver EKS Addon](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html) before continuing.
+
+### AWS EFS Persistent Storage Pre-work
+
+This section describes using AWS EFS storage for your Software Risk Manager Web volume. The AWS EFS CSI driver supports dynamic provisioning. This example uses static provisioning and demonstrates how the Software Risk Manager chart can reference a bound Persistent Volume Claim resource.
+
+>Note: These steps assume that you are using the Software Risk Manager Core feature with an external database. 
+
+1) Create and configure an [EFS filesystem](https://aws.amazon.com/pm/efs). Ensure that available network mounts exist in each Availability Zone before continuing and that inbound network rules permit network traffic on port 2049 from your cluster workloads.
+
+2) Install the [AWS EFS CSI Driver EKS Addon](https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html)
+
+3) Save this StorageClass content to a file named efs-storageclass.yaml:
+
+```
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+```
+
+4) Create the StorageClass resource with the following command:
+
+```
+kubectl apply -f ./efs-storageclass.yaml
+```
+
+5) Replace the \<volume-handle-id\> (e.g., fs-07b385603296a82db) placeholder and save the below YAML to a file named srm-web-appdata-pv.yaml:
+
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: srm-web-appdata
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: <volume-handle-id>
+```
+
+6) Create the PersistentVolume resource with the following command:
+
+```
+kubectl apply -f ./srm-web-appdata-pv.yaml
+```
+
+7) Create the Software Risk Manager namespace, replacing the namespace name as necessary:
+
+```
+kubectl create ns srm
+```
+
+8) Save this PersistentVolumeClaim content to a file named srm-web-appdata-pvc.yaml, replacing the namespace name as necessary:
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: srm-web-appdata
+  namespace: srm
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+9) Create the PersistentVolumeClaim resource with the following command:
+
+```
+kubectl apply -f ./srm-web-appdata-pvc.yaml
+```
+
+10) Wait for the PersistentVolumeClaim to reach a Bound status, check by periodically running the following command, replacing the namespace name as necessary:
+
+```
+kubectl -n srm get pvc srm-web-appdata
+```
+
+11) Save this Job content to a file named srm-web-appdata-job.yaml, replacing the namespace name as necessary:
+
+```
+apiVersion: batch/v1
+kind: Job 
+metadata:
+  name: srm-web-appdata
+  namespace: srm
+spec:
+  template:
+    spec:
+      containers:
+      - name: srm-web-appdata
+        image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "cd /data && chmod 2775 . && chown root:1000 ."]
+        volumeMounts:
+        - name: srm-web-appdata-storage
+          mountPath: /data
+      restartPolicy: Never
+      volumes:
+      - name: srm-web-appdata-storage
+        persistentVolumeClaim:
+          claimName: srm-web-appdata
+```
+
+12) Create the Job resource with the following command:
+
+```
+kubectl apply -f ./srm-web-appdata-job.yaml
+```
+
+13) Wait for the Job to complete, check by periodically running the following command, replacing the namespace name as necessary:
+
+```
+kubectl -n srm get job srm-web-appdata
+```
+
+14) If you already have an srm-extra-props.yaml file, merge the below content into your existing file. Otherwise, create your srm-extra-props.yaml file (see [Customizing Software Risk Manager (props)](#customizing-software-risk-manager-props)) and add the following content:
+
+```
+web:
+  persistence:
+    existingClaim: srm-web-appdata
+```
+
+15) Refer to [Customizing Software Risk Manager (props)](#customizing-software-risk-manager-props) for how to rerun helm with your srm-extra-props.yaml file.
+ 
 # Scan Farm Pre-work
 
 Software Risk Manager does not include the dependencies required for the Scan Farm features. You can skip this section if you do not plan to use the Scan Farm feature. Complete the following pre-work before installing the Scan Farm.
