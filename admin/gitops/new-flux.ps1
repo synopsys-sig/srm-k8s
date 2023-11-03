@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.1.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -17,7 +17,7 @@ param (
 	[string[]] $extraValuesFiles = @(),
 	[switch]   $useSealedSecrets,
 	[string]   $sealedSecretsNamespace = 'flux-system',
-	[string]   $sealedSecretsControllerName = 'sealed-secrets',
+	[string]   $sealedSecretsControllerName = 'sealed-secrets-controller',
 	[string]   $sealedSecretsPublicKeyPath
 )
 
