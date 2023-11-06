@@ -195,18 +195,18 @@ Although we often get asked what the hardware requirements are, there is no one 
 | Size | CPU Cores | Memory | IOPs | Storage |
 |:-|-:|-:|-:|-:|
 |Small|4|16 GB|3,000|64 GB|
-|Medium|8|32 GB|3,000|128 GB|
-|Large|16|64 GB|8,000|256 GB|
-|Extra Large|32|128 GB|16,000|512 GB|
+|Medium|8|32 GB|6,000|128 GB|
+|Large|16|64 GB|12,000|256 GB|
+|Extra Large|32|128 GB|32,000|512 GB|
 
 ### Core Web Database Workload Requirements
 
 | Size | CPU Cores | Memory | IOPs | Storage |
 |:-|-:|-:|-:|-:|
 |Small|4|16 GB|3,000|192 GB|
-|Medium|8|32 GB|3,000|384 GB|
-|Large|16|64 GB|8,000|768 GB|
-|Extra Large|32|128 GB|16,000|1536 GB|
+|Medium|8|32 GB|6,000|384 GB|
+|Large|16|64 GB|12,000|768 GB|
+|Extra Large|32|128 GB|32,000|1536 GB|
 
 ### Core Persistent Storage Requirements
 
