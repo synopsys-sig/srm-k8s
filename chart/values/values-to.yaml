@@ -57,7 +57,7 @@ to:
       sendResults: 'codedx/codedx-results'
       # -- the Docker image repository name for the SRM tool service workload
       toolService: 'codedx/codedx-tool-service'
-    # -- the Docker image version for the SRM Tool Orchestration workloads
+    # -- the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)
     tag: v1.28.0
   logs:
     # -- the maximum size of a tool service log file
