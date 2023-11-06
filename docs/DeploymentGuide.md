@@ -2253,7 +2253,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v1.28.0"` | the Docker image version for the SRM Tool Orchestration workloads |
+| to.image.tag | string | `"v1.28.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -2331,6 +2331,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | web.securityContext.readOnlyRootFilesystem | bool | `true` | whether the SRM web workload uses a read-only filesystem |
 | web.service.annotations | object | `{}` | the annotations to apply to the SRM web service |
 | web.service.port | int | `9090` | the port number of the SRM web service |
+| web.service.port_name | string | `http` | the name of the service port (set to 'https' for HTTPS ports, required for AWS ELB configuration) |
 | web.service.type | string | `"ClusterIP"` | the service type of the SRM web service |
 | web.serviceAccount.annotations | object | `{}` | the annotations to apply to the SRM service account |
 | web.serviceAccount.create | bool | `true` | whether to create a service account for the SRM web service |
