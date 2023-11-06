@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.1.0
+.VERSION 1.2.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -192,7 +192,7 @@ spec:
   chart:
     spec:
       chart: srm
-      version: 1.4.0
+      version: 1.6.0
       sourceRef:
         kind: HelmRepository
         name: srm
