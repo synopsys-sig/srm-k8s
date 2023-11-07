@@ -807,12 +807,14 @@ You can satisfy Scan Farm feature dependencies with components you install on yo
 
 ### Scanner Nodes Pre-work
 
-A Scan Farm SAST or SCA analysis requires an entire node with a specific node label and taint. You can assign a node label and taint using the following command where "scan-farm-worker-node-name" represents the name of a cluster node.
+Scan Farm SAST or SCA analyses require a dedicated node pool with a specific node label and taint. You can run more than one SCA scan on a single node, but a single SAST analysis requires exclusive node access during the scan. You can assign a node label and taint using the following command where "scan-farm-worker-node-name" represents the name of a cluster node.
 
 ```
 kubectl label --overwrite node scan-farm-worker-node-name pool-type=small
 kubectl taint node scan-farm-worker-node-name NodeType=ScannerNode:NoSchedule
 ```
+
+If using a cloud-hosted node pool, specify the node label and taint with your node pool configuration so that generated nodes meet Scan Farm requirements.
 
 ### Bitnami PostgreSQL Chart Pre-work
 
