@@ -192,7 +192,7 @@ spec:
   chart:
     spec:
       chart: srm
-      version: 1.6.0
+      version: 1.7.0
       sourceRef:
         kind: HelmRepository
         name: srm
