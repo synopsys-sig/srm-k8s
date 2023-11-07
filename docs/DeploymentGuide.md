@@ -271,7 +271,7 @@ Both buckets must support read/write access from the Cache Service and Storage S
 
 ### Scan Farm Node Pool Requirements
 
-The Scan Farm requires a separate node pool that supports nodes with 6.5 vCPUs and 26 GB of RAM. Meeting this requirement in your infrastructure might require a node pool of 8 vCPU and 32 GB RAM nodes. The nodes must include a Kubernetes taint for NodeType​=​​ScannerNode and a label of pool-type​=​small. An analysis will consume a single node, so you should configure your node pool to scale horizontally as your scanning workload requires.
+The Scan Farm requires a separate node pool that supports nodes with 6.5 vCPUs and 26 GB of RAM. Meeting this requirement in your infrastructure might require a node pool of 8 vCPU and 32 GB RAM nodes. The nodes must include a Kubernetes taint for NodeType​=​​ScannerNode and a label of pool-type​=​small. A SAST analysis will consume a single node, so you should configure your node pool to scale horizontally as your scanning workload requires.
 
 ### Scan Farm Private Registry
 
