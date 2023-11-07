@@ -1,11 +1,18 @@
 function New-ServiceConfig($config) {
 
+  $portName = 'http'
+  if ($config.IsElbIngress()) {
+    # force https to ensure correct AWS ELB generation
+    $portName = 'https'
+  }
+
 	@"
 web:
   service:
     type: $($config.webServiceType)
     annotations: $(ConvertTo-YamlMap $config.GetWebServiceAnnotations())
     port: $($config.webServicePortNumber)
+    port_name: '$portName'
 "@ | Out-File (Get-WebServiceValuesPath $config)
 }
 

@@ -148,3 +148,8 @@ web:
   cacertsSecret: srm-web-cacerts-secret
   # @ignore (refer to main values file for details)
   tlsSecret: srm-web-tls-secret
+  service:
+    # @ignore (refer to main values file for details)
+    port: 9443
+    # @ignore (refer to main values file for details)
+    port_name: https

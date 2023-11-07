@@ -207,6 +207,8 @@ web:
     type: ClusterIP
     # -- the port number of the SRM web service
     port: 9090
+    # -- the name of the service port (set to 'https' for HTTPS ports, required for AWS ELB configuration)
+    port_name: http
 
   serviceAccount:
     # -- whether to create a service account for the SRM web service
@@ -294,8 +296,6 @@ cnc:
     srm:
       # @ignore
       enabled: true
-      # -- the port number of the SRM web service
-      port: "9090"
 
   # @ignore
   trust-stores:

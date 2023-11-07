@@ -55,12 +55,10 @@ Determine the URL of the SRM web service.
 */}}
 {{- define "srm-web.serviceurl" -}}
 {{- $protocol := "http" }}
-{{- $port := "9090" }}
 {{- if .Values.web.tlsSecret -}}
 {{- $protocol = "https" -}}
-{{- $port = "9443" }}
 {{- end -}}
-{{- $protocol -}}://{{- include "srm-web.fullname" . -}}:{{- $port -}}/srm
+{{- $protocol -}}://{{- include "srm-web.fullname" . -}}:{{- .Values.web.service.port -}}/srm
 {{- end -}}
 
 {{/*

@@ -13,23 +13,23 @@ function New-DockerImageLocationConfig($config) {
 	if (-not $config.skipScanFarm) {
 		@"
 cnc:
-  imageRegistry: $registryAndRepositoryPrefix
+  imageRegistry: '$registryAndRepositoryPrefix'
 "@ | Out-File (Get-ScanFarmDockerImageLocationValuesPath $config)
 	}
 
 	@"
 web:
   image:
-    registry: $($config.dockerRegistry)
-    repository: $("$($repositoryPrefix)codedx/codedx-tomcat")
+    registry: '$($config.dockerRegistry)'
+    repository: '$("$($repositoryPrefix)codedx/codedx-tomcat")'
 "@ | Out-File (Get-WebDockerImageLocationValuesPath $config)
 
 	if (-not $config.skipDatabase) {
 		@"
 mariadb:
   image:
-    registry: $($config.dockerRegistry)
-    repository: $("$($repositoryPrefix)codedx/codedx-mariadb")
+    registry: '$($config.dockerRegistry)'
+    repository: '$("$($repositoryPrefix)codedx/codedx-mariadb")'
 "@ | Out-File (Get-DatabaseDockerImageLocationValuesPath $config)
 	}
 
@@ -37,27 +37,27 @@ mariadb:
 		@"
 to:
   image:
-    registry: $($config.dockerRegistry)
+    registry: '$($config.dockerRegistry)'
     repository:
-      tools: $("$($repositoryPrefix)codedx/codedx-tools")
-      toolsMono: $("$($repositoryPrefix)codedx/codedx-toolsmono")
-      helmPreDelete: $("$($repositoryPrefix)codedx/codedx-cleanup")
-      prepare: $("$($repositoryPrefix)codedx/codedx-prepare")
-      newAnalysis: $("$($repositoryPrefix)codedx/codedx-newanalysis")
-      sendErrorResults: $("$($repositoryPrefix)codedx/codedx-error-results")
-      sendResults: $("$($repositoryPrefix)codedx/codedx-results")
-      toolService: $("$($repositoryPrefix)codedx/codedx-tool-service")
+      tools: '$("$($repositoryPrefix)codedx/codedx-tools")'
+      toolsMono: '$("$($repositoryPrefix)codedx/codedx-toolsmono")'
+      helmPreDelete: '$("$($repositoryPrefix)codedx/codedx-cleanup")'
+      prepare: '$("$($repositoryPrefix)codedx/codedx-prepare")'
+      newAnalysis: '$("$($repositoryPrefix)codedx/codedx-newanalysis")'
+      sendErrorResults: '$("$($repositoryPrefix)codedx/codedx-error-results")'
+      sendResults: '$("$($repositoryPrefix)codedx/codedx-results")'
+      toolService: '$("$($repositoryPrefix)codedx/codedx-tool-service")'
 argo:
   images:
-    namespace: $registryAndRepositoryPrefix/codedx
+    namespace: '$registryAndRepositoryPrefix/codedx'
 "@ | Out-File (Get-ToDockerImageLocationValuesPath $config)
 
 		if (-not $config.skipMinIO) {
 			@"
 minio:
   image:
-    registry: $($config.dockerRegistry)
-    repository: $("$($repositoryPrefix)bitnami/minio")
+    registry: '$($config.dockerRegistry)'
+    repository: '$("$($repositoryPrefix)bitnami/minio")'
 "@ | Out-File (Get-StorageDockerImageLocationValuesPath $config)
 		}
 	}
@@ -69,7 +69,7 @@ function New-DockerImageVersionConfig($config) {
 		@"
 web:
   image:
-    tag: $($config.imageVersionWeb)
+    tag: '$($config.imageVersionWeb)'
 "@ | Out-File (Get-WebDockerImageVersionValuesPath $config)
 	}
 
@@ -77,7 +77,7 @@ web:
 		@"
 mariadb:
   image:
-    tag: $($config.imageVersionMariaDB)
+    tag: '$($config.imageVersionMariaDB)'
 "@ | Out-File (Get-DatabaseDockerImageVersionValuesPath $config)
 	}
 
@@ -87,7 +87,7 @@ mariadb:
 			@"
 to:
   image:
-    tag: $($config.imageVersionTo)
+    tag: '$($config.imageVersionTo)'
 "@ | Out-File (Get-ToDockerImageVersionValuesPath $config)
 		}
 
@@ -95,7 +95,7 @@ to:
 			@"
 minio:
   image:
-    tag: $($config.imageVersionMinio)
+    tag: '$($config.imageVersionMinio)'
 "@ | Out-File (Get-StorageDockerImageVersionValuesPath $config)
 		}
 
@@ -103,7 +103,7 @@ minio:
 			@"
 argo:
   images:
-    tag: $($config.imageVersionWorkflow)
+    tag: '$($config.imageVersionWorkflow)'
 "@ | Out-File (Get-WorkflowDockerImageVersionValuesPath $config)
 		}
 	}

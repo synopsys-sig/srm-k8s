@@ -40,7 +40,7 @@ spec:
           - -c
           - |
             echo 'Waiting for SRM web...'
-            while [ 1 ]; do if (timeout 2 bash -c "</dev/tcp/{{ include "srm-web.fullname" . }}/9090" echo $?); then echo 'SRM Web is ready'; break; else echo 'SRM Web is not yet ready; retrying...'; sleep 2; fi; done
+            while [ 1 ]; do if (timeout 2 bash -c "</dev/tcp/{{ include "srm-web.fullname" . }}/{{ .Values.web.service.port }}" echo $?); then echo 'SRM Web is ready'; break; else echo 'SRM Web is not yet ready; retrying...'; sleep 2; fi; done
 
             ADMINPWD=$(cat '{{ include "srm-web.admin.password.path" . }}')
             ADMINCRED=$(echo -n "admin:$ADMINPWD" | base64 --wrap=0)

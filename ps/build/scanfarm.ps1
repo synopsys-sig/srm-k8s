@@ -58,7 +58,7 @@ function New-ScanFarmConfig($config) {
 	New-ScanFarmStorageConfig $config
 
 	$webSvcName = $config.GetWebServiceName()
-	$webSvcUrl = "http://$webSvcName`:9090/srm"
+	$webSvcUrl = "http://$webSvcName`:$($config.webServicePortNumber)/srm"
 
 
 	@"

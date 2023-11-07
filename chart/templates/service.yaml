@@ -9,13 +9,12 @@ metadata:
 spec:
   type: {{ .Values.web.service.type }}
   ports:
-    - name: http
+    - name: {{ .Values.web.service.port_name | default "http" }}
       protocol: TCP
+      port: {{ .Values.web.service.port }}
       {{- if .Values.web.tlsSecret }}
-      port: 9443
       targetPort: 8443
       {{- else }}
-      port: 9090
       targetPort: 8080
       {{- end }}
   selector:
