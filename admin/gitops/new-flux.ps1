@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.2.0
+.VERSION 1.2.1
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -131,8 +131,7 @@ if ($useSealedSecrets) {
 		Remove-Item $_ -Force # Replace $_ with SealedSecret resource
 	}
 }
-
-$valuesFiles = @(Join-Path $workDirChartValuesCombined 'values-combined.yaml')
+$valuesFiles = @()
 
 # Optionally include tool orchestration configuration
 if (-not $config.skipToolOrchestration) {
@@ -143,6 +142,8 @@ if (-not $config.skipToolOrchestration) {
 if (-not $config.skipTls) {
 	$valuesFiles += [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../chart/values/values-tls.yaml'))
 }
+
+$valuesFiles += (Join-Path $workDirChartValuesCombined 'values-combined.yaml')
 
 $valuesFiles += $extraValuesFiles
 
