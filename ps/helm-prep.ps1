@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.6.0
+.VERSION 1.7.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -108,6 +108,7 @@ try {
 	'srmLicenseFile',
 	'scanFarmSastLicenseFile',
 	'scanFarmScaLicenseFile',
+	'scanFarmRedisServerCert',
 	'caCertsFilePath' | ForEach-Object {
 		$fileValue = $config.$_
 		if (-not ([String]::IsNullOrEmpty($fileValue))) {
