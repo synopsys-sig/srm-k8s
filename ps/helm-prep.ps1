@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.5.0
+.VERSION 1.6.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -52,6 +52,17 @@ Write-Host 'Loading...' -NoNewline
 	. $path | out-null
 }
 
+function Get-ConfigFileFullPath([string] $configFilePath, [string] $filePath) {
+
+	Push-Location (Split-Path $configFilePath -Parent)
+	$path = Resolve-Path $filePath -ErrorAction 'Continue' 2> $null | Select-Object -First 1
+	if ($null -ne $path) {
+		$path = $path.Path
+	}
+	$path
+	Pop-Location
+}
+
 try {
 	# Check for required parameters
 	if (-not (Test-Path $configPath -PathType Leaf)) {
@@ -99,17 +110,22 @@ try {
 	'scanFarmScaLicenseFile',
 	'caCertsFilePath' | ForEach-Object {
 		$fileValue = $config.$_
-		if ((-not ([String]::IsNullOrEmpty($fileValue))) -and 
-			(-not (Test-Path $fileValue -PathType Leaf))) {
-			Write-ErrorMessageAndExit "Unable to find file '$fileValue' for '$_' config parameter. Does the file exist?"
+		if (-not ([String]::IsNullOrEmpty($fileValue))) {
+			$config.$_ = Get-ConfigFileFullPath $configPath $fileValue
+			if ($null -eq $config.$_ -or (-not (Test-Path $config.$_ -PathType Leaf))) {
+				Write-ErrorMessageAndExit "Unable to find file '$fileValue' for '$_' config parameter. Does the file exist?"
+			}
 		}
 	}
-	$config.extraTrustedCaCertPaths | ForEach-Object {
-		if ((-not ([String]::IsNullOrEmpty($_))) -and 
-			(-not (Test-Path $_ -PathType Leaf))) {
-			Write-ErrorMessageAndExit "Unable to find file '$_' in the 'extraTrustedCaCertPaths' config parameter. Does the file exist?"
+	$config.extraTrustedCaCertPaths = $config.extraTrustedCaCertPaths | 
+		Where-Object { -not ([String]::IsNullOrEmpty($_)) } | 
+		ForEach-Object {
+			$certPath = Get-ConfigFileFullPath $configPath $_
+			if ($null-eq $certPath -or (-not (Test-Path $certPath -PathType Leaf))) {
+				Write-ErrorMessageAndExit "Unable to find file '$_' in the 'extraTrustedCaCertPaths' config parameter. Does the file exist?"
+			}
+			$certPath
 		}
-	}
 
 	# Reset work directory
 	$config.GetValuesWorkDir(),$config.GetK8sWorkDir(),$config.GetTempWorkDir(),$config.GetValuesCombinedWorkDir() | ForEach-Object {
