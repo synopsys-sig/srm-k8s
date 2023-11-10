@@ -96,7 +96,9 @@ resource from which you can pattern a path-based route definition.
 				if (-not $this.config.skipScanFarm) {
 					$tlsSvcs += $this.config.GetCacheServiceName()
 				}
-				$this.config.SetNote($this.GetType().Name, "- You will likely need to add an ingress annotation for communicating with these HTTPS service(s): $tlsSvcs")
+				if ($tlsSvcs.length -gt 0) {
+					$this.config.SetNote($this.GetType().Name, "- You will likely need to add an ingress annotation for communicating with these HTTPS service(s): $tlsSvcs")
+				}
 			}
 		}
 
