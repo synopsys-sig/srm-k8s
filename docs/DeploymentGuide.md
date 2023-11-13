@@ -1,4 +1,4 @@
-Software Risk Manager Kubernetes Deployment Guide
+Software Risk Manager Kubernetes (K8s) Deployment Guide
 
 <!-- toc -->
 
@@ -12,6 +12,7 @@ Software Risk Manager Kubernetes Deployment Guide
     + [Core Web Workload Requirements](#core-web-workload-requirements)
     + [Core Web Database Workload Requirements](#core-web-database-workload-requirements)
     + [Core Persistent Storage Requirements](#core-persistent-storage-requirements)
+    + [Core Internet Access Requirements](#core-internet-access-requirements)
   * [Scan Farm Feature Requirements](#scan-farm-feature-requirements)
     + [Scan Farm Database Requirements](#scan-farm-database-requirements)
     + [Scan Farm Cache Requirements](#scan-farm-cache-requirements)
@@ -19,11 +20,12 @@ Software Risk Manager Kubernetes Deployment Guide
     + [Scan Farm Node Pool Requirements](#scan-farm-node-pool-requirements)
     + [Scan Farm Private Registry](#scan-farm-private-registry)
     + [Scan Farm Ingress Requirements](#scan-farm-ingress-requirements)
-    + [Scan Farm Network Requirements](#scan-farm-network-requirements)
+    + [Scan Farm Internet Access Requirements](#scan-farm-internet-access-requirements)
     + [Scan Farm Default Pod Resources](#scan-farm-default-pod-resources)
   * [Tool Orchestration Feature Requirements](#tool-orchestration-feature-requirements)
     + [Tool Orchestration Default Pod Resources](#tool-orchestration-default-pod-resources)
     + [Tool Orchestration Persistent Storage Requirements](#tool-orchestration-persistent-storage-requirements)
+    + [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements)
 - [External Web Database Pre-work](#external-web-database-pre-work)
 - [Persistent Storage Pre-work](#persistent-storage-pre-work)
   * [AWS Persistent Storage Pre-work](#aws-persistent-storage-pre-work)
@@ -85,6 +87,10 @@ Software Risk Manager Kubernetes Deployment Guide
     + [Rerun Helm](#rerun-helm)
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
+  * [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
+    + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
+    + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
+    + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
 - [Backup and Restore](#backup-and-restore)
   * [About Velero](#about-velero)
   * [Installing Velero](#installing-velero)
@@ -219,6 +225,21 @@ The Software Risk Manager web workload requires a Persistent Volume resource to 
 | Replica DB Data | Core (w/ On-Cluster Database) | Database volume for replica database |
 | Replica DB Backup | Core (w/ On-Cluster Database) | Database volume for replica database backups |
 
+### Core Internet Access Requirements
+
+Software Risk Manager uses internet access in the background for some activities, such as keeping tool data up-to-date and periodically checking for a new Software Risk Manager release.
+
+Software Risk Manager does not require internet access; however, internet access is highly recommended to ensure full functionality.
+
+To disable background internet access by Software Risk Manager, [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by setting `codedx.offline-mode = true`. The default is false. Note that this will not disable any internet access that may occur due to user action or configuration settings, such as Tool Connector, Git, or Issue Tracker configurations.
+
+When internet access is enabled, Software Risk Manager will perform the following actions:
+
+- Update notifications - Software Risk Manager will periodically check for newer versions and display an update notification when one is available.
+- Dependency-Check updates - Dependency-Check will periodically download updates from the National Vulnerability Database, the Retire.js repository, or reach out to Maven Central while scanning Java dependencies (this aids in the dependency identification process, to cut down on both false positive and false negative results). 
+- If Software Risk Manager is in offline mode, this may lead to lower quality results when running Dependency-Check as a bundled tool.
+- Secure Code Warrior - Unless noted elsewhere, Software Risk Manager will reach out to any URLs belonging to the securecodewarrior.com domain.
+
 ## Scan Farm Feature Requirements
 
 This section covers the requirements you must satisfy with the external dependencies you provide for the database, cache, and object storage layers.
@@ -283,7 +304,7 @@ You can use a private registry hosted by a cloud provider (e.g., AWS, GCP, Azure
 
 The Scan Farm feature requires you to use an ingress controller, and your ingress controller must support multiple ingress resources referencing the same hostname. Synopsys recommends the [NGINX Community](https://kubernetes.github.io/ingress-nginx/) ingress controller. You can find the Installation Guide [here](https://kubernetes.github.io/ingress-nginx/deploy/).
 
-### Scan Farm Network Requirements
+### Scan Farm Internet Access Requirements
 
 SCA scanning depends on an external Black Duck system hosted by Synopsys at `https://codesight.synopsys.com`. SCA scans will fail if this endpoint is inaccessible from your cluster.
 
@@ -318,7 +339,59 @@ Below are the default CPU and memory assigned to Tool Orchestration pods.
 
 ### Tool Orchestration Persistent Storage Requirements
 
-When using Tool Orchestration without external object storage, a single, dynamically-provisioned Persistent Volume resource is required for orchestrated analysis workflow storage.
+When using Tool Orchestration without external object storage, a single, dynamically-provisioned Persistent Volume resource is required for orchestrated analysis workflow storage, including analysis inputs, results, and related tool log files.
+
+By default, Software Risk Manager will automatically remove old analyses and related storage from the tool service. Related tool results and findings will be retained when workflow storage gets cleaned up. Workflow cleanup is enabled by default, allowing storage for 100 completed analyses to exist in a success or failure state, with a maximum of five completed analyses per project.
+
+Additional analyses beyond the limits will remove the storage for the oldest analysis. To adjust workflow cleanup behavior, [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by setting these parameters:
+
+```
+- tws.storage.cleanup.enabled = true
+- tws.storage.cleanup.max-total-analyses = 100
+- tws.storage.cleanup.max-analyses-per-project = 5
+```
+
+You can use this expression to estimate your maximum workflow storage requirement:
+
+```
+(tws.storage.cleanup.max-total-analyses * average-analysis-input-size) +
+(tws.storage.cleanup.max-total-analyses * average-analysis-result-size) +
+(tws.storage.cleanup.max-total-analyses * average-tool-log-size)
+```
+
+You can use this expression to estimate your workflow storage requirement for completed analyses when the total analysis count is less than tws.storage.cleanup.max-total-analyses:
+
+```
+(tws.storage.cleanup.max-analyses-per-project * project-count * average-analysis-input-size) +
+(tws.storage.cleanup.max-analyses-per-project * project-count * average-analysis-result-size) +
+(tws.storage.cleanup.max-analyses-per-project * project-count * average-tool-log-size)
+```
+
+### Tool Orchestration Add-in Resource Requirements
+
+Software Risk Manager can create orchestrated analyses that run one or more application security testing tools where each tool has access to its host's memory and CPU resources. Using Kubernetes tools, you can control the memory and CPU capacity available for analyses. You can also improve Kubernetes scheduling outcomes by requesting CPU or memory capacity for specific tools or projects. Resource requirements can also include a node selector and pod toleration, with taint effects NoSchedule and NoExecute, to influence further where tools run on your cluster.
+
+The resource requirements feature cannot be configured using the Software Risk Manager user interface, but you can use the kubectl command to define configuration maps (ConfigMaps) that cover specific scopes determined by a special naming convention. The tool service will look for and read optional ConfigMaps to determine how resource requirements apply to a particular tool run.
+
+Resource requirements containing CPU and memory instructions translate to Kubernetes resource requests and limits and fit with any other related Kubernetes configuration, such as a resource limit defined for a Kubernetes namespace. You can specify resource requirement data by using the following ConfigMap field names:
+
+- requests.cpu – Kubernetes CPU request (e.g., 1).
+- requests.memory – Kubernetes memory request (e.g., 1G).
+- limits.cpu – Kubernetes CPU limit (e.g., 2).
+- limits.memory – Kubernetes memory limit (e.g., 2G).
+- nodeSelectorKey – key portion of a label associated with a node selector (e.g., purpose).
+- nodeSelectorValue – value portion of a label associated with a node selector.
+- podTolerationKey – key portion of a taint with the NoSchedule and NoExecute taint effects (e.g., dedicated).
+- podTolerationValue – value portion of a taint with the NoSchedule and NoExecute taint effects (e.g., tools).
+
+Below are the default CPU and memory settings for add-in tools. Refer to the [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration) section for how to customize resource requirements for your Software Risk Manager deployment.
+
+| Resource | Request | Limit |
+|:-|:-:|:-:|
+| CPU | 500m | 2000m |
+| Memory | 500Mi | 2G |
+
+>Note: There are no defaults for add-in node selectors and pod tolerations.
 
 # External Web Database Pre-work
 
@@ -1031,11 +1104,13 @@ Your first Software Risk Manager Kubernetes deployment is a four-step process:
 
 ## Prerequisites
 
-The deployment scripts in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. Additionally, the scripts in the repository depend on a [Java JRE](https://adoptium.net/temurin/releases/?version=11), specifically, the keytool program, which should be in your PATH. Before running the scripts, you should also have your kubectl context configured for your cluster. If this is impossible, set your context to a cluster with the same K8s version as the cluster hosting your Software Risk Manager software.
+The deployment scripts in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. Additionally, the scripts in the repository depend on a [Java JRE](https://adoptium.net/temurin/releases/?version=11), specifically, the keytool program, which should be in your PATH.
 
 - [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview) (not [Windows PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell))
 - [Java JRE](https://adoptium.net/temurin/releases/?version=11) (specifically, keytool in your PATH)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) context (kubectl config use-context your-context)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) (version should match your cluster's Kubernetes version)
+
+>Note: You do not need to be connected to your cluster to run the Helm Prep Wizard or Helm Prep Script because both use client-side kubectl capabilities.
 
 ### Windows Prerequisites
 
@@ -1047,7 +1122,7 @@ The Helm Prep Wizard has a dependency on a Synopsys PowerShell module published 
 
 ## Clone GitHub Repository
 
-The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) repository contains what you need to start your Software Risk Manager K8s deployment. Clone the repository to a stable directory on your system. You will use your cloned repository for both your initial deployment and for deploying future Software Risk Manager software upgrades.
+The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) repository contains what you need to start your Software Risk Manager Kubernetes deployment. Clone the repository to a stable directory on your system. You will use your cloned repository for both your initial deployment and for deploying future Software Risk Manager software upgrades.
 
 ```
 $ git clone https://github.com/synopsys-sig/srm-k8s
@@ -1055,11 +1130,11 @@ $ git clone https://github.com/synopsys-sig/srm-k8s
 
 ## Helm Prep Wizard
 
-You can think of the Helm Prep Wizard as an interactive installation document that gets you ready to deploy Software Risk Manager using Helm. The Helm Prep Wizard displays a series of questions to help you select Software Risk Manager features and specify related deployment parameters. It is a [PowerShell Core 7](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7) script you can run on macOS, Linux, or Windows to select Software Risk Manager deployment features and gather required deployment parameters. 
+You can think of the Helm Prep Wizard as an interactive installation document that gets you ready to deploy Software Risk Manager using Helm. It is a [PowerShell Core 7](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7) script you can run on macOS, Linux, or Windows to select Software Risk Manager deployment features and gather required deployment parameters. The Helm Prep Wizard depends on the "guided-setup" PowerShell module, which gets downloaded automatically from the PowerShell Gallery. Alternatively, you can download the module from NuGet. If you prefer to download/install manually, refer to the instructions in the installation script.
 
-You typically run the Helm Prep Wizard once at the outset of your initial deployment. To start the wizard, you must first clone this GitHub repository. 
+The Helm Prep Wizard displays a series of questions to help you select Software Risk Manager features and specify related deployment parameters. If you need to return to a previous screen to correct an error or revisit a question, enter 'B' to choose the "Back to Previous Step" option. If you are responding to a prompt that is not multiple choice, press Enter to reveal the "Back to Previous Step" choice.
 
-The Helm Prep Wizard depends on the "guided-setup" PowerShell module, which gets downloaded automatically from the PowerShell Gallery. Alternatively, you can download the module from NuGet. If you prefer to download/install manually, refer to the instructions in the installation script.
+You typically run the Helm Prep Wizard once at the outset of your initial deployment. Start the wizard after [cloning](#clone-github-repository) this GitHub repository by running the helm-prep-wizard.ps1 script from the srm-k8s directory.
 
 ```
 $ cd /path/to/srm-k8s
@@ -1070,7 +1145,7 @@ $ pwsh ./helm-prep-wizard.ps1
 
 ## Helm Prep Script
 
-The Helm Prep Wizard concludes by creating a run-helm-prep.ps1 script that calls the Software Risk Manager Helm Prep Script with your deployment parameters to generate Helm command and values files with dependent K8s YAML resource files suitable for your Software Risk Manager deployment.
+The Helm Prep Wizard concludes by creating a run-helm-prep.ps1 script that calls the Software Risk Manager Helm Prep Script with your deployment parameters to generate Helm command and values files with dependent Kubernetes YAML resource files suitable for your Software Risk Manager deployment.
 
 Your deployment parameters end up in a file named config.json stored in the working directory you specified in the wizard.
 
@@ -1344,7 +1419,7 @@ kubectl create ns srm
 kubectl -n srm create secret generic srm-ldap-private-props --from-file=srm-ldap-private-props
 ```
 
-5. Reference your srm-ldap-private-props K8s secret by adding a new entry to your srm-extra-props.yaml file.
+5. Reference your srm-ldap-private-props Kubernetes secret by adding a new entry to your srm-extra-props.yaml file.
 
 ```
 codedxProps:
@@ -1355,6 +1430,121 @@ codedxProps:
 ```
 
 >Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
+
+## Tool Orchestration Add-in Tool Configuration
+
+There are four types of ConfigMaps that can contain resource requirements:
+
+- Global
+- Global Tool
+- Project
+- Project Tool
+
+Software Risk Manager deployment creates the Global Resource Requirement, providing default resource requirements for tools across every project. Global Tool requirements override Global requirements for specific tools. Project requirements override Global and Global Tool requirements by providing default resource requirements for tools associated with a given project. Project Tool requirements override other requirements by specifying values for a specific tool in a particular project.
+
+The following is an example of how the scopes can overlap:
+
+Global Resource Requirement:
+- CPU Request = 1
+- CPU Limit = 4
+- Memory Request = 11G
+- Memory Limit = 12G
+
+Global Tool Resource Requirement:
+- CPU Request = 3
+
+Project Resource Requirement:
+- Memory Request = 13G
+
+Project Tool Resource Requirement:
+- Memory Limit = 14G
+
+Here are the effective resource requirements resulting from the above:
+
+Effective Resource Requirement:
+- CPU Request = 3
+- CPU Limit = 4
+- Memory Request = 13G
+- Memory Limit = 14G
+
+The naming convention determines the scope of a resource requirement ConfigMap:
+
+- Global: cdx-toolsvc-resource-requirements
+- Global Tool: cdx-toolsvc-ToolName-resource-requirements
+- Project: cdx-toolsvc-project-ProjectID-resource-requirements
+- Project Tool: cdx-toolsvc-project-ProjectID-ToolName-resource-requirements
+
+ProjectID is the integer value representing the Software Risk Manager project identifier and ToolName is the tool name converted to an acceptable k8s resource name by the following rules:
+
+  - Uppercase letters must be converted to lowercase.
+  - Any character other than a lowercase letter, number, dash, or period must be converted to a dash.
+  - An initial character that is neither a number nor a lowercase letter must be preceded by the letter "s."
+  - A name whose length is greater than 253, must be truncated to 253 characters.
+
+### Add-in Example 1 - Project Resource Requirement
+
+To create a resource requirement for all tool runs of a Software Risk Manager project represented by ID 21, create a file named cdx-toolsvc-project-21-resource-requirements.yaml and enter the following data:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cdx-toolsvc-project-21-resource-requirements
+data:
+  requests.cpu: "1"
+  limits.cpu: "2"
+  requests.memory: "1G"
+  limits.memory: "2G"
+```
+>Note: You can find a project's ID at the end of its Findings page URL. For example, a project with the ID 21 will have a Findings page URL that ends with /srm/projects/21.
+
+Run the following command to create the ConfigMap resource, replacing the namespace name as necessary:
+
+```
+kubectl -n cdx-svc create -f ./cdx-toolsvc-project-21-resource-requirements.yaml
+```
+
+### Add-in Example 2 - Global Tool Resource Requirement
+
+To create a Global Tool resource requirement for ESLint, create a file named cdx-toolsvc-eslint-resource-requirements.yaml and enter the following data:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cdx-toolsvc-eslint-resource-requirements
+data:
+  requests.cpu: "2"
+  limits.cpu: "3"
+  requests.memory: "4G"
+  limits.memory: "5G"
+```
+
+Run the following command to create the configmap resource, replacing the namespace name as necessary:
+
+```
+kubectl -n cdx-svc create -f ./cdx-toolsvc-eslint-resource-requirements.yaml
+```
+
+### Add-in Example 3 - Node Selector
+
+To create a Global Tool resource requirement for running a tool named MyTool on cluster nodes labeled with `canrunmytool=yes`, create a file named cdx-toolsvc-mytool-resource-requirements.yaml and enter the following data:
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cdx-toolsvc-mytool-resource-requirements
+data:
+  nodeSelectorKey: canrunmytool
+  nodeSelectorValue: yes
+```
+
+Run the following command to create the configmap resource, replacing the namespace name as necessary:
+
+```
+kubectl -n cdx-svc create -f ./cdx-toolsvc-mytool-resource-requirements.yaml
+```
 
 # Backup and Restore
 
@@ -1749,7 +1939,7 @@ Invoke your run-migrate.ps1 script to generate a config.json file.
 $ pwsh /path/to/run-migrate.ps1
 ```
 
->Note: You should specify a new, unique namespace and release name to avoid conflating legacy Code Dx K8s resources with Software Risk Manager ones. You can reuse your Code Dx license when prompted for an Software Risk Manager Web license.
+>Note: You should specify a new, unique namespace and release name to avoid conflating legacy Code Dx Kubernetes resources with Software Risk Manager ones. You can reuse your Code Dx license when prompted for an Software Risk Manager Web license.
 
 Address any warnings or instructions printed by the migration script. When complete, invoke the generated run-helm-prep.ps1 file to stage the resources required for your Software Risk Manager deployment.
 
@@ -2347,7 +2537,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 
 # Uninstall
 
-You can remove Software Risk Manager by running the following commands (replace release name and K8s namespace as necessary):
+You can remove Software Risk Manager by running the following commands, replacing release name and Kubernetes namespace as necessary:
 
 ```
 $ helm -n srm delete srm
