@@ -41,13 +41,15 @@ class CACertsFile : Step {
 
 	static [string] hidden $description = @'
 Specify the path to your Java cacerts file. You can find the cacerts file
-under your Java installation. Use of a cacerts file from a Java 8 JRE 
+under your Java installation. Use of a cacerts file from a Java 11 JRE 
 install is strongly recommended.
 
-Note: You can find a cacerts file in the jre/lib/security directory under
-your Java installation directory. On Linux, you can follow the symbolic
-link for your java file to locate your Java home directory and cacerts
-(e.g., /usr/local/openjdk-8/jre/lib/security).
+The cacerts file is not an individual certificate file. Visit the below URL
+and search for "cacerts Certificates File" to learn more:
+https://docs.oracle.com/en/java/javase/11/tools/keytool.html
+
+Note: You can find a cacerts file in the lib/security directory under
+your Java home directory.
 '@
 
 	CACertsFile([Config] $config) : base(
