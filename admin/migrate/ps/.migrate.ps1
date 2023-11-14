@@ -263,9 +263,13 @@ if ($skipDatabase) {
 	Read-Host @"
 ---
 Before invoking helm to install SRM, you must provision your external database by following the
-guidance at https://github.com/synopsys-sig/srm-k8s/tree/main/docs/db. Your SRM deployment will
-fail if your $($config.externalDatabaseHost) host does not have an 
-empty '$($config.externalDatabaseName)' database that the user '$($config.externalDatabaseUser)' can access.
+guidance at this URL:
+
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#external-web-database-pre-work.
+
+Your SRM deployment will fail if your '$($config.externalDatabaseHost)' host 
+does not have an empty '$($config.externalDatabaseName)' database that the user '$($config.externalDatabaseUser)'
+can access.
 ---
 Press Enter to continue...
 "@ | Out-Null
