@@ -169,7 +169,7 @@ The external, Synopsys-provided Black Duck SCA scanning endpoint will receive a 
 
 ## Tool Orchestration Feature
 
-Deployments that include the Tool Orchestration feature support orchestrated analyses that let you run both built-in and custom add-ins on your cluster. They have additional pods that support tool workflows and storage with an optional external dependency on object storage provided by a system with an AWS S3-compatible API (e.g., MinIO, AWS S3, GCS, etc.). 
+Deployments that include the Tool Orchestration feature support orchestrated analyses that let you run both built-in and custom [add-ins](https://github.com/codedx/srm-add-ins) on your cluster. They have additional pods that support tool workflows and storage with an optional external dependency on object storage provided by a system with an AWS S3-compatible API (e.g., MinIO, AWS S3, GCS, etc.). 
 
 ![Tool Orchestration External Components](images/diagram-tool-orchestration-external.png "Tool Orchestration External Components")
 
