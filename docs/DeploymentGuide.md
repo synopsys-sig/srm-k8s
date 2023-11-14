@@ -1861,19 +1861,27 @@ The new deployment model differs from the legacy one in the following ways:
 | Wizard | Guided Setup | Helm Prep Wizard |
 | Script | Deployment Script | Helm Prep Script |
 | Requires Connected Cluster | Yes | No |
+||||
 | Git Repo | [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) | [srm-k8s](https://github.com/synopsys-sig/srm-k8s) |
 | Chart Repo | n/a | https://synopsys-sig.github.io/srm-k8s |
+||||
 | Helm Charts | 2 | 1 |
 | Namespaces | 2 | 1 |
+||||
 | Core Feature | Yes | Yes |
 | Tool Orchestration Feature | Yes | Yes |
 | Scan Farm Feature | No | Yes |
+||||
 | Manual Helm Deployment | Yes | Yes |
 | Automated Helm Deployment | Yes | No |
 | Flux v1 GitOps Deployment | Yes | No |
 | Flux v2 GitOps Deployment | Yes | Yes |
 | YAML Deployment | Yes | No |
+||||
 | Pre-work Deployment Guide | No | Yes |
+| Quick Start Deployments | 0 | 2 |
+| Full Deployment Prereqs | 7 | 3 |
+| Full Deployment Configuration | run-setup.ps1 parameters | config.json file (conditionally password-protected) |
 
 The legacy deployment model available at [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) contains the Guided Setup that you previously ran to populate your initial run-setup.ps1 file with the Code Dx Deployment Script parameters suitable for your Code Dx installation. This section explains how to switch from the legacy deployment model to the new one, using your run-setup.ps1 as input into the migration process.
 
