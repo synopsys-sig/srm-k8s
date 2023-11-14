@@ -1900,7 +1900,7 @@ You will not run the Helm Prep Wizard when migrating your Code Dx deployment bec
 
 ## Before you Begin
 
-Before you get started, make sure that you have satisified the Software Risk Manager deployment [prerequisites](../../README.md#prerequisites) and understand the [pod resource requirements](../../README.md#pod-resources).
+Before you get started, make sure that you have satisified the Software Risk Manager deployment [prerequisites](#prerequisites) and understand the [requirements](#requirements).
 
 Back up your Code Dx system now so that you can restore its state should something go wrong with your data migration.
 
