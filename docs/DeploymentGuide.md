@@ -1299,6 +1299,8 @@ networkPolicy:
         tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 3128]
 ```
 
+>Note: Your egress extraPorts list may differ depending on installed features, so append 3128 as appropriate.
+
 ### Private Property Values
 
 The steps in this section show you how to configure private property values by specifying the proxy.username and proxy.password values.
@@ -1852,8 +1854,29 @@ $ pwsh ps/features/add-scanfarm.ps1 -configPath /path/to/work/directory/config.j
 
 Code Dx was renamed the Software Risk Manager with the 2023.8.0 release, which introduced a new deployment model that supports a separately licensed Scan Farm feature with built-in SAST and SCA scanning powered by Coverity and Black Duck.
 
-The legacy deployment model available at [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) contains the Guided Setup that you previously ran to populate your initial run-setup.ps1 file with the Code Dx Deployment Script parameters suitable for your Code Dx installation. This document explains how to switch from the legacy deployment model to the new one, using your run-setup.ps1 as input into the migration process.
-  
+The new deployment model differs from the legacy one in the following ways:
+
+| Deployment Detail | Old Model | New Model |
+|:-|:-:|:-:|
+| Wizard | Guided Setup | Helm Prep Wizard |
+| Script | Deployment Script | Helm Prep Script |
+| Requires Connected Cluster | Yes | No |
+| Git Repo | [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) | [srm-k8s](https://github.com/synopsys-sig/srm-k8s) |
+| Chart Repo | n/a | https://synopsys-sig.github.io/srm-k8s |
+| Helm Charts | 2 | 1 |
+| Namespaces | 2 | 1 |
+| Core Feature | Yes | Yes |
+| Tool Orchestration Feature | Yes | Yes |
+| Scan Farm Feature | No | Yes |
+| Manual Helm Deployment | Yes | Yes |
+| Automated Helm Deployment | Yes | No |
+| Flux v1 GitOps Deployment | Yes | No |
+| Flux v2 GitOps Deployment | Yes | Yes |
+| YAML Deployment | Yes | No |
+| Pre-work Deployment Guide | No | Yes |
+
+The legacy deployment model available at [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) contains the Guided Setup that you previously ran to populate your initial run-setup.ps1 file with the Code Dx Deployment Script parameters suitable for your Code Dx installation. This section explains how to switch from the legacy deployment model to the new one, using your run-setup.ps1 as input into the migration process.
+
 Installing Software Risk Manager from scratch without a data migration is a four-step process:
 
 - Clone this GitHub Repository
