@@ -2575,6 +2575,6 @@ $ helm -n srm delete srm
 $ kubectl delete ns srm
 ```
 
->Note: A helm hook may run on uninstall to clean up Tool Orchestration objects. You can bypass the workflow clean-up process by adding the --no-hooks parameter: helm -n srm delete --no-hooks srm
+>Note: A helm hook may run on uninstall to clean up Tool Orchestration objects. You can bypass the workflow clean-up process by adding the --no-hooks parameter: helm -n srm delete srm --no-hooks
 
 Delete any remaining Persistent Volumes (PV) and any related PV data.
