@@ -34,7 +34,7 @@ cnc:
   cnc-storage-service:
     endpoint:
       external:
-        proxyPath: upload
+        proxyPath: '$($config.scanFarmStorageContextPath)'
         url: $externalWebSvcUrl
 "@ | Out-File (Get-ScanFarmStorageExternalProxiedUrlValuesPath $config)
 }
