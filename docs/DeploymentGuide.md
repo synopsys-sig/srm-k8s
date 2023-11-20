@@ -235,7 +235,7 @@ To disable background internet access by Software Risk Manager, [customize your 
 
 When internet access is enabled, Software Risk Manager will perform the following actions:
 
-- Update notifications - Software Risk Manager will periodically check for newer versions and display an update notification when one is available.
+- Update notifications - Software Risk Manager will periodically check for newer versions and display an update notification when one is available. Requests for the latest version are sent to https://service.codedx.com/updates/latestVersionData.json.
 - Dependency-Check updates - Dependency-Check will periodically download updates from the National Vulnerability Database, the Retire.js repository, or reach out to Maven Central while scanning Java dependencies (this aids in the dependency identification process, to cut down on both false positive and false negative results). 
 - If Software Risk Manager is in offline mode, this may lead to lower quality results when running Dependency-Check as a bundled tool.
 - Secure Code Warrior - Unless noted elsewhere, Software Risk Manager will reach out to any URLs belonging to the securecodewarrior.com domain.
@@ -1816,7 +1816,7 @@ Terminal 4:
 
 # Upgrades
 
-Software Risk Manager has four major releases typically spaced evenly throughout the year. Minor releases are published in between on the second Tuesday of each month, with hotfixes released on an as-needed basis.
+Software Risk Manager has four major releases typically spaced evenly throughout the year. Minor releases are published on the second Tuesday of each month, with hotfixes released as needed. Updates get advertised with a notification in the Software Risk Manager web interface.
 
 You will not rerun the Helm Prep Wizard to upgrade Software Risk Manager. An upgrade occurs with a three-step process:
 
