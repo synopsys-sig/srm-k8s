@@ -91,6 +91,8 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
     + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
     + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
+- [Maintenance](#maintenance)
+  * [Software Risk Manager Admin Password Reset](#software-risk-manager-admin-password-reset)
 - [Backup and Restore](#backup-and-restore)
   * [About Velero](#about-velero)
   * [Installing Velero](#installing-velero)
@@ -1551,6 +1553,27 @@ Run the following command to create the configmap resource, replacing the namesp
 ```
 kubectl -n cdx-svc create -f ./cdx-toolsvc-mytool-resource-requirements.yaml
 ```
+
+# Maintenance
+
+Refer to this section for details on operating your Software Risk Manager deployment.
+
+## Software Risk Manager Admin Password Reset
+
+Updating the administrator password for your Software Risk Manager deployment is a two-step process:
+
+1. Change your admin password
+2. Update the admin password in the related Kubernetes Secret resource (mandatory when using the Scan Farm feature)
+
+You can change your admin password using the web application or the API. To update using the web application, log on using your admin credential, visit /srm/me, click Password, and update your password. Alternatively, set a new password using the API at /x/profile/password.
+
+Failing to update your admin Kubernetes Secret resource when using the Scan Farm feature will block future Software Risk Manager upgrades. While you can temporarily update the resource by hand, the Helm Prep script will revert your update if you do not also update config.json, so consider updating config.json and regenerating your Kubernetes Secret resource(s) by re-running the script:
+
+1. [Unlock config.json](#configuration-file-protection)
+2. Edit config.json by updating the `adminPwd` parameter
+3. [Lock config.json](#configuration-file-protection)
+4. Rerun your run-helm-prep.ps1 script
+5. Run the command(s) listed under Required K8s Resources
 
 # Backup and Restore
 
