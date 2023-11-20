@@ -333,9 +333,13 @@ Below are the default CPU and memory assigned to Tool Orchestration pods.
 | Pod | CPU | Memory |
 |:-|:-:|:-:|
 | Tool Service | 1000m | 1024Mi |
-| MinIO | 2000m | 500Mi |
+| MinIO (see Note 1) | 2000m | 500Mi |
 | Workflow | 500m | 500Mi |
-| Tools | 500m | 500Mi |
+| Add-in Tools (see Note 2) | 500m (request) - 2000m (limit) | 500Mi (request) - 2G (limit) |
+
+>Note 1: The MinIO pod is not applicable when using external workflow storage (e.g., AWS S3).
+
+>Note 2: Deployments that include the Tool Orchestration feature support orchestrated analyses that let you run both built-in and custom [add-ins](https://github.com/codedx/srm-add-ins) on your cluster. Refer to the [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements) section for add-in tool pod resources that you can set on a global, tool, project, or project tool basis.
 
 ### Tool Orchestration Persistent Storage Requirements
 
