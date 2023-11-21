@@ -218,7 +218,7 @@ Although we often get asked what the hardware requirements are, there is no one 
 
 ### Core Persistent Storage Requirements
 
-The Software Risk Manager web workload requires a Persistent Volume resource to store various files: the analysis inputs it receives, including the source code it uses to display in the Finding Details page, log files, and configuration files. By default, the volume will be provisioned dynamically at deployment time. The optional on-cluster MariaDB database usage determines whether additional, dynamically-provisioned Persistent Volume resources are needed.
+The Software Risk Manager web workload requires a Persistent Volume resource to store various files: the analysis inputs it receives, including the source code it displays on the Finding Details page, log files, and configuration files, to include data required to decrypt certain database records. By default, the volume will be provisioned dynamically at deployment time. The optional on-cluster MariaDB database usage determines whether additional, dynamically-provisioned Persistent Volume resources are needed.
 
 | Volume | Feature | Description |
 |:-|:-:|:-:|
