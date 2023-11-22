@@ -131,7 +131,7 @@ try {
 	# Validate admin password
 	$hasAdminPassword = -not [string]::IsNullOrEmpty($config.adminPwd)
 	if (-not $config.useGeneratedPwds -and -not $hasAdminPassword) {
-		Write-ErrorMessageAndExit 'You must specify an admin password (adminPwd) when not using auto-generated passwords'
+		Write-ErrorMessageAndExit 'You must specify an admin password in the adminPwd field of your config.json file when not using auto-generated passwords'
 	}
 
 	# Reset work directory
