@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.7.0
+.VERSION 1.8.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -128,6 +128,12 @@ try {
 			$certPath
 		}
 
+	# Validate admin password
+	$hasAdminPassword = -not [string]::IsNullOrEmpty($config.adminPwd)
+	if (-not $config.useGeneratedPwds -and -not $hasAdminPassword) {
+		Write-ErrorMessageAndExit 'You must specify an admin password (adminPwd) when not using auto-generated passwords'
+	}
+
 	# Reset work directory
 	$config.GetValuesWorkDir(),$config.GetK8sWorkDir(),$config.GetTempWorkDir(),$config.GetValuesCombinedWorkDir() | ForEach-Object {
 		if (Test-Path $_ -PathType Container) {
@@ -172,7 +178,7 @@ try {
 	New-LicenseConfig $config
 	New-DatabaseConfig $config
 
-	if (-not $config.useGeneratedPwds) {
+	if ($hasAdminPassword) {
 		New-WebSecretConfig $config
 	}
 
