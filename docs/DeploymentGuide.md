@@ -190,7 +190,7 @@ Refer to what follows for the supported or tested versions of software that comp
 
 ## Kubernetes Requirements
 
-The Software Risk Manager deployment supports Kubernetes versions 1.22 through 1.27 and was tested with OpenShift 4.13.
+The Software Risk Manager deployment supports Kubernetes versions 1.22 through 1.28 and was tested with OpenShift 4.13.
 
 ## System Size
 
