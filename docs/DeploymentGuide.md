@@ -141,6 +141,8 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
   * [Chart Dependencies](#chart-dependencies)
   * [Values](#values)
 - [Uninstall](#uninstall)
+- [Troubleshooting](#troubleshooting)
+  * [Scan Farm Migration Job Fails](#scan-farm-migration-job-fails)
 - [Appendix](#appendix)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Scan Farm Wizard](#scan-farm-wizard)
@@ -2658,6 +2660,29 @@ $ kubectl delete ns srm
 >Note: A helm hook may run on uninstall to clean up Tool Orchestration objects. You can bypass the workflow clean-up process by adding the --no-hooks parameter: helm -n srm delete srm --no-hooks
 
 Delete any remaining Persistent Volumes (PV) and any related PV data.
+
+# Troubleshooting
+
+Refer to these sections for troubleshooting guidance.
+
+## Scan Farm Migration Job Fails
+
+A misconfiguration could cause a Scan Farm migration job to fail. The job's restartPolicy is "on-failure," so the related container gets removed, making the logs hard to grab from the command line. If you have something collecting generated logs on your cluster, you should be able to troubleshoot from that output. Otherwise, you can edit the Scan Farm chart directly by switching the restartPolicy for the job to Never.
+
+The Scan Farm chart does not include a helm value setting for the job's restart policy, so you have to edit the chart locally like this:
+
+```
+$ cd /path/to/git/srm-k8s/chart/charts
+$ tar xvf cnc-2023.6.1.tgz
+$ vim cnc/templates/cnc-scan-service.yaml # edit job's restartPolicy
+$ mv cnc-2023.6.1.tgz ~ # move original chart elsewhere
+$ helm package cnc # recreate cnc-2023.6.1.tgz
+$ rm -r cnc # delete working chart
+```
+
+>Note: The above procedure uses the "cnc" dependency chart version 2023.6.1.
+
+Avoid re-running the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
 
 # Appendix
 
