@@ -203,6 +203,14 @@ Although we often get asked what the hardware requirements are, there is no one 
 |Large|2,000 - 10,000|10,000|32|
 |Extra Large|10,000+|10,000+|64|
 
+The Helm Prep Wizard (see [Full Installation](#installation---full)) includes a screen where you can specify the system size:
+
+![Helm Prep Wizard Size](images/helm-prep-wizard-size.png "Helm Prep Wizard Size")
+
+And the Helm Prep script will use the system size to set the `sizing.size` Helm values setting, and it will also configure any dependency charts according to the specified size. [Quick Starts](#installation---quick-start) use Unspecified, so they do not support automatic component sizing.
+
+>Note: The system sizing capability does not apply to Scan Farm workloads.
+
 ## Core Feature Requirements
 
 This section describes the web and web database requirements based on the system size.
@@ -274,13 +282,13 @@ The Scan Farm feature depends on a PostgreSQL database supporting versions 10.16
 
 Here are the requirements and recommendations for your Redis instance:
 
-- Redis must be configured without eviction. The Cache Service design requires that all metadata be resident in Redis at all times. The Cache Service will refuse to start if Redis is not correctly configured.
+- Redis must be configured without eviction. You must ensure the Redis eviction policy is set to noeviction (maxmemory-policy=noeviction). The Cache Service design requires that all metadata be resident in Redis at all times. The Cache Service will refuse to start if Redis is not correctly configured.
 
 - The Redis memory limit should be 1 GB. However, this should be adjusted based on your requirements. The Cache Service checks the memory usage of the Redis server at start-up and will not start if memory usage is more than 99% of the server limit.
 
 - The Cache Service does not use Redis persistence; therefore, configure Redis without persistence. If persistence is enabled, the Redis pod memory limit must be significantly higher than the Redis server memory limit.
 
-- You must ensure the Redis eviction policy is set to noeviction (maxmemory-policy=noeviction). Your Redis instance must permit network traffic from the Cache Service.
+- Your Redis instance must permit network traffic from the Cache Service.
 
 Synopsys recommends configuring your Redis instance with both authentication and TLS.
 
@@ -2647,3 +2655,19 @@ $ kubectl delete ns srm
 >Note: A helm hook may run on uninstall to clean up Tool Orchestration objects. You can bypass the workflow clean-up process by adding the --no-hooks parameter: helm -n srm delete srm --no-hooks
 
 Delete any remaining Persistent Volumes (PV) and any related PV data.
+
+# Appendix
+
+Refer to these sections for additional Software Risk Manager documentation.
+
+## Helm Prep Wizard
+
+Below is a graph showing every Helm Prep Wizard step. You only have to visit the steps that apply to your SRM deployment.
+
+![Helm Prep Wizard Steps](./images/helm-prep-wizard-graph.png)
+
+## Scan Farm Wizard
+
+Below is a graph showing every Add Scan Farm Wizard step. You only have to visit the steps that apply to your SRM deployment.
+
+![Add Scan Farm Steps](./images/add-scan-farm-wizard-graph.png)
