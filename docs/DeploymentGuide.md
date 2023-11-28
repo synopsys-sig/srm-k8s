@@ -141,6 +141,9 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
   * [Chart Dependencies](#chart-dependencies)
   * [Values](#values)
 - [Uninstall](#uninstall)
+- [Appendix](#appendix)
+  * [Helm Prep Wizard](#helm-prep-wizard-1)
+  * [Scan Farm Wizard](#scan-farm-wizard)
 
 <!-- tocstop -->
 
