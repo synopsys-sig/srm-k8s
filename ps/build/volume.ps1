@@ -7,42 +7,120 @@ web:
 }
 
 function New-MasterDatabaseVolumeSizeConfig($config) {
+
+	$storageSizeGiB = $config.dbVolumeSizeGiB
+	if (-not $storageSizeGiB -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$storageSizeGiB = "192"
+			}
+			([SystemSize]::Medium) {
+				$storageSizeGiB = "384"
+			}
+			([SystemSize]::Large) {
+				$storageSizeGiB = "768"
+			}
+			([SystemSize]::ExtraLarge) {
+				$storageSizeGiB = "1536"
+			}
+		}
+	}
+
 	@"
 mariadb:
   master:
     persistence:
-      size: $($config.dbVolumeSizeGiB)Gi
+      size: $($storageSizeGiB)Gi
 "@ | Out-File (Get-MasterDatabaseVolumeSizeValuesPath $config)
 }
 
 function New-SubordinateDatabaseVolumeSizeConfig($config) {
+
+	$storageSizeGiB = $config.dbSlaveVolumeSizeGiB
+	if (-not $storageSizeGiB -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$storageSizeGiB = "192"
+			}
+			([SystemSize]::Medium) {
+				$storageSizeGiB = "384"
+			}
+			([SystemSize]::Large) {
+				$storageSizeGiB = "768"
+			}
+			([SystemSize]::ExtraLarge) {
+				$storageSizeGiB = "1536"
+			}
+		}
+	}
+
+	$backupStorageSizeGiB = $config.dbSlaveBackupVolumeSizeGiB
+	if (-not $backupStorageSizeGiB -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$backupStorageSizeGiB = "576"
+			}
+			([SystemSize]::Medium) {
+				$backupStorageSizeGiB = "1152"
+			}
+			([SystemSize]::Large) {
+				$backupStorageSizeGiB = "2304"
+			}
+			([SystemSize]::ExtraLarge) {
+				$backupStorageSizeGiB = "4608"
+			}
+		}
+	}
+
 	@"
 mariadb:
   slave:
     persistence:
       backup:
-        size: $($config.dbSlaveBackupVolumeSizeGiB)Gi
-      size: $($config.dbSlaveVolumeSizeGiB)Gi
+        size: $($backupStorageSizeGiB)Gi
+      size: $($storageSizeGiB)Gi
 "@ | Out-File (Get-SubordinateDatabaseVolumeSizeValuesPath $config)
 }
 
 function New-StorageVolumeSizeConfig($config) {
+
+	$storageSizeGiB = $config.minioVolumeSizeGiB
+	if (-not $storageSizeGiB -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$storageSizeGiB = "64"
+			}
+			([SystemSize]::Medium) {
+				$storageSizeGiB = "128"
+			}
+			([SystemSize]::Large) {
+				$storageSizeGiB = "256"
+			}
+			([SystemSize]::ExtraLarge) {
+				$storageSizeGiB = "512"
+			}
+		}
+	}
+
 	@"
 minio:
   persistence:
-    size: $($config.minioVolumeSizeGiB)Gi
+    size: $($storageSizeGiB)Gi
 "@ | Out-File (Get-StorageVolumeSizeValuesPath $config)
 }
 
 function New-VolumeSizeConfig($config) {
 
+	$hasSystemSize = $config.IsSystemSizeSpecified()
+
+	# note: explicit volume reservation will override system size
 	New-ComponentConfig $config `
 		{ $config.webVolumeSizeGiB } New-WebVolumeSizeConfig `
-		{ $config.dbVolumeSizeGiB } New-MasterDatabaseVolumeSizeConfig `
-		{ $config.dbSlaveVolumeSizeGiB } New-SubordinateDatabaseVolumeSizeConfig `
+		{ $hasSystemSize -or $config.dbVolumeSizeGiB } New-MasterDatabaseVolumeSizeConfig `
+		{ $hasSystemSize -or $config.dbSlaveVolumeSizeGiB } New-SubordinateDatabaseVolumeSizeConfig `
 		{ $false } {} `
 		{ $false } {} `
-		{ $config.minioVolumeSizeGiB } New-StorageVolumeSizeConfig `
+		{ $hasSystemSize -or $config.minioVolumeSizeGiB } New-StorageVolumeSizeConfig `
 		{ $false } {}
 }
 

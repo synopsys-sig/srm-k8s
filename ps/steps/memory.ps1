@@ -67,6 +67,10 @@ will cause SRM pods to get stuck in a Pending state.
 		}
 		return $message
 	}
+
+	[bool]CanRun() {
+		return -not $this.config.IsSystemSizeSpecified()
+	}
 }
 
 class MemoryStep : Step {
@@ -145,7 +149,7 @@ class WebMemory : MemoryStep {
 	}
 
 	[string]GetDefault() {
-		return $this.config.useTriageAssistant ? '16384Mi' : '8192Mi'
+		return '16384Mi'
 	}
 }
 
@@ -174,7 +178,7 @@ class MasterDatabaseMemory : MemoryStep {
 	}
 
 	[string]GetDefault() {
-		return '8192Mi'
+		return '16384Mi'
 	}
 }
 
@@ -232,7 +236,7 @@ class ToolServiceMemory : MemoryStep {
 	}
 
 	[string]GetDefault() {
-		return '500Mi'
+		return '1024Mi'
 	}
 }
 

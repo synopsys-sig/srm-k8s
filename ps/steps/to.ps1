@@ -57,6 +57,6 @@ You must run at least one service instance.
 	}
 
 	[bool]CanRun() {
-		return -not $this.config.skipToolOrchestration
+		return -not $this.config.skipToolOrchestration -and -not $this.config.IsSystemSizeSpecified()
 	}
 }

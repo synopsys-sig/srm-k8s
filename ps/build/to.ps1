@@ -112,8 +112,13 @@ features:
   minio: $minioEnabled
 minio:
   enabled: $minioEnabled
+"@ | Out-File (Get-ToConfigMinIOValuesPath $config)
+
+	if ($config.toolServiceReplicas -gt 0) {
+		@"
 to:
   service:
     numReplicas: $($config.toolServiceReplicas)
 "@ | Out-File (Get-ToConfigValuesPath $config)
+	}
 }

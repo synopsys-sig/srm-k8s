@@ -44,6 +44,17 @@ class Yaml {
 		return $this.nodeGraph.getVertexByKey($this.rootNodeKey)
 	}
 
+	[object] GetKeyValue([string[]] $keys) {
+	
+		$node = $this.GetRootNode()
+		$keys | ForEach-Object {
+			if ($null -ne $node) {
+				$node = $node.FindNeighborByKey($_)
+			}
+		}
+		return $null -eq $node ? $null : $node.keyValue
+	}
+
 	[string] ToYamlString() {
 		return $this.ToYamlString($false)
 	}

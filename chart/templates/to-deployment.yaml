@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "srm-to.labels" . | nindent 4 }}
 spec:
-  replicas: {{ required "numReplicas is required" .Values.to.service.numReplicas }}
+  replicas: {{ required "numReplicas is required" (include "srm.sizing.toolServiceReplicas" .) }}
   strategy:
     type: RollingUpdate
   selector:
@@ -38,7 +38,9 @@ spec:
         image: "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.toolService }}:{{ .Values.to.image.tag }}"
         imagePullPolicy: Always
         resources:
-          {{- toYaml .Values.to.resources | trim | nindent 10 }}
+          limits:
+            cpu: {{ include "srm.sizing.toolServiceCPU" . }}
+            memory: {{ include "srm.sizing.toolServiceMemory" . }}
         command: 
           - "/opt/codedx/service/bin/service"
         args:

@@ -1,5 +1,8 @@
 using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
 
+$ErrorActionPreference = 'Stop'
+$VerbosePreference = 'Continue'
+
 Import-Module 'pester' -ErrorAction SilentlyContinue
 if (-not $?) {
 	Write-Host 'Pester is not installed, so this test cannot run. Run pwsh, install the Pester module (Install-Module Pester), and re-run this script.'

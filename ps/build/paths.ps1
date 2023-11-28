@@ -142,6 +142,10 @@ function Get-ToConfigValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'to-config.values.yaml'
 }
 
+function Get-ToConfigMinIOValuesPath($config) {
+	Join-Path $config.GetValuesWorkDir() 'to-config-minio.values.yaml'
+}
+
 function Get-ToCredentialValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'to-cred.values.yaml'
 }
@@ -440,4 +444,8 @@ function Get-ScanFarmAzureValuesPath($config) {
 
 function Get-SigRepoSecretK8sPath($config) {
 	Join-Path $config.GetK8sWorkDir() 'sig-repo-secret.k8s.yaml'
+}
+
+function Get-SizingValuesPath($config) {
+	Join-Path $config.GetValuesWorkDir() 'sizing.values.yaml'
 }

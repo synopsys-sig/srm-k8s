@@ -8,7 +8,7 @@ You can follow the Quick Start instructions if you want to deploy Software Risk 
 
 ### Quick Start - SRM Core Feature
 
-Run the following commands to install SRM Core using the default configuration:
+Run the following commands to install SRM Core using a configuration with limited resource reservations:
 
 ```
 $ helm -n srm upgrade --reset-values --install --create-namespace --repo https://synopsys-sig.github.io/srm-k8s srm srm # --set openshift.createSCC=true
@@ -18,7 +18,7 @@ $ helm -n srm upgrade --reset-values --install --create-namespace --repo https:/
 
 ### Quick Start - SRM with Tool Orchestration Feature
 
-Run the following commands to install SRM with Tool Orchestration using the default configuration:
+Run the following commands to install SRM with Tool Orchestration using a configuration with limited resource reservations:
 
 ```
 $ git clone https://github.com/synopsys-sig/srm-k8s

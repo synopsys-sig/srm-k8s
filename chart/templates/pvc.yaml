@@ -10,7 +10,7 @@ spec:
   - {{ .Values.web.persistence.accessMode }}
   resources:
     requests:
-      storage: {{ .Values.web.persistence.size }}
+      storage: {{ include "srm.sizing.webStorage" . }}
 {{- if .Values.web.persistence.storageClass }}
   storageClassName: {{ .Values.web.persistence.storageClass | quote }}
 {{- end -}}

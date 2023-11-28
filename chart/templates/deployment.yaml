@@ -90,7 +90,10 @@ spec:
               protocol: TCP
              {{- end }}
           resources:
-            {{- toYaml .Values.web.resources | nindent 12 }}
+            limits:
+              cpu: {{ include "srm.sizing.webCPU" . }}
+              memory: {{ include "srm.sizing.webMemory" . }}
+              ephemeral-storage: {{ index .Values.web.resources.limits "ephemeral-storage" }}
           volumeMounts:
             - name: database-credential-secret
               mountPath: {{ include "srm-web.database.props.path" . }}

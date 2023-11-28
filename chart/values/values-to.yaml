@@ -67,8 +67,6 @@ to:
   # -- the minimum seconds for an orchestrated analysis workflow step
   minimumWorkflowStepRunTimeSeconds: 3
   service:
-    # -- the number of tool service replicas
-    numReplicas: 1
     # -- the K8s service type for the tool service
     type: ClusterIP
     # -- the tool service port number
@@ -92,12 +90,6 @@ to:
     workflowValue: 10000
     # -- the tool service priority value, which must be set relative to other Tool Orchestration component priority values
     serviceValue: 10100
-  resources:
-    limits:
-      # -- the required CPU for the tool service workload
-      cpu: 1000m
-      # -- the required memory for the tool service workload
-      memory: 1024Mi
   tools:
     # -- the node selector key to use for tool pods
     nodeSelectorKey:
@@ -187,7 +179,7 @@ minio:
       # -- the required CPU for the MinIO workload
       cpu: 2000m
       # -- the required memory for the MinIO workload
-      memory: 500Mi
+      memory: 5120Mi
   # -- the K8s secret name for web component TLS with required fields tls.crt and tls.key
   tlsSecret:
   # -- the pod tolerations for the MinIO component

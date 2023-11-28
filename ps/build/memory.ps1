@@ -8,22 +8,60 @@ web:
 }
 
 function New-MasterDatabaseMemoryConfig($config) {
+
+	$memory = $config.dbMasterMemoryReservation
+	if (-not $memory -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$memory = "16384Mi"
+			}
+			([SystemSize]::Medium) {
+				$memory = "32768Mi"
+			}
+			([SystemSize]::Large) {
+				$memory = "65536Mi"
+			}
+			([SystemSize]::ExtraLarge) {
+				$memory = "131072Mi"
+			}
+		}
+	}
+
 	@"
 mariadb:
   master:
     resources:
       limits:
-        memory: $($config.dbMasterMemoryReservation)
+        memory: $memory
 "@ | Out-File (Get-MasterDatabaseMemoryValuesPath $config)
 }
 
 function New-SubordinateDatabaseMemoryConfig($config) {
+
+	$memory = $config.dbSlaveMemoryReservation
+	if (-not $memory -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$memory = "8192Mi"
+			}
+			([SystemSize]::Medium) {
+				$memory = "16384Mi"
+			}
+			([SystemSize]::Large) {
+				$memory = "32768Mi"
+			}
+			([SystemSize]::ExtraLarge) {
+				$memory = "65536Mi"
+			}
+		}
+	}
+
 	@"
 mariadb:
   slave:
     resources:
       limits:
-        memory: $($config.dbSlaveMemoryReservation)
+        memory: $memory
 "@ | Out-File (Get-SubordinateDatabaseMemoryValuesPath $config)
 }
 
@@ -37,32 +75,73 @@ to:
 }
 
 function New-StorageMemoryConfig($config) {
+
+	$memory = $config.minioMemoryReservation
+	if (-not $memory -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$memory = "5120Mi"
+			}
+			([SystemSize]::Medium) {
+				$memory = "10240Mi"
+			}
+			([SystemSize]::Large) {
+				$memory = "20480Mi"
+			}
+			([SystemSize]::ExtraLarge) {
+				$memory = "40960Mi"
+			}
+		}
+	}
+
 	@"
 minio:
   resources:
     limits:
-      memory: $($config.minioMemoryReservation)
+      memory: $memory
 "@ | Out-File (Get-StorageMemoryValuesPath $config)
 }
 
 function New-WorkflowMemoryConfig($config) {
+
+	$memory = $config.workflowMemoryReservation
+	if (-not $memory -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$memory = "500Mi"
+			}
+			([SystemSize]::Medium) {
+				$memory = "1000Mi"
+			}
+			([SystemSize]::Large) {
+				$memory = "1500Mi"
+			}
+			([SystemSize]::ExtraLarge) {
+				$memory = "2000Mi"
+			}
+		}
+	}
+
 	@"
 argo:
   controller:
     resources:
       limits:
-        memory: $($config.workflowMemoryReservation)
+        memory: $memory
 "@ | Out-File (Get-WorkflowMemoryValuesPath $config)
 }
 
 function New-MemoryConfig($config) {
 
+	$hasSystemSize = $config.IsSystemSizeSpecified()
+
+	# note: explicit memory reservation will override system size
 	New-ComponentConfig $config `
 		{ $config.webMemoryReservation } New-WebMemoryConfig `
-		{ $config.dbMasterMemoryReservation } New-MasterDatabaseMemoryConfig `
-		{ $config.dbSlaveMemoryReservation } New-SubordinateDatabaseMemoryConfig `
+		{ $hasSystemSize -or $config.dbMasterMemoryReservation } New-MasterDatabaseMemoryConfig `
+		{ $hasSystemSize -or $config.dbSlaveMemoryReservation } New-SubordinateDatabaseMemoryConfig `
 		{ $false } {} `
 		{ $config.toolServiceMemoryReservation } New-ToMemoryConfig `
-		{ $config.minioMemoryReservation } New-StorageMemoryConfig `
-		{ $config.workflowMemoryReservation } New-WorkflowMemoryConfig
+		{ $hasSystemSize -or $config.minioMemoryReservation } New-StorageMemoryConfig `
+		{ $hasSystemSize -or $config.workflowMemoryReservation } New-WorkflowMemoryConfig
 }

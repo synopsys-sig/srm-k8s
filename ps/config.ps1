@@ -39,14 +39,22 @@ enum ScanFarmStorageType {
 	Azure
 }
 
+enum SystemSize {
+	Unspecified
+	Small
+	Medium
+	Large
+	ExtraLarge
+}
+
 class Config {
 
 	static [int]   $kubeApiTargetPortDefault = 443
-	static [int]   $toolServiceReplicasDefault = 1
-	static [int]   $volumeSizeGiBDefault = 64
+	static [int]   $toolServiceReplicasDefault = 0     # new default to support system size override when > 0
+	static [int]   $volumeSizeGiBDefault = 0           # new default to support system size override when > 0
 	static [int]   $externalDatabasePortDefault = 3306
 
-	static [string]   $thisVersion = "1.2"
+	static [string]   $thisVersion = "1.3"
 
 	static [string[]] $protectedFields = @(
 		'sigRepoUsername',
@@ -167,7 +175,7 @@ class Config {
 	[ScanFarmLicenseType] $scanFarmType
 
 	[bool]         $skipDatabase
-	[bool]         $useTriageAssistant
+	[bool]         $useTriageAssistant                       # deprecated
 	[bool]         $skipScanFarm
 	[bool]         $skipToolOrchestration
 	[bool]         $skipMinIO
@@ -271,6 +279,8 @@ class Config {
 	[int]          $minioVolumeSizeGiB
 	[string]       $storageClassName
 
+	[string]       $systemSize
+
 	[bool]         $useNodeSelectors
 	[KeyValue]     $webNodeSelector                          # formerly codeDxNodeSelector
 	[KeyValue]     $masterDatabaseNodeSelector
@@ -314,9 +324,12 @@ class Config {
 		$this.salts = @()
 		$this.isLocked = $false
 		# v1.2 fields
-		$this.scanFarmStorageIsProxied = $true      # < v1.2 assumed proxy
-		$this.scanFarmStorageContextPath = 'upload' # < v1.2 assumed upload
-		$this.scanFarmStorageExternalUrl = ''       # redundantly initialized for readability
+		$this.scanFarmStorageIsProxied = $true       # < v1.2 assumed proxy
+		$this.scanFarmStorageContextPath = 'upload'  # < v1.2 assumed upload
+		$this.scanFarmStorageExternalUrl = ''        # redundantly initialized for readability
+		# v1.3 fields
+		$this.systemSize = [SystemSize]::Unspecified # < 1.3 set CPU and memory independently (unspecified for backward compatibility)
+		$this.useTriageAssistant = $true             # minimum resource size accounts for Triage Assistant
 	}
 
 	static [Config] FromJsonFile($configJsonFile) {
@@ -507,5 +520,9 @@ class Config {
 		} catch {
 			throw "Unable to unlock config file. Is the password correct? The error was: $_"
 		}
+	}
+
+	[bool] IsSystemSizeSpecified() {
+		return -not ([string]::IsNullOrEmpty($this.systemSize) -or $this.systemSize -eq [SystemSize]::Unspecified)
 	}
 }

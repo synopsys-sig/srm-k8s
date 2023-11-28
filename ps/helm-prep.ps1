@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.8.0
+.VERSION 1.9.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -40,6 +40,7 @@ Write-Host 'Loading...' -NoNewline
 './build/scanfarm-db.ps1',
 './build/scanfarm-storage.ps1',
 './build/schedule.ps1',
+'./build/size.ps1',
 './build/to.ps1',
 './build/volume.ps1',
 './build/web.ps1',
@@ -148,6 +149,11 @@ try {
 	# Stage cacerts
 	if (-not [string]::IsNullOrEmpty($config.caCertsFilePath)) {
 		Copy-Item $config.caCertsFilePath (Get-CertsPath $config)
+	}
+
+	# Handle sizing configuration
+	if ($config.IsSystemSizeSpecified()) {
+		New-SystemSize $config
 	}
 
 	# Handle tool orchestration configuration

@@ -73,6 +73,10 @@ specifying 64 means creating two 64 GiB volumes.
 
 		return $message
 	}
+
+	[bool]CanRun() {
+		return -not $this.config.IsSystemSizeSpecified()
+	}
 }
 
 class VolumeSizeStep : Step {

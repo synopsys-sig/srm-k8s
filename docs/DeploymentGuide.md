@@ -8,9 +8,11 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
   * [Tool Orchestration Feature](#tool-orchestration-feature)
 - [Requirements](#requirements)
   * [Kubernetes Requirements](#kubernetes-requirements)
+  * [System Size](#system-size)
   * [Core Feature Requirements](#core-feature-requirements)
     + [Core Web Workload Requirements](#core-web-workload-requirements)
     + [Core Web Database Workload Requirements](#core-web-database-workload-requirements)
+    + [Core Web Replica Database Workload Requirements](#core-web-replica-database-workload-requirements)
     + [Core Persistent Storage Requirements](#core-persistent-storage-requirements)
     + [Core Internet Access Requirements](#core-internet-access-requirements)
   * [Scan Farm Feature Requirements](#scan-farm-feature-requirements)
@@ -23,7 +25,10 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
     + [Scan Farm Internet Access Requirements](#scan-farm-internet-access-requirements)
     + [Scan Farm Default Pod Resources](#scan-farm-default-pod-resources)
   * [Tool Orchestration Feature Requirements](#tool-orchestration-feature-requirements)
-    + [Tool Orchestration Default Pod Resources](#tool-orchestration-default-pod-resources)
+    + [Tool Service Workload Requirements](#tool-service-workload-requirements)
+    + [Workflow Controller Workload Requirements](#workflow-controller-workload-requirements)
+    + [On-Cluster Workflow Storage Requirements](#on-cluster-workflow-storage-requirements)
+    + [Add-in Tool Workload Requirements](#add-in-tool-workload-requirements)
     + [Tool Orchestration Persistent Storage Requirements](#tool-orchestration-persistent-storage-requirements)
     + [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements)
 - [External Web Database Pre-work](#external-web-database-pre-work)
@@ -187,7 +192,7 @@ Refer to what follows for the supported or tested versions of software that comp
 
 The Software Risk Manager deployment supports Kubernetes versions 1.22 through 1.27 and was tested with OpenShift 4.13.
 
-## Core Feature Requirements
+## System Size
 
 Although we often get asked what the hardware requirements are, there is no one answer since it largely depends on how many Software Risk Manager projects will be active at the same time, how frequently analyses will be conducted, whether built-in tools are being used, the number of results from tools in use, how many concurrent users are expected to use the system, and what other system interactions might be configured. Taking that into account, you can use some general guidelines to determine the size of your deployment.
 
@@ -197,6 +202,10 @@ Although we often get asked what the hardware requirements are, there is no one 
 |Medium|100 - 2,000|2,000|16|
 |Large|2,000 - 10,000|10,000|32|
 |Extra Large|10,000+|10,000+|64|
+
+## Core Feature Requirements
+
+This section describes the web and web database requirements based on the system size.
 
 ### Core Web Workload Requirements
 
@@ -215,6 +224,17 @@ Although we often get asked what the hardware requirements are, there is no one 
 |Medium|8|32 GB|6,000|384 GB|
 |Large|16|64 GB|12,000|768 GB|
 |Extra Large|32|128 GB|32,000|1536 GB|
+
+### Core Web Replica Database Workload Requirements
+
+The replica database is an optional component when using the on-cluster MariaDB component.
+
+| Size | CPU Cores | Memory | IOPs | Storage | Backup Storage |
+|:-|-:|-:|-:|-:|-:|
+|Small|4|16 GB|3,000|192 GB|576 GB|
+|Medium|8|32 GB|6,000|384 GB|1152 GB|
+|Large|16|64 GB|12,000|768 GB|2304 GB|
+|Extra Large|32|128 GB|32,000|1536 GB|4608 GB|
 
 ### Core Persistent Storage Requirements
 
@@ -328,24 +348,44 @@ Below are the default CPU and memory assigned to Scan Farm pods.
 
 The initial MinIO volume size should be 64 GB when not using external object storage. External object storage can be provided by any storage system that supports an AWS S3-compliant API (e.g., AWS, GCP, MinIO, etc.).
 
-### Tool Orchestration Default Pod Resources
+### Tool Service Workload Requirements
 
-Below are the default CPU and memory assigned to Tool Orchestration pods.
+| Size | CPU Cores | Memory | Replicas
+|:-|-:|-:|-:|
+|Small|1|1024 Mi|1|
+|Medium|2|2048 Mi|2|
+|Large|2|2048 Mi|3|
+|Extra Large|2|2048 Mi|4|
 
-| Pod | CPU | Memory |
-|:-|:-:|:-:|
-| Tool Service | 1000m | 1024Mi |
-| MinIO (see Note 1) | 2000m | 500Mi |
-| Workflow | 500m | 500Mi |
-| Add-in Tools (see Note 2) | 500m (request) - 2000m (limit) | 500Mi (request) - 2G (limit) |
+### Workflow Controller Workload Requirements
 
->Note 1: The MinIO pod is not applicable when using external workflow storage (e.g., AWS S3).
+| Size | CPU Cores | Memory
+|:-|-:|-:|
+|Small|.5|500 Mi|
+|Medium|1|1000 Mi|
+|Large|2|1500 Mi|
+|Extra Large|4|2000 Mi|
 
->Note 2: Deployments that include the Tool Orchestration feature support orchestrated analyses that let you run both built-in and custom [add-ins](https://github.com/codedx/srm-add-ins) on your cluster. Refer to the [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements) section for add-in tool pod resources that you can set on a global, tool, project, or project tool basis.
+### On-Cluster Workflow Storage Requirements
+
+The MinIO pod is not applicable when using external workflow object storage (e.g., AWS S3).
+
+| Size | CPU Cores | Memory | Storage
+|:-|-:|-:|-:|
+|Small|2|5120 Mi|64 GB|
+|Medium|4|10240 Mi|128 GB|
+|Large|8|20480 Mi|256 GB|
+|Extra Large|16|40960 Mi|512 GB|
+
+### Add-in Tool Workload Requirements
+
+Deployments that include the Tool Orchestration feature support orchestrated analyses that let you run both built-in and custom [add-ins](https://github.com/codedx/srm-add-ins) on your cluster. Refer to the [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements) section for add-in tool pod resources that you can set on a global, tool, project, or project tool basis.
+
+By default, add-in tools use a 500m CPU request with a 2000m CPU limit and make a request for 500Mi memory with a 2G limit.
 
 ### Tool Orchestration Persistent Storage Requirements
 
-When using Tool Orchestration without external object storage, a single, dynamically-provisioned Persistent Volume resource is required for orchestrated analysis workflow storage, including analysis inputs, results, and related tool log files.
+When using Tool Orchestration without external object storage, a single, dynamically-provisioned Persistent Volume resource is required for orchestrated analysis workflow storage, including analysis inputs, results, and related tool log files. Refer to the [On-Cluster Workflow Storage Requirements](#on-cluster-workflow-storage-requirements) section for default volume capacity based on system size.
 
 By default, Software Risk Manager will automatically remove old analyses and related storage from the tool service. Related tool results and findings will be retained when workflow storage gets cleaned up. Workflow cleanup is enabled by default, allowing storage for 100 completed analyses to exist in a success or failure state, with a maximum of five completed analyses per project.
 
@@ -2493,6 +2533,8 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | networkPolicy.web.egress.extraPorts.tcp | list | `[22,53,80,389,443,636,7990,7999]` | the TCP ports allowed for egress from the web component |
 | networkPolicy.web.egress.extraPorts.udp | list | `[53,389,636,3269]` | the UDP ports allowed for egress from the web component |
 | openshift.createSCC | bool | `false` | whether to create SecurityContextConstraint resources, which is required when using OpenShift |
+| sizing.size | string | `Small` | whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size) |
+| sizing.version | string | `v1.0` | the version of the sizing guidance |
 | to.caConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt |
 | to.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM Tool Orchestration Docker images |
 | to.image.repository.helmPreDelete | string | `"codedx/codedx-cleanup"` | the Docker image repository name for the SRM cleanup workload |
@@ -2573,9 +2615,9 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | web.props.limits.jobs.database | int | `2000` | the value of the SRM prop swa.jobs.database-limit, which determines the maximum available database I/O |
 | web.props.limits.jobs.disk | int | `2000` | the value of the SRM prop swa.jobs.disk-limit, which determins the maximum available disk I/O |
 | web.props.limits.jobs.memory | int | `2000` | the value of the SRM prop swa.jobs.memory-limit, which determines the maximum available memory |
-| web.resources.limits.cpu | string | `"2000m"` | the required CPU for the web workload (must be >= 2 vCPUs and >= 4 vCPUs when using Triage Assistant) |
+| web.resources.limits.cpu | string | `"4000m"` | the required CPU for the web workload (must be >= 2 vCPUs) |
 | web.resources.limits.ephemeral-storage | string | `"2868Mi"` | the ephemeral storage for the web workload |
-| web.resources.limits.memory | string | `"8192Mi"` | the required memory for the web workload (must be >= 8192Mi and >= 16384Mi when using Triage Assistant) |
+| web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
 | web.scanfarm.sast.version | string | `"2023.6.1"` | the SAST component version to use for build-less scans |
 | web.scanfarm.sca.version | string | `"8.9.0"` | the SCA component version to use for build-less scans |
 | web.securityContext.readOnlyRootFilesystem | bool | `true` | whether the SRM web workload uses a read-only filesystem |

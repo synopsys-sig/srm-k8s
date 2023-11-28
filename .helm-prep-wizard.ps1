@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.5.0
+.VERSION 1.6.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
@@ -35,12 +35,12 @@ Write-Host 'Loading...' -NoNewline
 'ps/steps/scanfarm-db.ps1',
 'ps/steps/scanfarm-storage.ps1',
 'ps/steps/schedule.ps1',
+'ps/steps/size.ps1',
 'ps/steps/storage.ps1',
 'ps/steps/tls.ps1',
 'ps/steps/to.ps1',
 'ps/steps/volume.ps1',
-'ps/steps/welcome.ps1',
-'ps/steps/web.ps1' | ForEach-Object {
+'ps/steps/welcome.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {
@@ -181,6 +181,7 @@ $s = @{}
 [SignerName],
 [SigRepoUsername],
 [SigRepoPassword],
+[Size],
 [SrmWebLicense],
 [StorageClassName],
 [SubordinateDatabaseBackupVolumeSize],
@@ -210,7 +211,6 @@ $s = @{}
 [UseTlsOption],
 [UseTolerations],
 [UseToolOrchestration],
-[UseTriageAssistant],
 [Welcome],
 [WebCPU],
 [WebDockerImageVersion],
@@ -250,7 +250,10 @@ Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmS3AccessMet
 Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmGcsProjectName]],$s[[ScanFarmGcsKey]],$s[[DockerRegistryHost]]
 Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmAzureSubscription]],$s[[ScanFarmAzureTenantId]],$s[[ScanFarmAzureResourceGroup]],$s[[ScanFarmAzureStorageAccountName]],$s[[ScanFarmAzureStorageAccountKey]],$s[[ScanFarmAzureEndpoint]],$s[[ScanFarmAzureClientId]],$s[[ScanFarmAzureClientSecret]],$s[[DockerRegistryHost]]
 
+Add-StepTransitions $graph $s[[UseToolOrchestration]] $s[[UseExternalStorage]]
+
 Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
+	$s[[Size]],
 	$s[[SrmWebLicense]],
 	$s[[WorkDir]],
 	$s[[ChooseEnvironment]],
@@ -259,7 +262,6 @@ Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[UseExternalDatabase]],
 	$s[[ExternalDatabaseHost]],$s[[ExternalDatabasePort]],$s[[ExternalDatabaseName]],$s[[ExternalDatabaseUser]],$s[[ExternalDatabasePwd]],$s[[ExternalDatabaseOneWayAuth]],$s[[ExternalDatabaseTrustCert]],$s[[ExternalDatabaseCert]],
 	$s[[DatabaseReplicaCount]],
-	$s[[UseTriageAssistant]],
 	$s[[UseScanFarm]],
 	$s[[UseDockerRegistry]],$s[[DockerRegistryHost]],
 	$s[[UseDockerRegistryCredential]],$s[[DockerImagePullSecret]],$s[[DockerRegistryUser]],$s[[DockerRegistryPwd]],
@@ -299,9 +301,9 @@ Add-StepTransitions $graph $s[[IngressHostname]] $s[[CACertsFile]]
 Add-StepTransitions $graph $s[[AddExtraCertificates]] $s[[GeneratePwds]]
 
 Add-StepTransitions $graph $s[[UseExternalDatabase]] $s[[DatabaseReplicaCount]]
-Add-StepTransitions $graph $s[[ExternalDatabaseOneWayAuth]] $s[[UseTriageAssistant]]
-Add-StepTransitions $graph $s[[ExternalDatabaseTrustCert]] $s[[UseTriageAssistant]]
-Add-StepTransitions $graph $s[[ExternalDatabaseCert]] $s[[UseTriageAssistant]]
+Add-StepTransitions $graph $s[[ExternalDatabaseOneWayAuth]] $s[[UseScanFarm]]
+Add-StepTransitions $graph $s[[ExternalDatabaseTrustCert]] $s[[UseScanFarm]]
+Add-StepTransitions $graph $s[[ExternalDatabaseCert]] $s[[UseScanFarm]]
 
 Add-StepTransitions $graph $s[[GetKubernetesPort]] $s[[AuthenticationType]]
 Add-StepTransitions $graph $s[[UseNetworkPolicyOption]] $s[[UseTlsOption]]
@@ -340,6 +342,11 @@ Add-StepTransitions $graph $s[[UseDockerRepositoryPrefix]] $s[[UseDefaultDockerI
 Add-StepTransitions $graph $s[[UseDefaultDockerImages]] $s[[DefaultCPU]]
 Add-StepTransitions $graph $s[[MariaDBDockerImageVersion]] $s[[DefaultCPU]]
 Add-StepTransitions $graph $s[[WebDockerImageVersion]] $s[[DefaultCPU]]
+
+Add-StepTransitions $graph $s[[UseDefaultDockerImages]] $s[[StorageClassName]]
+Add-StepTransitions $graph $s[[MariaDBDockerImageVersion]] $s[[StorageClassName]]
+Add-StepTransitions $graph $s[[WebDockerImageVersion]] $s[[StorageClassName]]
+Add-StepTransitions $graph $s[[WorkflowDockerImageVersion]] $s[[StorageClassName]]
 
 Add-StepTransitions $graph $s[[WebDockerImageVersion]] $s[[ToolOrchestrationDockerImageVersion]]
 

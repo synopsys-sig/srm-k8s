@@ -13,6 +13,13 @@ features:
   # -- whether to enable the Tool Orchestration feature, which requires an SRM Tool Orchestration license
   to: false
 
+# -- controls sizing for the Core and Tool Orchestration features (does not cover dependencies)
+sizing:
+  # -- whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size)
+  size: Unspecified
+  # -- the version of the sizing guidance
+  version: v1.0
+
 ingress:
   # -- whether to enable an SRM ingress (required for the Scan Farm feature)
   enabled: false
@@ -145,30 +152,30 @@ web:
     limits:
       analysis:
         # -- the value of the SRM prop analysis.concurrent-analysis-limit, which determines the maximum number of analyses to run concurrently
-        concurrent: 2
+        concurrent: 8
       database:
         # -- the size of the database connection pool
-        poolSize: 5
+        poolSize: 12
         # -- the maximum milliseconds that a client will wait for a database connection from the pool
         timeout: 60000
       jobs:
         # -- the value of the SRM prop swa.jobs.cpu-limit, which determines the maximum available CPU
-        cpu: 2000
+        cpu: 4000
         # -- the value of the SRM prop swa.jobs.memory-limit, which determines the maximum available memory
-        memory: 2000
+        memory: 4000
         # -- the value of the SRM prop swa.jobs.database-limit, which determines the maximum available database I/O
-        database: 2000
+        database: 4000
         # -- the value of the SRM prop swa.jobs.disk-limit, which determins the maximum available disk I/O
-        disk: 2000
+        disk: 4000
     # -- the list of extra resources containing SRM prop settings
     extra: []
 
   resources:
     limits:
-      # -- the required CPU for the web workload (must be >= 2 vCPUs and >= 4 vCPUs when using Triage Assistant)
-      cpu: 2000m
-      # -- the required memory for the web workload (must be >= 8192Mi and >= 16384Mi when using Triage Assistant)
-      memory: 8192Mi
+      # -- the required CPU for the web workload (must be >= 2 vCPUs)
+      cpu: 4000m
+      # -- the required memory for the web workload
+      memory: 16384Mi
       # -- the ephemeral storage for the web workload
       ephemeral-storage: 2868Mi
 
@@ -386,9 +393,9 @@ mariadb:
     resources:
       limits:
         # -- the required CPU for the MariaDB primary database workload
-        cpu: 1000m
+        cpu: 4000m
         # -- the required memory for the MariaDB primary database workload
-        memory: 8192Mi
+        memory: 16384Mi
     # -- the pod tolerations for the MariaDB primary database component
     tolerations: []
   replication:
@@ -453,7 +460,7 @@ mariadb:
     resources:
       limits:
         # -- the required CPU for the MariaDB replica database workload
-        cpu: 1000m
+        cpu: 2000m
         # -- the required memory for the MariaDB replica database workload
         memory: 8192Mi
     # -- the pod tolerations for the MariaDB replica database component
@@ -462,3 +469,14 @@ mariadb:
   tests:
     # @ignore
     enabled: false
+
+to:
+  resources:
+    limits:
+      # -- the required CPU for the tool service workload
+      cpu: 1000m
+      # -- the required memory for the tool service workload
+      memory: 1024Mi
+  service:
+    # -- the number of tool service replicas
+    numReplicas: 1

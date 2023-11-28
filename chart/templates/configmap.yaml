@@ -26,14 +26,14 @@ data:
   {{ include "srm-web.main.props.filename" . }}: |-
     swa.db.url = {{ $dbUrl }}
     swa.db.driver = com.mysql.jdbc.Driver
-    swa.jobs.cpu-limit = {{ .Values.web.props.limits.jobs.cpu }}
-    swa.jobs.memory-limit = {{ .Values.web.props.limits.jobs.memory }}
-    swa.jobs.database-limit = {{ .Values.web.props.limits.jobs.database }}
-    swa.jobs.disk-limit = {{ .Values.web.props.limits.jobs.disk }}
-    analysis.concurrent-analysis-limit = {{ .Values.web.props.limits.analysis.concurrent }}
+    swa.jobs.cpu-limit = {{ include "srm.sizing.webJobLimitCPU" . }}
+    swa.jobs.memory-limit = {{ include "srm.sizing.webJobLimitMemory" . }}
+    swa.jobs.database-limit = {{ include "srm.sizing.webJobLimitDB" . }}
+    swa.jobs.disk-limit = {{ include "srm.sizing.webJobLimitDisk" . }}
+    analysis.concurrent-analysis-limit = {{ include "srm.sizing.webConcurrentAnalyses" . }}
 
   {{ include "srm-web.connection-pool.filename" . }}: |-
-    maximumPoolSize = {{ .Values.web.props.limits.database.poolSize }}
+    maximumPoolSize = {{ include "srm.sizing.webConnectionPoolSize" . }}
     connectionTimeout={{ .Values.web.props.limits.database.timeout }}
 
   tomcat.env: |-

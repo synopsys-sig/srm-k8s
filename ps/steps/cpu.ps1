@@ -67,6 +67,10 @@ will cause SRM pods to get stuck in a Pending state.
 		}
 		return $message
 	}
+
+	[bool]CanRun() {
+		return -not $this.config.IsSystemSizeSpecified()
+	}
 }
 
 class CPUStep : Step {
@@ -147,7 +151,7 @@ class WebCPU : CPUStep {
 	}
 
 	[string]GetDefault() {
-		return $this.config.useTriageAssistant ? '4000m' : '2000m'
+		return '4000m'
 	}
 }
 
@@ -173,7 +177,7 @@ class MasterDatabaseCPU : CPUStep {
 	}
 
 	[string]GetDefault() {
-		return '2000m'
+		return '4000m'
 	}
 }
 
@@ -199,7 +203,7 @@ class SubordinateDatabaseCPU : CPUStep {
 	}
 
 	[string]GetDefault() {
-		return '1000m'
+		return '2000m'
 	}
 }
 
@@ -222,6 +226,10 @@ class ToolServiceCPU : CPUStep {
 
 	[void]ApplyDefault() {
 		$this.config.toolServiceCPUReservation = $this.GetDefault()
+	}
+
+	[string]GetDefault() {
+		return '1000m'
 	}
 }
 
@@ -270,5 +278,9 @@ class WorkflowCPU : CPUStep {
 
 	[bool]CanRun() {
 		return ([CPUStep]$this).CanRun() -and (-not ($this.config.skipToolOrchestration))
+	}
+
+	[string]GetDefault() {
+		return '500m'
 	}
 }

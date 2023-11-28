@@ -1,9 +1,9 @@
 function New-WebCPUConfig($config) {
 
 	$cpuCount = Get-VirtualCpuCountFromReservation $config.webCPUReservation
-  if ($cpuCount -lt 2) {
-    throw "Unable to continue with the CPU reservation $($config.webCPUReservation) because the web component's CPU reservation must be >= 2 vCPUs"
-  }
+	if ($cpuCount -lt 2) {
+		throw "Unable to continue with the CPU reservation $($config.webCPUReservation) because the web component's CPU reservation must be >= 2 vCPUs"
+	}
 	
 	# https://community.synopsys.com/s/article/Code-Dx-Hikari-connection-pooling-settings-and-connection-timeout
 	$poolSize = $cpuCount * 3
@@ -29,22 +29,60 @@ web:
 }
 
 function New-MasterDatabaseCPUConfig($config) {
+
+	$cpu = $config.dbMasterCPUReservation
+	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$cpu = "4000m"
+			}
+			([SystemSize]::Medium) {
+				$cpu = "8000m"
+			}
+			([SystemSize]::Large) {
+				$cpu = "16000m"
+			}
+			([SystemSize]::ExtraLarge) {
+				$cpu = "32000m"
+			}
+		}
+	}
+
 	@"
 mariadb:
   master:
     resources:
       limits:
-        cpu: $($config.dbMasterCPUReservation)
+        cpu: $cpu
 "@ | Out-File (Get-MasterDatabaseCPUValuesPath $config)
 }
 
 function New-SubordinateDatabaseCPUConfig($config) {
+
+	$cpu = $config.dbSlaveCPUReservation
+	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$cpu = "2000m"
+			}
+			([SystemSize]::Medium) {
+				$cpu = "4000m"
+			}
+			([SystemSize]::Large) {
+				$cpu = "8000m"
+			}
+			([SystemSize]::ExtraLarge) {
+				$cpu = "16000m"
+			}
+		}
+	}
+
 	@"
 mariadb:
   slave:
     resources:
       limits:
-        cpu: $($config.dbSlaveCPUReservation)
+        cpu: $cpu
 "@ | Out-File (Get-SubordinateDatabaseCPUValuesPath $config)
 }
 
@@ -58,33 +96,74 @@ to:
 }
 
 function New-StorageCPUConfig($config) {
+
+	$cpu = $config.minioCPUReservation
+	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$cpu = "2000m"
+			}
+			([SystemSize]::Medium) {
+				$cpu = "4000m"
+			}
+			([SystemSize]::Large) {
+				$cpu = "8000m"
+			}
+			([SystemSize]::ExtraLarge) {
+				$cpu = "16000m"
+			}
+		}
+	}
+
 	@"
 minio:
   resources:
     limits:
-      cpu: $($config.minioCPUReservation)
+      cpu: $cpu
 "@ | Out-File (Get-StorageCPUValuesPath $config)
 }
 
 function New-WorkflowCPUConfig($config) {
+
+	$cpu = $config.workflowCPUReservation
+	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
+		switch ($config.systemSize) {
+			([SystemSize]::Small) {
+				$cpu = "500m"
+			}
+			([SystemSize]::Medium) {
+				$cpu = "1000m"
+			}
+			([SystemSize]::Large) {
+				$cpu = "2000m"
+			}
+			([SystemSize]::ExtraLarge) {
+				$cpu = "4000m"
+			}
+		}
+	}
+
 	@"
 argo:
   controller:
     resources:
       limits:
-        cpu: $($config.workflowCPUReservation)
+        cpu: $cpu
 "@ | Out-File (Get-WorkflowCPUValuesPath $config)
 }
 
 function New-CPUConfig($config) {
 
+	$hasSystemSize = $config.IsSystemSizeSpecified()
+
+	# note: explicit CPU reservation will override system size
 	New-ComponentConfig $config `
 		{ $config.webCPUReservation } New-WebCPUConfig `
-		{ $config.dbMasterCPUReservation } New-MasterDatabaseCPUConfig `
-		{ $config.dbSlaveCPUReservation } New-SubordinateDatabaseCPUConfig `
+		{ $hasSystemSize -or $config.dbMasterCPUReservation } New-MasterDatabaseCPUConfig `
+		{ $hasSystemSize -or $config.dbSlaveCPUReservation } New-SubordinateDatabaseCPUConfig `
 		{ $false } {} `
 		{ $config.toolServiceCPUReservation } New-ToCPUConfig `
-		{ $config.minioCPUReservation } New-StorageCPUConfig `
-		{ $config.workflowCPUReservation } New-WorkflowCPUConfig
+		{ $hasSystemSize -or $config.minioCPUReservation } New-StorageCPUConfig `
+		{ $hasSystemSize -or $config.workflowCPUReservation } New-WorkflowCPUConfig
 }
 
