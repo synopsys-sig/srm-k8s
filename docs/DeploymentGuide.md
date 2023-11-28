@@ -231,10 +231,10 @@ The replica database is an optional component when using the on-cluster MariaDB 
 
 | Size | CPU Cores | Memory | IOPs | Storage | Backup Storage |
 |:-|-:|-:|-:|-:|-:|
-|Small|4|16 GB|3,000|192 GB|576 GB|
-|Medium|8|32 GB|6,000|384 GB|1152 GB|
-|Large|16|64 GB|12,000|768 GB|2304 GB|
-|Extra Large|32|128 GB|32,000|1536 GB|4608 GB|
+|Small|2|8 GB|3,000|192 GB|576 GB|
+|Medium|4|16 GB|6,000|384 GB|1152 GB|
+|Large|8|32 GB|12,000|768 GB|2304 GB|
+|Extra Large|16|64 GB|32,000|1536 GB|4608 GB|
 
 ### Core Persistent Storage Requirements
 
