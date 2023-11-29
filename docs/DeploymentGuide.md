@@ -1291,7 +1291,112 @@ helm -n srm get notes srm
 
 ## Deploying with GitOps (Flux)
 
-You can find the new-flux.ps1 script under the /path/to/git/srm-k8s/admin/gitops directory. The script has the following parameters:
+This section describes how to configure a fictitious GitHub repository named "srm-gitops" for use with [Flux](https://fluxcd.io/flux/) and [Bitnami's Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets). The configuration in the git repository will manage a Kubernetes cluster referred to as the "demo" cluster where a Software Risk Manager deployment can be managed using GitOps.
+
+Instructions that follow refer to a fictitious GitHub repository at https://github.com/synopsys-sig/srm-gitops and a made-up "srm" kubectl context. To follow along with the instructions, replace the following content:
+
+- replace the demo directory references with a directory name that represents your cluster
+- replace the srm-gitops GitHub repository references with the location of your GitHub repository
+- replace the srm kubectl context references with the context name associated with your cluster
+
+>Note: Flux is one way to implement GitOps. The Software Risk Manager deployment includes support for generating Flux-related resources. You can use an alternative GitOps solution, like [Argo CD](https://argo-cd.readthedocs.io/en/stable/), by hand-creating the related GitOps resources.
+
+## One-Time Setup Steps
+
+For the most up-to-date instructions, refer to the [Flux bootstrap instructions](https://fluxcd.io/flux/installation/bootstrap/). Here are the one-time Flux v2.1 steps that will bootstrap the GitHub demo cluster:
+
+### Flux Steps:
+
+1) Switch to the srm context:
+
+    ```
+    kubectl config use-context srm
+    ```
+
+2) Provision a GitHub PAT for a user with all GitHub 'repo' permissions. Establish a GITHUB_TOKEN environment variable:
+
+    ```
+    export GITHUB_TOKEN=<PAT>
+    ```
+
+3) Download the flux CLI tool (v2.1) and verify prerequisites:
+
+    ```
+    flux check --pre
+    ```
+
+4) Download the repo:
+
+    ```
+    git clone https://github.com/synopsys-sig/srm-gitops
+    ```
+
+5) Bootstrap flux components on cluster (--token-auth bootstraps Flux for HTTPS repo access):
+
+    ```
+    cd ~/git/srm-gitops
+    flux bootstrap github --token-auth --owner=sysnopsys-sig --repository=srm-gitops --branch=main --path=./demo
+    ```
+
+6) Pull latest for srm-deployment:
+
+    ```
+    cd ~/git/srm-gitops
+    git pull --rebase
+    ```
+
+### Bitnami Sealed Secrets Steps:
+
+1) Create directories for the sealed-secrets release:
+
+    ```
+    cd ~/git/srm-gitops
+    mkdir -p ./demo/Releases/SealedSecrets/HelmRepository
+    mkdir -p ./demo/Releases/SealedSecrets/HelmRelease
+    ```
+
+2) Generate the sealed-secrets HelmRepository resource file:
+
+    ```
+    cd ~/git/srm-gitops
+    flux create source helm sealed-secrets --interval=1h --url=https://bitnami-labs.github.io/sealed-secrets --export > ./demo/Releases/SealedSecrets/HelmRepository/repo.yaml
+    ```
+
+3) Generate the sealed-secrets HelmRelease resource:
+
+    ```
+    cd ~/git/srm-gitops
+    flux create helmrelease sealed-secrets --interval=1h --release-name=sealed-secrets-controller --target-namespace=flux-system --source=HelmRepository/sealed-secrets --chart=sealed-secrets --chart-version=">=1.15.0-0" --crds=CreateReplace --export > ./demo/Releases/SealedSecrets/HelmRelease/release.yaml
+    ```
+
+4) Commit files to deploy SealedSecrets:
+
+    ```
+    cd ~/git/srm-gitops
+    git add ./demo/Releases/SealedSecrets
+    git commit
+    git push
+    ```
+
+5) Download Bitnami's [kubeseal](https://github.com/bitnami-labs/sealed-secrets/releases) and fetch public key:
+
+    ```
+    cd ~/git/srm-gitops
+    kubeseal --fetch-cert --controller-name=sealed-secrets-controller --controller-namespace=flux-system > ./demo/sealed-secrets.pem
+    ```
+
+6) Commit the public key:
+
+    ```
+    cd ~/git/srm-gitops
+    git add ./demo/sealed-secrets.pem
+    git commit
+    git push
+    ```
+
+### Software Risk Manager Deployment
+
+With Flux and Bitnami's SealedSecrets deployed, after running the Helm Prep Wizard and Helm Prep script, run the new-flux.ps1 script in the /path/to/git/srm-k8s/admin/gitops directory, specifying the following script parameters:
 
 ```
 param (
@@ -1302,12 +1407,41 @@ param (
 	[string[]] $extraValuesFiles = @(),
 	[switch]   $useSealedSecrets,
 	[string]   $sealedSecretsNamespace = 'flux-system',
-	[string]   $sealedSecretsControllerName = 'sealed-secrets',
+	[string]   $sealedSecretsControllerName = 'sealed-secrets-controller',
 	[string]   $sealedSecretsPublicKeyPath
 )
 ```
 
-You must run the Helm Prep Script before running new-flux.ps1, which will add under your work directory a new flux-v2 directory that contains the Kubernetes resources you can commit to your git repository to deploy Software Risk Manager with Flux. Use [Bitnami's Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) to avoid committing unprotected Kubernetes Secret resources. Use a Sealed Secrets alternative if you decide not to set the useSealedSecrets script parameter to true. 
+Use the `-extraValuesFiles` script parameter to include any extra SRM values files you use. Specify `-useSealedSecrets` to use the installed Sealed Secrets software and reference your Sealed Secrets public key file with the `-sealedSecretsPublicKeyPath` parameter. If you decide not to use Sealed Secrets, use an alternative solution to avoid storing Kubernetes secret resources in your git repository.
+
+The new-flux.ps1 script will generate a flux-v2 directory under your work directory (`-workDir` parameter). The contents of flux-v2 will typically look like this:
+
+```
+├───ConfigMap
+├───CRD
+├───HelmRelease
+├───HelmRepository
+├───Namespace
+└───SealedSecret
+```
+
+The flux-v2 directory contains the Kubernetes resources you can commit to your git repository to deploy Software Risk Manager with Flux. You can commit namespace-scoped resources to a Releases/SRM folder and cluster-scoped resources, like CRDs, under the demo folder representing your cluster:
+
+```
+├───demo
+│   └───CRD
+│   └───Releases
+│       ├───SRM
+│       │   ├───ConfigMap
+│       │   ├───GitRepository
+│       │   ├───HelmRelease
+│       │   ├───HelmRepository
+│       │   ├───Namespace
+│       │   └───SealedSecret
+│       └───SealedSecrets
+│           ├───HelmRelease
+│           └───HelmRepository
+```
 
 # Customizing Software Risk Manager (props)
 
