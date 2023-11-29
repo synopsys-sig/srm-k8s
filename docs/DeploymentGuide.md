@@ -1433,7 +1433,6 @@ The flux-v2 directory contains the Kubernetes resources you can commit to your g
 │   └───Releases
 │       ├───SRM
 │       │   ├───ConfigMap
-│       │   ├───GitRepository
 │       │   ├───HelmRelease
 │       │   ├───HelmRepository
 │       │   ├───Namespace
