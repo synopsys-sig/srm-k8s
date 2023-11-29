@@ -84,7 +84,11 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
     + [Invoking the Helm Prep Script](#invoking-the-helm-prep-script)
   * [Invoke helm/kubectl Commands](#invoke-helmkubectl-commands)
     + [Fetch Initial Admin Password](#fetch-initial-admin-password-1)
-  * [Deploying with GitOps (Flux)](#deploying-with-gitops-flux)
+- [Deploying with GitOps (Flux)](#deploying-with-gitops-flux)
+  * [One-Time Setup Steps](#one-time-setup-steps)
+    + [Flux Steps:](#flux-steps)
+    + [Bitnami Sealed Secrets Steps:](#bitnami-sealed-secrets-steps)
+  * [Software Risk Manager Deployment](#software-risk-manager-deployment)
 - [Customizing Software Risk Manager (props)](#customizing-software-risk-manager-props)
   * [Proxy Server Example](#proxy-server-example)
     + [Public Property Values](#public-property-values)
@@ -1289,7 +1293,9 @@ You can retrieve the initial Software Risk Manager admin password using a comman
 helm -n srm get notes srm
 ```
 
-## Deploying with GitOps (Flux)
+# Deploying with GitOps (Flux)
+
+After running the Helm Prep Wizard and Helm Prep scripts, you can optionally deploy Software Risk Manager using Flux, which is one way to implement GitOps. The Software Risk Manager deployment includes support for generating Flux-related resources. You can use an alternative GitOps solution, like [Argo CD](https://argo-cd.readthedocs.io/en/stable/), by hand-creating the related GitOps resources.
 
 This section describes how to configure a fictitious GitHub repository named "srm-gitops" for use with [Flux](https://fluxcd.io/flux/) and [Bitnami's Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets). The configuration in the git repository will manage a Kubernetes cluster referred to as the "demo" cluster where a Software Risk Manager deployment can be managed using GitOps.
 
@@ -1298,8 +1304,6 @@ Instructions that follow refer to a fictitious GitHub repository at https://gith
 - replace the demo directory references with a directory name that represents your cluster
 - replace the srm-gitops GitHub repository references with the location of your GitHub repository
 - replace the srm kubectl context references with the context name associated with your cluster
-
->Note: Flux is one way to implement GitOps. The Software Risk Manager deployment includes support for generating Flux-related resources. You can use an alternative GitOps solution, like [Argo CD](https://argo-cd.readthedocs.io/en/stable/), by hand-creating the related GitOps resources.
 
 ## One-Time Setup Steps
 
@@ -1394,7 +1398,7 @@ For the most up-to-date instructions, refer to the [Flux bootstrap instructions]
     git push
     ```
 
-### Software Risk Manager Deployment
+## Software Risk Manager Deployment
 
 With Flux and Bitnami's SealedSecrets deployed, after running the Helm Prep Wizard and Helm Prep script, run the new-flux.ps1 script in the /path/to/git/srm-k8s/admin/gitops directory, specifying the following script parameters:
 
@@ -1433,6 +1437,34 @@ The flux-v2 directory contains the Kubernetes resources you can commit to your g
 │   └───Releases
 │       ├───SRM
 │       │   ├───ConfigMap
+│       │   ├───HelmRelease
+│       │   ├───HelmRepository
+│       │   ├───Namespace
+│       │   └───SealedSecret
+│       └───SealedSecrets
+│           ├───HelmRelease
+│           └───HelmRepository
+```
+
+Consider adding your *locked* config.json file and any files it references to your GitOps repository. Making your config.json file available to others will let them re-generate your work directory files and re-run new-flux.ps1 if and when that's required.
+
+Be sure to run kubeseal by hand before adding extra Kubernetes secret resources referenced indirectly by config.json. You should drop the ".yaml" file extension from extra Helm values files to prevent Flux from trying to generate a related Kubernetes resource.
+
+You can replace absolute paths in config.json by using paths relative to config.json's directory or `~` to reference paths relative to a home directory. For example, you can switch your work directory config.json parameter from `/Users/me/.k8s-srm` to `~/.k8s-srm`.
+
+Below is an example showing config.json and srm-extra-props, renamed from srm-extra-props.yaml, in a HelmPrep folder under Releases/SRM. Also included is an srm-proxy-private-props.yaml SealedSecret resource created using kubeseal from the srm-proxy-private-props Kubernetes secret resource referenced by srm-extra-props.yaml:
+
+```
+├───demo
+│   └───CRD
+│   └───Releases
+│       ├───SRM
+│       │   ├───ConfigMap
+│       │   ├───HelmPrep
+│       │   ├───HelmPrep
+│       │   |   ├─── config.json
+│       │   |   ├─── srm-extra-props
+│       │   |   ├─── srm-proxy-private-props.yaml
 │       │   ├───HelmRelease
 │       │   ├───HelmRepository
 │       │   ├───Namespace
