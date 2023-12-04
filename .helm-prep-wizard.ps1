@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.6.0
+.VERSION 1.6.1
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
@@ -252,6 +252,8 @@ Add-StepTransitions $graph $s[[ScanFarmCacheBucketName]] $s[[ScanFarmAzureSubscr
 
 Add-StepTransitions $graph $s[[UseToolOrchestration]] $s[[UseExternalStorage]]
 
+Add-StepTransitions $graph $s[[UseExternalDatabase]] $s[[ExternalDatabaseHost]],$s[[ExternalDatabasePort]],$s[[ExternalDatabaseName]],$s[[ExternalDatabaseUser]],$s[[ExternalDatabasePwd]],$s[[ExternalDatabaseOneWayAuth]],$s[[ExternalDatabaseTrustCert]],$s[[ExternalDatabaseCert]],$s[[UseScanFarm]]
+
 Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[Size]],
 	$s[[SrmWebLicense]],
@@ -260,7 +262,6 @@ Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[Namespace]],
 	$s[[ReleaseName]],
 	$s[[UseExternalDatabase]],
-	$s[[ExternalDatabaseHost]],$s[[ExternalDatabasePort]],$s[[ExternalDatabaseName]],$s[[ExternalDatabaseUser]],$s[[ExternalDatabasePwd]],$s[[ExternalDatabaseOneWayAuth]],$s[[ExternalDatabaseTrustCert]],$s[[ExternalDatabaseCert]],
 	$s[[DatabaseReplicaCount]],
 	$s[[UseScanFarm]],
 	$s[[UseDockerRegistry]],$s[[DockerRegistryHost]],
