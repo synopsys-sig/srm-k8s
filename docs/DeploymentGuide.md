@@ -146,7 +146,10 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
   * [Values](#values)
 - [Uninstall](#uninstall)
 - [Troubleshooting](#troubleshooting)
-  * [Scan Farm Migration Job Fails](#scan-farm-migration-job-fails)
+  * [Core Feature Troubleshooting](#core-feature-troubleshooting)
+    + [Table Already Exists](#table-already-exists)
+  * [Scan Farm Feature Troubleshooting](#scan-farm-feature-troubleshooting)
+    + [Scan Farm Migration Job Fails](#scan-farm-migration-job-fails)
 - [Appendix](#appendix)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Scan Farm Wizard](#scan-farm-wizard)
@@ -2830,7 +2833,87 @@ Delete any remaining Persistent Volumes (PV) and any related PV data.
 
 Refer to these sections for troubleshooting guidance.
 
-## Scan Farm Migration Job Fails
+## Core Feature Troubleshooting
+
+This section includes troubleshooting guidance for the Core feature.
+
+### Table Already Exists
+
+Each boot of the Software Risk Manager web component tests whether database schema updates are required. The initial boot provisions the entire database schema, marking successful provisioning by creating a new `.installation` file in the root AppData directory mounted at `/opt/codedx`. Future boots will skip initial provisioning and test whether schema updates are required.
+
+Software Risk Manager treats a missing `/opt/codedx/.installation` as a scenario where the web database schema does not exist. An attempt to provision a database schema where one already exists will generate an error in the Software Risk Manager log that looks like this:
+
+```
+INFO  2023-11-29 19:11:42.006 [main] com.avi.codedx.d.m.b - Creating tables . . .
+ERROR 2023-11-29 19:11:42.129 [main] com.codedx.n.ad - Bad SQL Query:
+===========
+CREATE TABLE `ANALYSES` (
+        `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `PROJECT_ID` INT UNSIGNED NOT NULL,
+        `PROJECT_VERSION_ID` INT UNSIGNED DEFAULT NULL,
+        `USER_ID` INT UNSIGNED NOT NULL,
+        `CREATION_TIME` DATETIME NOT NULL,
+        `STATE` VARCHAR(8) COLLATE utf8mb4_bin NOT NULL,
+        `START_TIME` DATETIME DEFAULT NULL,
+        `END_TIME` DATETIME DEFAULT NULL,
+        `IS_PENDING_CLEANUP` TINYINT(1) NOT NULL DEFAULT FALSE,
+        PRIMARY KEY (`ID`),
+        KEY `IDX_ANALYSES__PROJECT_ID` (`PROJECT_ID`)
+)
+==========
+ERROR 2023-11-29 19:11:42.129 [main] com.avi.codedx.d.j.e.gb - Create Statement 1/598 failed:
+```CREATE TABLE `ANALYSES` (
+        `ID` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `PROJECT_ID` INT UNSIGNED NOT NULL,
+        `PROJECT_VERSION_ID` INT UNSIGNED DEFAULT NULL,
+        `USER_ID` INT UNSIGNED NOT NULL,
+        `CREATION_TIME` DATETIME NOT NULL,
+        `STATE` VARCHAR(8) COLLATE utf8mb4_bin NOT NULL,
+        `START_TIME` DATETIME DEFAULT NULL,
+        `END_TIME` DATETIME DEFAULT NULL,
+        `IS_PENDING_CLEANUP` TINYINT(1) NOT NULL DEFAULT FALSE,
+        PRIMARY KEY (`ID`),
+        KEY `IDX_ANALYSES__PROJECT_ID` (`PROJECT_ID`)
+)
+...
+java.sql.SQLSyntaxErrorException: (conn=25) Table 'analyses' already exists
+...
+Caused by: java.sql.SQLException: Table 'analyses' already exists
+...
+ERROR 2023-11-29 19:11:42.134 [main] com.avi.codedx.installer.l - Installation did not succeed due to an unexpected exception:
+java.sql.SQLSyntaxErrorException: (conn=25) Table 'analyses' already exists
+```
+
+This error typically occurs when Software Risk Manager gets installed following an uninstall. Common causes are inadvertently reusing an existing Persistent Volume with the on-cluster MariaDB database or forgetting to recreate the database catalog in an external database. In both cases, a new web volume is missing the `.installation` file, so the web component attempts to provision a schema where one already exists, generating the table-already-exists message.
+
+The safest way to resolve this issue is to ensure a blank database catalog before attempting a helm deployment (this resolution would not apply to existing deployments with data you do not want to lose). For on-cluster database configurations, refer to the [uninstall instructions](#uninstall) that mention removing related Persistent Volume resources. For external database configurations, drop the database catalog (e.g., `DROP DATABASE srmdb;`) before following Steps 2 and 3 of the [external database pre-work instructions](#external-web-database-pre-work) (you can reuse the same database user).
+
+Alternatively, if you are confident that your database schema was provisioned entirely, you can create the `.installation` file by hand, but you must understand the root cause of your missing `.installation` file. Recreating the file is okay if it got inadvertently deleted; however, other circumstances may require additional intervention. For example, suppose you lost your entire web volume. In that case, you will be missing files related to what's in your database, like analysis inputs and support files required to interpret specific database records. If your troubleshooting ends up auto-generating new passwords, you will need to restore the original admin password (see the [update the admin password](#software-risk-manager-admin-password-reset) instructions). To manually create your `.installation` file, do the following, replacing the namespace and deployment names as required:
+
+```
+# exec into the pod
+kubectl -n srm exec -c srm -it deployment/srm-web -- bash
+
+# change directory
+cd /opt/codedx
+
+# create .installation file
+cat << EOF > .installation
+installed.on=$(date | sed s/\:/\\\\:/g)
+EOF
+
+# restart the replicas
+kubectl -n srm scale --replicas=0 deployment/srm-web
+kubectl -n srm scale --replicas=1 deployment/srm-web
+```
+
+When the web workload reboots, the new `/opt/codedx/.installation` file will cause the web workload to skip initial database provisioning.
+
+## Scan Farm Feature Troubleshooting
+
+This section includes troubleshooting guidance for the Scan Farm feature.
+
+### Scan Farm Migration Job Fails
 
 A misconfiguration could cause a Scan Farm migration job to fail. The job's restartPolicy is "on-failure," so the related container gets removed, making the logs hard to grab from the command line. If you have something collecting generated logs on your cluster, you should be able to troubleshoot from that output. Otherwise, you can edit the Scan Farm chart directly by switching the restartPolicy for the job to Never.
 
