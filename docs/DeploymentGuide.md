@@ -27,7 +27,7 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
   * [Tool Orchestration Feature Requirements](#tool-orchestration-feature-requirements)
     + [Tool Service Workload Requirements](#tool-service-workload-requirements)
     + [Workflow Controller Workload Requirements](#workflow-controller-workload-requirements)
-    + [On-Cluster Workflow Storage Requirements](#on-cluster-workflow-storage-requirements)
+    + [On-Cluster Workflow Storage Requirements (MinIO)](#on-cluster-workflow-storage-requirements-minio)
     + [Add-in Tool Workload Requirements](#add-in-tool-workload-requirements)
     + [Tool Orchestration Persistent Storage Requirements](#tool-orchestration-persistent-storage-requirements)
     + [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements)
@@ -383,7 +383,7 @@ The initial MinIO volume size should be 64 GB when not using external object sto
 |Large|2|1500 Mi|
 |Extra Large|4|2000 Mi|
 
-### On-Cluster Workflow Storage Requirements
+### On-Cluster Workflow Storage Requirements (MinIO)
 
 The MinIO pod is not applicable when using external workflow object storage (e.g., AWS S3).
 
@@ -2659,7 +2659,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | mariadb.image.pullSecrets | list | `[]` | the K8s image pull secret to use for MariaDB Docker images |
 | mariadb.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the MariaDB Docker image |
 | mariadb.image.repository | string | `"codedx/codedx-mariadb"` | the Docker image repository name for the MariaDB workload |
-| mariadb.image.tag | string | `"v1.27.0"` | the Docker image version for the MariaDB workload |
+| mariadb.image.tag | string | `"v1.28.0"` | the Docker image version for the MariaDB workload |
 | mariadb.master.masterCaConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt Command: kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt |
 | mariadb.master.masterTlsSecret | string | `nil` | the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | mariadb.master.nodeSelector | object | `{}` | the node selector to use for the MariaDB primary database workload |
@@ -2723,7 +2723,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v1.29.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v1.30.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -2769,7 +2769,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2023.8.7"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2023.8.8"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=90.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
