@@ -33,6 +33,7 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
     + [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements)
 - [External Web Database Pre-work](#external-web-database-pre-work)
 - [Persistent Storage Pre-work](#persistent-storage-pre-work)
+  * [Volume Configuration Pre-work](#volume-configuration-pre-work)
   * [AWS Persistent Storage Pre-work](#aws-persistent-storage-pre-work)
     + [AWS EBS Persistent Storage Pre-work](#aws-ebs-persistent-storage-pre-work)
     + [AWS EFS Persistent Storage Pre-work](#aws-efs-persistent-storage-pre-work)
@@ -495,6 +496,14 @@ Refer to the Web Database Workload Requirements section for database instance co
 # Persistent Storage Pre-work
 
 Software Risk Manager depends on one or more Persistent Volume resources, depending on the features you install and how you configure them. You will always have at least one volume for the Core feature's web component. Dynamic volume provisioning is required by default. Refer to the following sections for Kubernetes provider-specific instructions.
+
+## Volume Configuration Pre-work
+
+Consider using Persistent Volumes with a [Retain reclaim policy](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#retain). Volumes associated with a [Delete reclaim policy](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#delete) will be lost if a Persistent Volume Claim is inadvertently deleted. Dynamic volume provisioning will use the [reclaim policy](https://kubernetes.io/docs/concepts/storage/storage-classes/#reclaim-policy) specified by the [storage class](https://kubernetes.io/docs/concepts/storage/storage-classes/#the-storageclass-resource).
+
+>Note: You can edit Persistent Volume resources to change the retention policy of existing volumes.
+
+Should volume resizing be necessary in the future, consider using Persistent Volumes that [allow volume expansion](https://kubernetes.io/docs/concepts/storage/storage-classes/#allow-volume-expansion).
 
 ## AWS Persistent Storage Pre-work
 
