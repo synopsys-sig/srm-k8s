@@ -289,7 +289,7 @@ This section covers the requirements you must satisfy with the external dependen
 
 ### Scan Farm Database Requirements
 
-The Scan Farm feature depends on a PostgreSQL database supporting versions 10.16–14.5. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM.
+The Scan Farm feature depends on a PostgreSQL database supporting versions 10.16–14.5. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
 
 ### Scan Farm Cache Requirements
 
@@ -297,11 +297,13 @@ Here are the requirements and recommendations for your Redis instance:
 
 - Redis must be configured without eviction. You must ensure the Redis eviction policy is set to noeviction (maxmemory-policy=noeviction). The Cache Service design requires that all metadata be resident in Redis at all times. The Cache Service will refuse to start if Redis is not correctly configured.
 
-- The Redis memory limit should be 1 GB. However, this should be adjusted based on your requirements. The Cache Service checks the memory usage of the Redis server at start-up and will not start if memory usage is more than 99% of the server limit.
+- The Redis memory limit should be 1 GB. The Cache Service checks the memory usage of the Redis server at start-up and will not start if memory usage is more than 99% of the server limit.
 
 - The Cache Service does not use Redis persistence; therefore, configure Redis without persistence. If persistence is enabled, the Redis pod memory limit must be significantly higher than the Redis server memory limit.
 
 - Your Redis instance must permit network traffic from the Cache Service.
+
+- Allocate 1 vCPU for on-cluster Redis workloads.
 
 Synopsys recommends configuring your Redis instance with both authentication and TLS.
 
@@ -2612,7 +2614,38 @@ $ kubectl -n srm scale --replicas=1 deployment/srm-web
 
 # Cannot Run PowerShell Core
 
-Running the Helm Prep Wizard and Helm Prep Script is the recommended deployment method when the Quick Start installation is not applicable. The Helm Prep Wizard is a one-time step, and the Helm Prep Script helps ensure that your Kubernetes resources and Helm values files are correctly defined. Rerunning the Helm Prep Script on upgrade helps ensure your deployment works with any required chart changes associated with a new Software Risk Manager version. Running the scripts in an alternate environment can help you stage your helm deployment if you cannot run PowerShell Core in your primary environment.
+Running the Helm Prep Wizard and Helm Prep Script is the recommended deployment method when the Quick Start installation is not applicable. The Helm Prep Wizard is a one-time step, and the Helm Prep Script helps ensure that your Kubernetes resources and Helm values files are correctly defined. Rerunning the Helm Prep Script on upgrade helps ensure your deployment works with any required chart changes associated with a new Software Risk Manager version. 
+
+Running the scripts in an alternate environment can help you stage your helm deployment if you cannot run PowerShell Core in your primary environment. Alternatively, consider running the scripts from a Docker container:
+
+```
+$ docker run -it --rm mcr.microsoft.com/powershell bash
+$ apt update
+
+$ # install git
+$ apt install -y git
+
+$ # install Java
+$ apt install -y wget apt-transport-https
+$ mkdir -p /etc/apt/keyrings
+$ wget -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | tee /etc/apt/keyrings/adoptium.asc
+$ echo "deb [signed-by=/etc/apt/keyrings/adoptium.asc] https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list
+$ apt update
+$ apt install -y temurin-11-jdk
+
+$ # install kubectl (specify correct version for your cluster)
+$ apt install -y curl
+$ curl -L https://dl.k8s.io/release/v1.28.4/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl
+$ chmod +x /usr/local/bin/kubectl
+
+$ # start Helm Prep Wizard
+$ git clone https://github.com/synopsys-sig/srm-k8s
+$ cd srm-k8s
+$ pwsh ./helm-prep-wizard.ps1
+
+$ # run Helm Prep Script
+$ pwsh "/root/.k8s-srm/run-helm-prep.ps1"
+```
 
 # Software Risk Manager Helm Chart
 
