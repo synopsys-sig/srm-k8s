@@ -367,6 +367,8 @@ Below are the default CPU and memory assigned to Scan Farm pods.
 | Coverity Scan Job | 6500m | 26000Mi |
 | SCA Scan Job      | 1500m | 1500Mi  |
 
+>Note: The SCA Scan Job resources are fixed at 1.5 vCPUs and 1500Mi of memory. You cannot currently change the resource limits for SCA scan pods.
+
 ## Tool Orchestration Feature Requirements
 
 The initial MinIO volume size should be 64 GB when not using external object storage. External object storage can be provided by any storage system that supports an AWS S3-compliant API (e.g., AWS, GCP, MinIO, etc.).
