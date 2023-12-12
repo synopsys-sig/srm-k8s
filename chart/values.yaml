@@ -113,7 +113,7 @@ web:
     # -- the Docker image repository name for the SRM web workload
     repository: codedx/codedx-tomcat
     # -- the Docker image version for the SRM web workload
-    tag: v2023.8.8
+    tag: v2023.12.0
     # -- the K8s Docker image pull policy for the SRM web workload
     pullPolicy: IfNotPresent
 
@@ -198,7 +198,7 @@ web:
   scanfarm:
     sast:
       # -- the SAST component version to use for build-less scans
-      version: 2023.6.1
+      version: 2023.9.2
     sca:
       # -- the SCA component version to use for build-less scans
       version: 8.9.0

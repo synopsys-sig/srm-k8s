@@ -2816,7 +2816,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2023.8.8"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2023.12.0"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=90.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
@@ -2843,7 +2843,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | web.resources.limits.cpu | string | `"4000m"` | the required CPU for the web workload (must be >= 2 vCPUs) |
 | web.resources.limits.ephemeral-storage | string | `"2868Mi"` | the ephemeral storage for the web workload |
 | web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
-| web.scanfarm.sast.version | string | `"2023.6.1"` | the SAST component version to use for build-less scans |
+| web.scanfarm.sast.version | string | `"2023.9.2"` | the SAST component version to use for build-less scans |
 | web.scanfarm.sca.version | string | `"8.9.0"` | the SCA component version to use for build-less scans |
 | web.securityContext.readOnlyRootFilesystem | bool | `true` | whether the SRM web workload uses a read-only filesystem |
 | web.service.annotations | object | `{}` | the annotations to apply to the SRM web service |

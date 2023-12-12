@@ -48,9 +48,9 @@ The following example commands use a fictitious private registry hosted in AWS a
 The first example stores Synopsys Docker images at the root of your private registry:
 
 ```
-$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.8
-$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.8 id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.8
-$ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.8
+$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.12.0
+$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.12.0 id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.12.0
+$ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.12.0
 ```
 
 >Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
@@ -58,9 +58,9 @@ $ docker push id.dkr.ecr.us-east-2.amazonaws.com/codedx/codedx-tomcat:v2023.8.8
 The following example stores Synopsys Docker images under "my-srm" in your private registry. In this scenario, you must enter "my-srm" as your private registry repository prefix in the Guided Setup:
 
 ```
-$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.8
-$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.8 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.8
-$ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.8.8
+$ docker pull sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.12.0
+$ docker tag sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.12.0 id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.12.0
+$ docker push id.dkr.ecr.us-east-2.amazonaws.com/my-srm/codedx/codedx-tomcat:v2023.12.0
 ```
 
 >Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
@@ -71,7 +71,7 @@ See the following sections for the Docker images you must obtain via docker pull
 
 The SRM Web pod requires this Docker image:
 
-- sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.8.8
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2023.12.0
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
 
@@ -79,7 +79,7 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-tomcat:v2023.8.8' | ForEach-Object {
+'codedx/codedx-tomcat:v2023.12.0' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -129,12 +129,12 @@ If you are not using the SRM Scan Farm feature, skip this section.
 
 The SRM Scan Farm feature requires these Docker images:
 
-- sig-repo.synopsys.com/synopsys/cnc-cache-service:2023.6.1
-- sig-repo.synopsys.com/synopsys/cnc-common-infra:2023.6.1
-- sig-repo.synopsys.com/synopsys/cnc-scan-service:2023.6.1
-- sig-repo.synopsys.com/synopsys/cnc-scan-service-migration:2023.6.1
-- sig-repo.synopsys.com/synopsys/cnc-storage-service:2023.6.1
-- sig-repo.synopsys.com/synopsys/cnc-storage-service-migration:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-cache-service:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-common-infra:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-scan-service:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-scan-service-migration:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-storage-service:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-storage-service-migration:2023.9.2
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
 
@@ -142,12 +142,12 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'cnc-cache-service:2023.6.1',
-'cnc-common-infra:2023.6.1',
-'cnc-scan-service:2023.6.1',
-'cnc-scan-service-migration:2023.6.1',
-'cnc-storage-service:2023.6.1',
-'cnc-storage-service-migration:2023.6.1' | ForEach-Object {
+'cnc-cache-service:2023.9.2',
+'cnc-common-infra:2023.9.2',
+'cnc-scan-service:2023.9.2',
+'cnc-scan-service-migration:2023.9.2',
+'cnc-storage-service:2023.9.2',
+'cnc-storage-service-migration:2023.9.2' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -166,8 +166,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 
 The SRM Scan Farm SAST feature requires these Docker images:
 
-- sig-repo.synopsys.com/synopsys/cnc-cov-capture-linux64-2023.6.1:2023.6.1
-- sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-2023.6.1:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-cov-capture-linux64-2023.9.2:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-2023.9.2:2023.9.2
 
 >Note: The Coverity capture/analysis Docker image name format is sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-\<cov-version>:version.
 
@@ -177,8 +177,8 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'cnc-cov-capture-linux64-2023.6.1:2023.6.1',
-'cnc-cov-analysis-linux64-2023.6.1:2023.6.1' | ForEach-Object {
+'cnc-cov-capture-linux64-2023.9.2:2023.9.2',
+'cnc-cov-analysis-linux64-2023.9.2:2023.9.2' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -197,7 +197,7 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 
 The SRM Scan Farm SCA feature requires this Docker image:
 
-- sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-8.9.0:2023.6.1
+- sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-8.9.0:2023.9.2
 
 >Note: The Detect Docker image name format is sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-\<detect-version>:version.
 
@@ -207,7 +207,7 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'cnc-synopsys-detect-8.9.0:2023.6.1' | ForEach-Object {
+'cnc-synopsys-detect-8.9.0:2023.9.2' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -228,8 +228,8 @@ If you are not using the SRM Tool Orchestration feature, skip this section.
 
 The SRM Tool Orchestration feature requires these Docker images:
 
-- sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2023.8.8
-- sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2023.8.8
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2023.12.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2023.12.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v1.30.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v1.30.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-results:v1.30.0
@@ -246,8 +246,8 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-tools:v2023.8.8',
-'codedx/codedx-toolsmono:v2023.8.8',
+'codedx/codedx-tools:v2023.12.0',
+'codedx/codedx-toolsmono:v2023.12.0',
 'codedx/codedx-prepare:v1.30.0',
 'codedx/codedx-newanalysis:v1.30.0',
 'codedx/codedx-results:v1.30.0',
@@ -279,9 +279,9 @@ If you are logged in to the Synopsys SIG Docker registry and your private regist
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'codedx/codedx-tomcat:v2023.8.8',
-'codedx/codedx-tools:v2023.8.8',
-'codedx/codedx-toolsmono:v2023.8.8',
+'codedx/codedx-tomcat:v2023.12.0',
+'codedx/codedx-tools:v2023.12.0',
+'codedx/codedx-toolsmono:v2023.12.0',
 'codedx/codedx-prepare:v1.30.0',
 'codedx/codedx-newanalysis:v1.30.0',
 'codedx/codedx-results:v1.30.0',
@@ -292,15 +292,15 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 'bitnami/minio:2021.4.6-debian-10-r11',
 'codedx/codedx-workflow-controller:v2.17.0',
 'codedx/codedx-argoexec:v2.17.0',
-'cnc-cache-service:2023.6.1',
-'cnc-common-infra:2023.6.1',
-'cnc-scan-service:2023.6.1',
-'cnc-scan-service-migration:2023.6.1',
-'cnc-storage-service:2023.6.1',
-'cnc-storage-service-migration:2023.6.1',
-'cnc-cov-capture-linux64-2023.6.1:2023.6.1',
-'cnc-cov-analysis-linux64-2023.6.1:2023.6.1',
-'cnc-synopsys-detect-8.9.0:2023.6.1' | ForEach-Object {
+'cnc-cache-service:2023.9.2',
+'cnc-common-infra:2023.9.2',
+'cnc-scan-service:2023.9.2',
+'cnc-scan-service-migration:2023.9.2',
+'cnc-storage-service:2023.9.2',
+'cnc-storage-service-migration:2023.9.2',
+'cnc-cov-capture-linux64-2023.9.2:2023.9.2',
+'cnc-cov-analysis-linux64-2023.9.2:2023.9.2',
+'cnc-synopsys-detect-8.9.0:2023.9.2' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
