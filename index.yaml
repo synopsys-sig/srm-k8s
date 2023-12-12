@@ -2,8 +2,36 @@ apiVersion: v1
 entries:
   srm:
   - apiVersion: v2
+    appVersion: 2023.12.0
+    created: "2023-12-12T15:42:03.3751566-05:00"
+    dependencies:
+    - condition: features.mariadb
+      name: mariadb
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 7.4.4
+    - condition: features.scanfarm
+      name: cnc
+      repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
+      version: 2023.9.2
+    - condition: features.to
+      name: argo
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 0.14.5
+    - condition: features.minio
+      name: minio
+      repository: https://codedx.github.io/codedx-kubernetes
+      version: 3.2.1
+    description: Software Risk Manager
+    digest: 26e8ba13bd9280e3e763c575abd4394413856964365591e19f9dd53bfe686c5d
+    icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
+    name: srm
+    type: application
+    urls:
+    - https://synopsys-sig.github.io/srm-k8s/srm-1.11.0.tgz
+    version: 1.11.0
+  - apiVersion: v2
     appVersion: 2023.8.8
-    created: "2023-12-05T14:20:36.9886211-05:00"
+    created: "2023-12-12T15:42:03.3646839-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -31,7 +59,7 @@ entries:
     version: 1.10.0
   - apiVersion: v2
     appVersion: 2023.8.7
-    created: "2023-12-05T14:20:37.080989-05:00"
+    created: "2023-12-12T15:42:03.4475931-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -59,7 +87,7 @@ entries:
     version: 1.9.0
   - apiVersion: v2
     appVersion: 2023.8.7
-    created: "2023-12-05T14:20:37.0709082-05:00"
+    created: "2023-12-12T15:42:03.4384013-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -87,7 +115,7 @@ entries:
     version: 1.8.0
   - apiVersion: v2
     appVersion: 2023.8.6
-    created: "2023-12-05T14:20:37.0552883-05:00"
+    created: "2023-12-12T15:42:03.4307016-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -115,7 +143,7 @@ entries:
     version: 1.7.0
   - apiVersion: v2
     appVersion: 2023.8.6
-    created: "2023-12-05T14:20:37.0497325-05:00"
+    created: "2023-12-12T15:42:03.4215853-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -143,7 +171,7 @@ entries:
     version: 1.6.0
   - apiVersion: v2
     appVersion: 2023.8.5
-    created: "2023-12-05T14:20:37.0397294-05:00"
+    created: "2023-12-12T15:42:03.4127196-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -171,7 +199,7 @@ entries:
     version: 1.5.0
   - apiVersion: v2
     appVersion: 2023.8.4
-    created: "2023-12-05T14:20:37.0297573-05:00"
+    created: "2023-12-12T15:42:03.4030158-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -199,7 +227,7 @@ entries:
     version: 1.4.0
   - apiVersion: v2
     appVersion: 2023.8.3
-    created: "2023-12-05T14:20:37.0101227-05:00"
+    created: "2023-12-12T15:42:03.3935992-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -227,7 +255,7 @@ entries:
     version: 1.3.0
   - apiVersion: v2
     appVersion: 2023.8.1
-    created: "2023-12-05T14:20:36.9992926-05:00"
+    created: "2023-12-12T15:42:03.3846318-05:00"
     dependencies:
     - condition: features.mariadb
       name: mariadb
@@ -253,4 +281,4 @@ entries:
     urls:
     - https://synopsys-sig.github.io/srm-k8s/srm-1.2.0.tgz
     version: 1.2.0
-generated: "2023-12-05T14:20:36.9778479-05:00"
+generated: "2023-12-12T15:42:03.354223-05:00"
