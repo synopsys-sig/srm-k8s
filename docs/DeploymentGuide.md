@@ -1,8 +1,8 @@
-Software Risk Manager Kubernetes (K8s) Deployment Guide
+# Software Risk Manager Kubernetes Deployment
 
 <!-- toc -->
 
-- [Software Risk Manager Kubernetes Deployment](#software-risk-manager-kubernetes-deployment)
+- [Software Risk Manager Features](#software-risk-manager-features)
   * [Core Feature](#core-feature)
   * [Scan Farm Feature](#scan-farm-feature)
   * [Tool Orchestration Feature](#tool-orchestration-feature)
@@ -157,7 +157,7 @@ Software Risk Manager Kubernetes (K8s) Deployment Guide
 
 <!-- tocstop -->
 
-# Software Risk Manager Kubernetes Deployment
+# Software Risk Manager Features
 
 The footprint of your Software Risk Manager Kubernetes deployment depends on the licensed features you plan to use. Some features depend on external systems you must configure separately, while others optionally depend on external components. The following sections include feature-related deployment diagrams. Since the parts are additive, you can conflate diagrams to see the entire footprint for your selected feature set.
 
