@@ -484,7 +484,9 @@ If you are using a database instance hosted by AWS, Azure, or GCP, refer to [how
 
 Refer to the Web Database Workload Requirements section for database instance configuration details. You must pre-create the database catalog and the Software Risk Manager database user with the following steps.
 
-1. Create a database user. You can customize the following statement to create a user named "srm," remove 'REQUIRE SSL' when not using TLS.
+>Note: If you have to reinstall Software Risk Manager and purge your Software Risk Manager data, you must repeat Steps 2 and 3 after deleting your Software Risk Manager Persistent Volume.
+
+1. Create a database user. You can customize the following statement to create a user named "srm," remove 'REQUIRE SSL' when not using TLS (your database instance may require transport security).
 
    CREATE USER 'srm'@'%' IDENTIFIED BY 'enter-a-password-here' REQUIRE SSL;
 
@@ -496,6 +498,8 @@ Refer to the Web Database Workload Requirements section for database instance co
 
    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, ALTER, REFERENCES, INDEX, DROP, TRIGGER ON srmdb.* to 'srm'@'%';
    FLUSH PRIVILEGES;
+
+4. If your database configuration requires Software Risk Manager to trust a certificate (e.g., the [Amazon RDS root certificate](https://s3.amazonaws.com/rds-downloads/rds-ca-2019-root.pem)), download the certificate to make it available later in the Helm Prep Wizard.
 
 # Persistent Storage Pre-work
 
