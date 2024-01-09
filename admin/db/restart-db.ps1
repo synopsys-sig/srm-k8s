@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.1.0
 .GUID e3f56093-60e5-4035-8e61-f4bad1bebae9
 .AUTHOR Synopsys
 #>
@@ -41,6 +41,7 @@ $statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
 
 # identify the number of replicas
 $statefulSetMariaDBSlaveCount = 0
+$values = Get-HelmValues $namespace $releaseName
 if ($values.mariadb.replication.enabled) {
 	$statefulSetMariaDBSlaveCount = $values.mariadb.slave.replicas
 	if ($null -eq $statefulSetMariaDBSlaveCount) {
