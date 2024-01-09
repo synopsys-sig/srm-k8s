@@ -15,6 +15,7 @@
     + [Core Web Replica Database Workload Requirements](#core-web-replica-database-workload-requirements)
     + [Core Persistent Storage Requirements](#core-persistent-storage-requirements)
     + [Core Internet Access Requirements](#core-internet-access-requirements)
+    + [Core Pod Security Admission Requirements](#core-pod-security-admission-requirements)
   * [Scan Farm Feature Requirements](#scan-farm-feature-requirements)
     + [Scan Farm Database Requirements](#scan-farm-database-requirements)
     + [Scan Farm Cache Requirements](#scan-farm-cache-requirements)
@@ -31,6 +32,7 @@
     + [Add-in Tool Workload Requirements](#add-in-tool-workload-requirements)
     + [Tool Orchestration Persistent Storage Requirements](#tool-orchestration-persistent-storage-requirements)
     + [Tool Orchestration Add-in Resource Requirements](#tool-orchestration-add-in-resource-requirements)
+    + [Tool Orchestration Pod Security Admission Requirements](#tool-orchestration-pod-security-admission-requirements)
 - [External Web Database Pre-work](#external-web-database-pre-work)
 - [Persistent Storage Pre-work](#persistent-storage-pre-work)
   * [Volume Configuration Pre-work](#volume-configuration-pre-work)
@@ -283,6 +285,10 @@ When internet access is enabled, Software Risk Manager will perform the followin
 - If Software Risk Manager is in offline mode, this may lead to lower quality results when running Dependency-Check as a bundled tool.
 - Secure Code Warrior - Unless noted elsewhere, Software Risk Manager will reach out to any URLs belonging to the securecodewarrior.com domain.
 
+### Core Pod Security Admission Requirements
+
+When enforcing policy violations with the optional [Kubernetes Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission) feature, the Core feature requires the `baseline` level.
+
 ## Scan Farm Feature Requirements
 
 This section covers the requirements you must satisfy with the external dependencies you provide for the database, cache, and object storage layers.
@@ -463,6 +469,10 @@ Below are the default CPU and memory settings for add-in tools. Refer to the [To
 | Memory | 500Mi | 2G |
 
 >Note: There are no defaults for add-in node selectors and pod tolerations.
+
+### Tool Orchestration Pod Security Admission Requirements
+
+When enforcing policy violations with the optional [Kubernetes Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission) feature, the Tool Orchestration feature requires the `privileged` level.
 
 # External Web Database Pre-work
 
