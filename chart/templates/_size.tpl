@@ -13,7 +13,7 @@
                     "webJobLimitMemory" "4000"
                     "webJobLimitDB" "4000"
                     "webJobLimitDisk" "4000"
-                    "toolServiceCPU" "1000"
+                    "toolServiceCPU" "1000m"
                     "toolServiceMemory" "1024Mi"
                     "toolServiceReplicas" "1"
 -}}
@@ -28,7 +28,7 @@
                     "webJobLimitMemory" "8000"
                     "webJobLimitDB" "8000"
                     "webJobLimitDisk" "8000"
-                    "toolServiceCPU" "2000"
+                    "toolServiceCPU" "2000m"
                     "toolServiceMemory" "2048Mi"
                     "toolServiceReplicas" "2"
 -}}
@@ -43,7 +43,7 @@
                     "webJobLimitMemory" "16000"
                     "webJobLimitDB" "16000"
                     "webJobLimitDisk" "16000"
-                    "toolServiceCPU" "2000"
+                    "toolServiceCPU" "2000m"
                     "toolServiceMemory" "2048Mi"
                     "toolServiceReplicas" "3"
 -}}
@@ -58,7 +58,7 @@
                     "webJobLimitMemory" "32000"
                     "webJobLimitDB" "32000"
                     "webJobLimitDisk" "32000"
-                    "toolServiceCPU" "2000"
+                    "toolServiceCPU" "2000m"
                     "toolServiceMemory" "2048Mi"
                     "toolServiceReplicas" "4"
 -}}
