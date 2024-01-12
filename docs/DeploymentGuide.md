@@ -226,6 +226,8 @@ And the Helm Prep script will use the system size to set the `sizing.size` Helm 
 
 >Note: The system sizing capability does not apply to Scan Farm workloads.
 
+The default system size is Unspecified. A system size specification will override most configurable resource requests. If you want to use specific resource requests, keep the `sizing.size` chart parameter at its default value.
+
 ## Core Feature Requirements
 
 This section describes the web and web database requirements based on the system size.
