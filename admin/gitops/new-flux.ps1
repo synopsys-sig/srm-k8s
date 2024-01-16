@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.8
+.VERSION 1.9
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -14,7 +14,7 @@ param (
 	[Parameter(Mandatory=$true)][string] $namespace,
 	[Parameter(Mandatory=$true)][string] $releaseName,
 	[string]   $helmChartRepoUrl = 'https://synopsys-sig.github.io/srm-k8s',
-	[string]   $helmChartVersion = '1.12.1',
+	[string]   $helmChartVersion = '1.13.0',
 	[string[]] $extraValuesFiles = @(),
 	[switch]   $useSealedSecrets,
 	[string]   $sealedSecretsNamespace = 'flux-system',
