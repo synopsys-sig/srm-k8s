@@ -3048,7 +3048,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v1.30.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v1.31.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |

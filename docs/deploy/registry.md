@@ -230,12 +230,12 @@ The SRM Tool Orchestration feature requires these Docker images:
 
 - sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2023.12.2
 - sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2023.12.2
-- sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v1.30.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v1.30.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-results:v1.30.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-error-results:v1.30.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v1.30.0
-- sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v1.30.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v1.31.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v1.31.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-results:v1.31.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-error-results:v1.31.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v1.31.0
+- sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v1.31.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-workflow-controller:v2.17.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-argoexec:v2.17.0
 - sig-repo.synopsys.com/synopsys/bitnami/minio:2021.4.6-debian-10-r11 (when not using external workflow storage)
@@ -248,12 +248,12 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 
 'codedx/codedx-tools:v2023.12.2',
 'codedx/codedx-toolsmono:v2023.12.2',
-'codedx/codedx-prepare:v1.30.0',
-'codedx/codedx-newanalysis:v1.30.0',
-'codedx/codedx-results:v1.30.0',
-'codedx/codedx-error-results:v1.30.0',
-'codedx/codedx-tool-service:v1.30.0',
-'codedx/codedx-cleanup:v1.30.0',
+'codedx/codedx-prepare:v1.31.0',
+'codedx/codedx-newanalysis:v1.31.0',
+'codedx/codedx-results:v1.31.0',
+'codedx/codedx-error-results:v1.31.0',
+'codedx/codedx-tool-service:v1.31.0',
+'codedx/codedx-cleanup:v1.31.0',
 'bitnami/minio:2021.4.6-debian-10-r11',
 'codedx/codedx-workflow-controller:v2.17.0',
 'codedx/codedx-argoexec:v2.17.0' | ForEach-Object {
@@ -282,12 +282,12 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 'codedx/codedx-tomcat:v2023.12.2',
 'codedx/codedx-tools:v2023.12.2',
 'codedx/codedx-toolsmono:v2023.12.2',
-'codedx/codedx-prepare:v1.30.0',
-'codedx/codedx-newanalysis:v1.30.0',
-'codedx/codedx-results:v1.30.0',
-'codedx/codedx-error-results:v1.30.0',
-'codedx/codedx-tool-service:v1.30.0',
-'codedx/codedx-cleanup:v1.30.0',
+'codedx/codedx-prepare:v1.31.0',
+'codedx/codedx-newanalysis:v1.31.0',
+'codedx/codedx-results:v1.31.0',
+'codedx/codedx-error-results:v1.31.0',
+'codedx/codedx-tool-service:v1.31.0',
+'codedx/codedx-cleanup:v1.31.0',
 'codedx/codedx-mariadb:v1.28.0',
 'bitnami/minio:2021.4.6-debian-10-r11',
 'codedx/codedx-workflow-controller:v2.17.0',
