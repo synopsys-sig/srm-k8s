@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.6.1
+.VERSION 1.7.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
@@ -178,6 +178,8 @@ $s = @{}
 [ScanFarmStorage],
 [ScanFarmStorageBucketName],
 [ScanFarmType],
+[ServiceAccountNameToolService],
+[ServiceAccountNameWorkflow],
 [SignerName],
 [SigRepoUsername],
 [SigRepoPassword],
@@ -267,7 +269,7 @@ Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[UseDockerRegistry]],$s[[DockerRegistryHost]],
 	$s[[UseDockerRegistryCredential]],$s[[DockerImagePullSecret]],$s[[DockerRegistryUser]],$s[[DockerRegistryPwd]],
 	$s[[UseToolOrchestration]],$s[[ToolServiceReplicaCount]],
-	$s[[UseExternalStorage]],
+	$s[[UseExternalStorage]],$s[[ServiceAccountNameToolService]],$s[[ServiceAccountNameWorkflow]],
 	$s[[ExternalStorageEndpoint]],$s[[ExternalStorageTLS]],$s[[ExternalStorageUsername]],$s[[ExternalStoragePassword]],$s[[ExternalStorageBucket]],$s[[ExternalStorageTrustCert]],$s[[ExternalStorageCertificate]],
 	$s[[UseNetworkPolicyOption]],$s[[GetKubernetesPort]],
 	$s[[UseTlsOption]],$s[[CertsCAPath]],$s[[SignerName]],
@@ -284,6 +286,10 @@ Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[UseNodeSelectors]],$s[[WebNodeSelector]],$s[[MasterDatabaseNodeSelector]],$s[[SubordinateDatabaseNodeSelector]],$s[[ToolServiceNodeSelector]],$s[[MinIONodeSelector]],$s[[WorkflowControllerNodeSelector]],$s[[ToolNodeSelector]],$s[[UseTolerations]],
 	$s[[WebTolerations]],$s[[MasterDatabaseTolerations]],$s[[SubordinateDatabaseTolerations]],$s[[ToolServiceTolerations]],$s[[MinIOTolerations]],$s[[WorkflowControllerTolerations]],$s[[ToolTolerations]],
 	$s[[Lock]],$s[[Finish]]
+
+Add-StepTransitions $graph $s[[ToolOrchestrationDockerImageVersion]] $s[[WorkflowDockerImageVersion]]
+
+Add-StepTransitions $graph $s[[ExternalStorageTLS]] $s[[ExternalStorageBucket]]
 
 Add-StepTransitions $graph $s[[ToolTolerations]] $s[[Finish]]
 
@@ -318,6 +324,8 @@ Add-StepTransitions $graph $s[[UseDockerRegistry]] $s[[UseToolOrchestration]]
 Add-StepTransitions $graph $s[[UseDockerRegistryCredential]] $s[[UseToolOrchestration]]
 
 Add-StepTransitions $graph $s[[UseToolOrchestration]] $s[[UseNetworkPolicyOption]]
+
+Add-StepTransitions $graph $s[[UseExternalStorage]] $s[[ExternalStorageEndpoint]]
 
 Add-StepTransitions $graph $s[[UseExternalStorage]] $s[[UseNetworkPolicyOption]]
 Add-StepTransitions $graph $s[[ExternalStorageBucket]] $s[[UseNetworkPolicyOption]]

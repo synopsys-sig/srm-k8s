@@ -122,6 +122,10 @@ function Get-ToExternalWorkflowStoragePath($config) {
 	Join-Path $config.GetValuesWorkDir()  'to.external-workflow-storage.values.yaml'
 }
 
+function Get-ToExternalWorkflowStorageServiceAccountPath($config) {
+	Join-Path $config.GetValuesWorkDir()  'to.external-workflow-storage-sa.values.yaml'
+}
+
 function Get-ToExternalCertWorkflowStoragePath($config) {
 	Join-Path $config.GetValuesWorkDir()  'to.external-cert-workflow-storage.values.yaml'
 }

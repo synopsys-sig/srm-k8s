@@ -46,6 +46,10 @@
 {{- printf "%s-workflow-role" ((include "srm.fullname" .) | trunc 48 | trimSuffix "-") }}
 {{- end -}}
 
+{{- define "srm-to.workflow.rolebindingname" -}}
+{{- printf "%s-to-workflow-rolebinding" ((include "srm.fullname" .) | trunc 38 | trimSuffix "-") }}
+{{- end -}}
+
 {{- define "srm-to.job-labels" -}}
 helm.sh/chart: {{ include "srm.chart" . }}
 {{- if .Chart.AppVersion }}
@@ -83,6 +87,17 @@ Create the name of the TO service account to use
 {{- end }}
 {{- end }}
 
+{{/*
+Create the name of the TO workflow service account to use
+*/}}
+{{- define "srm-to.serviceAccountNameWorkflow" -}}
+{{- if .Values.to.serviceAccountNameWorkflow.create }}
+{{- default (printf "%s-workflow" ((include "srm-to.fullname" .) | trunc 53 | trimSuffix "-")) .Values.to.serviceAccountNameWorkflow.name }}
+{{- else }}
+{{- default "default" .Values.to.serviceAccountNameWorkflow.name }}
+{{- end }}
+{{- end }}
+
 {{- define "srm-to.storageEndpoint" -}}
 {{- if .Values.minio.enabled -}}
 {{- print (include "minio.ref.fullname" .) "." .Release.Namespace ".svc.cluster.local:" .Values.minio.service.port -}}
@@ -102,8 +117,10 @@ Create the name of the TO service account to use
 {{- define "srm-to.storageCredentialSecretName" -}}
 {{- if .Values.features.minio -}}
 {{- include "minio.ref.secretName" . -}}
-{{- else -}}
+{{- else if .Values.to.workflowStorage.existingSecret -}}
 {{- .Values.to.workflowStorage.existingSecret -}}
+{{- else -}}
+{{- "" -}}
 {{- end -}}
 {{- end -}}
 

@@ -28,3 +28,7 @@ function New-Mocks() {
 	Mock Write-StepGraph {
 	}
 }
+
+function New-Password([string] $pwdValue) {
+	(new-object net.NetworkCredential("",$pwdValue)).securepassword
+}

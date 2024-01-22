@@ -52,17 +52,34 @@ function New-ToStorageSecret($config, $storageUsername, $storagePwd) {
 
 function New-ExternalWorkflowStorage($config) {
 
-	New-ToStorageSecret $config $config.externalWorkflowStorageUsername $config.externalWorkflowStoragePwd
+	$workflowStorageSecret = ''
+	if ($config.workflowStorageType -ne [WorkflowStorageType]::AwsIAM) {
+
+		New-ToStorageSecret $config $config.externalWorkflowStorageUsername $config.externalWorkflowStoragePwd
+		$workflowStorageSecret = Get-ToStorageSecretName $config
+	}
 
 	$yaml = @"
 to:
   workflowStorage:
     endpoint: $($config.externalWorkflowStorageEndpoint)
     endpointSecure: $(ConvertTo-Json $config.externalWorkflowStorageEndpointSecure)
-    existingSecret: $(Get-ToStorageSecretName $config)
+    existingSecret: $workflowStorageSecret
     bucketName: $($config.externalWorkflowStorageBucketName)
 "@ | Out-File (Get-ToExternalWorkflowStoragePath $config)
-	
+
+	if ($config.workflowStorageType -eq [WorkflowStorageType]::AwsIAM) {
+		@"
+to:
+  serviceAccount:
+    create: false
+    name: $($config.serviceAccountToolService)
+  serviceAccountNameWorkflow:
+    create: false
+    name: $($config.serviceAccountWorkflow)
+"@ | Out-File (Get-ToExternalWorkflowStorageServiceAccountPath $config)
+	}
+
 	if (-not $config.externalWorkflowStorageTrustCert) {
 		return
 	}

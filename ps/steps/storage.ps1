@@ -12,21 +12,29 @@ an older MinIO version that you can use.
 		$config,
 		'Orchestrated Analysis Storage',
 		[UseExternalStorage]::description,
-		'Do you want to use an external object storage system you provide?') {}
+		'What object storage configuration will you use?') {}
 
-	[IQuestion]MakeQuestion([string] $prompt) {
-		return new-object YesNoQuestion($prompt, 
-			'Yes, I want to use an object storage system that I will provide', 
-			'No, I want to use an object storage system that SRM deploys on Kubernetes', 1)
+	[IQuestion] MakeQuestion([string] $prompt) {
+		return new-object MultipleChoiceQuestion($prompt, @(
+			[tuple]::create('On-Cluster &MinIO', 'Use an on-cluster MinIO instance'),
+			[tuple]::create('&External (Access Key)', 'Use external workflow storage with access key'),
+			[tuple]::create('External (&AWS IAM)', 'Use external workflow storage with AWS IAM')), 0)
 	}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.skipMinIO = ([YesNoQuestion]$question).choice -eq 0
+		$this.config.skipMinIO = $true;
+
+		switch (([MultipleChoiceQuestion]$question).choice) {
+			0 { $this.config.workflowStorageType = [WorkflowStorageType]::OnCluster; $this.config.skipMinIO = $false; }
+			1 { $this.config.workflowStorageType = [WorkflowStorageType]::AccessKey }
+			2 { $this.config.workflowStorageType = [WorkflowStorageType]::AwsIAM }
+		}
 		return $true
 	}
 
 	[void]Reset(){
 		$this.config.skipMinIO = $false
+		$this.config.workflowStorageType = [WorkflowStorageType]::OnCluster
 	}
 
 	[bool]CanRun() {
@@ -125,7 +133,7 @@ the account should have permission to create that bucket.
 	}
 
 	[bool]CanRun() {
-		return $this.config.skipMinIO
+		return $this.config.workflowStorageType -eq [WorkflowStorageType]::AccessKey
 	}
 }
 
@@ -161,7 +169,7 @@ the account should have permission to create that bucket.
 	}
 
 	[bool]CanRun() {
-		return $this.config.skipMinIO
+		return $this.config.workflowStorageType -eq [WorkflowStorageType]::AccessKey
 	}
 }
 
@@ -259,5 +267,67 @@ The file should include the entire certificate chain.
 
 	[void]Reset(){
 		$this.config.externalWorkflowStorageCertChainPath = ''
+	}
+}
+
+class ServiceAccountNameToolService : Step {
+
+	static [string] hidden $description = @'
+Specify the Tool Service Kubernetes service account name that you linked
+to an IAM role/policy with the required object storage permissions.
+
+You can find the Tool Service AWS object storage permissions at the following URL:
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#aws-irsa
+'@
+
+	ServiceAccountNameToolService([Config] $config) : base(
+		[ServiceAccountNameToolService].Name,
+		$config,
+		'Tool Service Account',
+		[ServiceAccountNameToolService]::description,
+		'Enter your Tool Service Kubernetes Service Account name') {}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.serviceAccountToolService = ([Question]$question).response
+		return $true
+	}
+
+	[void]Reset(){
+		$this.config.serviceAccountToolService = ''
+	}
+
+	[bool]CanRun() {
+		return $this.config.workflowStorageType -eq [WorkflowStorageType]::AwsIAM
+	}
+}
+
+class ServiceAccountNameWorkflow : Step {
+
+	static [string] hidden $description = @'
+Specify the tool workflow Kubernetes service account name that you linked
+to an IAM role/policy with the required object storage permissions.
+
+You can find the tool workflow AWS object storage permissions at the following URL:
+https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#aws-irsa
+'@
+
+	ServiceAccountNameWorkflow([Config] $config) : base(
+		[ServiceAccountNameWorkflow].Name,
+		$config,
+		'Workflow Service Account',
+		[ServiceAccountNameWorkflow]::description,
+		'Enter your Workflow Kubernetes Service Account name') {}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.serviceAccountWorkflow = ([Question]$question).response
+		return $true
+	}
+
+	[void]Reset(){
+		$this.config.serviceAccountWorkflow = ''
+	}
+
+	[bool]CanRun() {
+		return $this.config.workflowStorageType -eq [WorkflowStorageType]::AwsIAM
 	}
 }

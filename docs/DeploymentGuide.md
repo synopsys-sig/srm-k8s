@@ -65,6 +65,7 @@
   * [Node Pool Pre-work](#node-pool-pre-work)
   * [Object Storage Pre-work](#object-storage-pre-work)
     + [AWS](#aws)
+    + [AWS IRSA](#aws-irsa)
     + [GCP](#gcp)
     + [MinIO](#minio)
 - [Password Pre-work](#password-pre-work)
@@ -1083,13 +1084,274 @@ When you opt for external workflow storage for Tool Orchestration workloads, you
 
 [Amazon S3](https://aws.amazon.com/s3/) is supported for tool orchestration workflow storage when your bucket is accessible using an access and secret key. The bucket must be accessible from the cluster running orchestrated analyses.
 
+You can opt for this storage type by selecting `External (Access Key)` from the Orchestrated Analysis Storage screen of the Helm Prep Wizard.
+
+>Note: Using [AWS IRSA](#aws-irsa) is preferred to using `External (Access Key)`.
+
+The following AWS permissions are required for the AWS sevice account:
+
+- s3:GetObject
+- s3:DeleteObject
+- s3:PutObject
+- s3:ListBucket
+
+You can follow the below example, which includes bash commands that shows one way to configure bucket access.
+
+1. Define variables used for this example
+
+```
+account_id=$(aws sts get-caller-identity --query "Account" --output text)
+username='username'
+bucket='srm-bucket'
+```
+
+2. Create a policy
+
+```
+cat > srm-tool-orchestration-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:PutObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::$bucket",
+                "arn:aws:s3:::$bucket/*"
+            ]
+        }
+    ]
+}
+EOF
+
+aws iam create-policy --policy-name srm-tool-orchestration-policy --policy-document file://srm-tool-orchestration-policy.json
+```
+
+3. Attach policy to account
+
+```
+aws iam attach-user-policy --user-name=$username --policy-arn=arn:aws:iam::$account_id:policy/srm-tool-orchestration-policy
+```
+
+If you want to uninstall what you created above, run the following commands:
+
+```
+account_id=$(aws sts get-caller-identity --query "Account" --output text)
+username='username'
+
+policy_arn="arn:aws:iam::$account_id:policy/srm-tool-orchestration-policy"
+
+aws iam detach-user-policy --user-name=$username --policy-arn=$policy_arn
+aws iam delete-policy      --policy-arn $policy_arn
+```
+
+### AWS IRSA
+
+[AWS IAM Roles for Service Account (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) is supported for tool orchestration workflow storage when your bucket is accessible from the AWS cluster running orchestrated analyses.
+
+You can opt for this storage type by selecting `External (AWS IAM)` from the Orchestrated Analysis Storage screen of the Helm Prep Wizard.
+
+You must provision Kubernetes ServiceAccount resources for both the SRM Tool Service and tool workflows and link them to the IAM permissions below. The Helm Prep Wizard will prompt for the account names.
+
+The following AWS permissions are required for the tool service:
+
+- s3:GetObject
+- s3:DeleteObject
+- s3:PutObject
+- s3:ListBucket
+
+The following AWS permissions are required for the workflow service:
+
+- s3:GetObject
+- s3:PutObject
+- s3:ListBucket
+
+After you have an [IAM OIDC provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html), you can follow the below example, which includes bash commands that show one way to configure AWS IRSA for two service accounts named `toolsvc-sa` and `workflow-sa`.
+
+1. Define variables used for this example
+
+```
+account_id=$(aws sts get-caller-identity --query "Account" --output text)
+awsRegion='us-east-2'
+
+clusterName='srm'
+oidc_provider=$(aws eks describe-cluster --name $clusterName --region $awsRegion --query "cluster.identity.oidc.issuer" --output text | sed -e "s/^https:\/\///")
+
+namespace='srm'
+tool_svc_service_account='toolsvc-sa'
+workflow_service_account='workflow-sa'
+
+bucket='srm-bucket'
+```
+
+2. Create Tool Service policy
+
+```
+cat > tool-service-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:PutObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::$bucket",
+                "arn:aws:s3:::$bucket/*"
+            ]
+        }
+    ]
+}
+EOF
+
+aws iam create-policy --policy-name srm-tool-service-bucket-policy --policy-document file://tool-service-policy.json
+```
+
+3. Create Workflow policy
+
+```
+cat > workflow-policy.json << EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::$bucket",
+                "arn:aws:s3:::$bucket/*"
+            ]
+        }
+    ]
+}
+EOF
+
+aws iam create-policy --policy-name srm-workflow-bucket-policy --policy-document file://workflow-policy.json
+```
+
+4. Create Tool Service role
+
+```
+cat > tool-service-role.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::$account_id:oidc-provider/$oidc_provider"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "$oidc_provider:aud": "sts.amazonaws.com",
+          "$oidc_provider:sub": "system:serviceaccount:$namespace:$tool_svc_service_account"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+aws iam create-role --role-name srm-tool-service-bucket-role --assume-role-policy-document file://tool-service-role.json --description "srm-tool-service-bucket-role"
+```
+
+5. Create Workflow role
+
+```
+cat > workflow-role.json << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::$account_id:oidc-provider/$oidc_provider"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "$oidc_provider:aud": "sts.amazonaws.com",
+          "$oidc_provider:sub": "system:serviceaccount:$namespace:$workflow_service_account"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+aws iam create-role --role-name srm-workflow-bucket-role --assume-role-policy-document file://workflow-role.json --description "srm-workflow-bucket-role"
+```
+
+6. Attach policies to roles
+
+```
+aws iam attach-role-policy --role-name srm-tool-service-bucket-role --policy-arn=arn:aws:iam::$account_id:policy/srm-tool-service-bucket-policy
+
+aws iam attach-role-policy --role-name srm-workflow-bucket-role --policy-arn=arn:aws:iam::$account_id:policy/srm-workflow-bucket-policy
+```
+
+7. Create Service Accounts
+
+```
+kubectl create namespace $namespace
+
+kubectl -n $namespace create serviceaccount $tool_svc_service_account
+kubectl -n $namespace create serviceaccount $workflow_service_account
+
+kubectl -n $namespace annotate serviceaccount $tool_svc_service_account eks.amazonaws.com/role-arn=arn:aws:iam::$account_id:role/srm-tool-service-bucket-role
+kubectl -n $namespace annotate serviceaccount $workflow_service_account eks.amazonaws.com/role-arn=arn:aws:iam::$account_id:role/srm-workflow-bucket-role
+```
+
+If you want to uninstall what you created above, run the following commands:
+
+```
+account_id=$(aws sts get-caller-identity --query "Account" --output text)
+
+tool_service_policy_arn="arn:aws:iam::$account_id:policy/srm-tool-service-bucket-policy"
+workflow_policy_arn="arn:aws:iam::$account_id:policy/srm-workflow-bucket-policy"
+
+aws iam detach-role-policy --role-name=srm-tool-service-bucket-role --policy-arn=$tool_service_policy_arn
+aws iam delete-role        --role-name=srm-tool-service-bucket-role
+aws iam delete-policy      --policy-arn $tool_service_policy_arn
+
+aws iam detach-role-policy --role-name=srm-workflow-bucket-role --policy-arn=$workflow_policy_arn
+aws iam delete-role        --role-name=srm-workflow-bucket-role
+aws iam delete-policy      --policy-arn $workflow_policy_arn
+
+kubectl annotate serviceaccount -n $namespace $tool_svc_service_account eks.amazonaws.com/role-arn-
+kubectl annotate serviceaccount -n $namespace $workflow_service_account eks.amazonaws.com/role-arn-
+
+kubectl -n $namespace delete serviceaccount $tool_svc_service_account $workflow_service_account
+```
+
 ### GCP
 
 [Cloud Storage](https://cloud.google.com/storage/docs/introduction) is supported for tool orchestration workflow storage when your bucket is accessible using an [HMAC key](https://cloud.google.com/storage/docs/authentication/hmackeys) with an Access ID and Secret. The bucket must be accessible from the cluster running orchestrated analyses.
 
+You can opt for this storage type by selecting `External (Access Key)` from the Orchestrated Analysis Storage screen of the Helm Prep Wizard.
+
 ### MinIO
 
 [MinIO](https://min.io/) is supported for tool orchestration workflow storage when your bucket is accessible using an access and secret key. The bucket must be accessible from the cluster running orchestrated analyses.
+
+You can opt for this storage type by selecting `External (Access Key)` from the Orchestrated Analysis Storage screen of the Helm Prep Wizard.
 
 # Password Pre-work
 
@@ -2803,6 +3065,9 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | to.serviceAccount.annotations | object | `{}` | the annotations to apply to the SRM tool service account |
 | to.serviceAccount.create | bool | `true` | whether to create a service account for the tool service |
 | to.serviceAccount.name | string | `nil` | the name of the service account to use; a name is generated using the fullname template when unset and create is true |
+| to.serviceAccountNameWorkflow.annotations | object | `{}` | the annotations to apply to the SRM tool workflow service account |
+| to.serviceAccountNameWorkflow.create | bool | `true` | whether to create a service account for the tool workflow service |
+| to.serviceAccountNameWorkflow.name | string | `nil` | the name of the workflow service account to use; a name is generated using the fullname template when unset and create is true |
 | to.tlsSecret | string | `nil` | the K8s secret name for tool service TLS with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls to-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | to.toSecret | string | `nil` | the K8s secret name containing the API key for the tool service with required field api-key Command: kubectl -n srm create secret generic tool-service-pd --from-literal api-key=password |
 | to.tolerations | list | `[]` | the pod tolerations for the tool service component |

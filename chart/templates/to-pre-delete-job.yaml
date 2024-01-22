@@ -1,4 +1,5 @@
 {{- if .Values.features.to -}}
+{{ $storageCredentialSecretName := (include "srm-to.storageCredentialSecretName" .) -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -53,8 +54,10 @@ spec:
           - "-storageTlsEnabled={{ include "srm-to.storageTlsEnabled" . }}"
           - "-storageBucket"
           - "{{ .Values.to.workflowStorage.bucketName }}"
+          {{- if $storageCredentialSecretName }}
           - "-storageCredentialSecretName"
-          - "{{ include "srm-to.storageCredentialSecretName" . }}"
+          - "{{ $storageCredentialSecretName }}"
+          {{- end }}
           - "-storageTlsConfigMapName"
           - "{{ include "srm-to.storageTlsConfigMapName" . }}"
           - "-storageTlsConfigMapPublicCertName"
@@ -62,6 +65,7 @@ spec:
           - "-workDir"
           - "/opt/codedx/cleanup/work"
         volumeMounts:
+        {{- if $storageCredentialSecretName }}
         - name: storage-secret-volume
           mountPath: "/opt/codedx/cleanup/secrets/storageUsername"
           readOnly: true
@@ -70,6 +74,7 @@ spec:
           mountPath: "/opt/codedx/cleanup/secrets/storagePassword"
           readOnly: true
           subPath: storagePassword
+        {{- end }}
         {{- if .Values.to.workflowStorage.configMapName }}
         - name: storage-cert-volume
           mountPath: /etc/ssl/certs/cdx-minio.pem
@@ -81,14 +86,16 @@ spec:
           mountPath: "/opt/codedx/cleanup/tls"
         {{- end }}
       volumes:
+      {{- if $storageCredentialSecretName }}
       - name: storage-secret-volume
         secret:
-          secretName: {{ include "srm-to.storageCredentialSecretName" . | quote }}
+          secretName: {{ $storageCredentialSecretName | quote }}
           items:
           - key: access-key
             path: storageUsername
           - key: secret-key
             path: storagePassword
+      {{- end }}
       {{- if .Values.to.workflowStorage.configMapName }}
       - name: storage-cert-volume
         configMap:

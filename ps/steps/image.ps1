@@ -241,7 +241,7 @@ class MinioDockerImageVersion : DockerImageVersionStep {
 	}
 
 	[bool]CanRun() {
-		return -not $this.config.useDefaultDockerImages -and -not $this.config.skipToolOrchestration
+		return -not $this.config.useDefaultDockerImages -and -not $this.config.skipToolOrchestration -and -not $this.config.skipMinIO
 	}
 }
 

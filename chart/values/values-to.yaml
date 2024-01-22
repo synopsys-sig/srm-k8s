@@ -58,7 +58,7 @@ to:
       # -- the Docker image repository name for the SRM tool service workload
       toolService: 'codedx/codedx-tool-service'
     # -- the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)
-    tag: v1.30.0
+    tag: v1.31.0
   logs:
     # -- the maximum size of a tool service log file
     maxSizeMB: 10
@@ -77,6 +77,13 @@ to:
     # -- the annotations to apply to the SRM tool service account
     annotations: {}
     # -- the name of the service account to use; a name is generated using the fullname template when unset and create is true
+    name:
+  serviceAccountNameWorkflow:
+    # -- whether to create a service account for tool workflows (an existing service account must reference Kubernetes image pull secret as needed)
+    create: true
+    # -- the annotations to apply to the tool workflow service account
+    annotations: {}
+    # -- the name of the tool workflow service account to use; a name is generated using the fullname template when unset and create is true
     name:
   # -- the node selector to use for the tool service
   nodeSelector: {}

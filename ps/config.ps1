@@ -47,6 +47,12 @@ enum SystemSize {
 	ExtraLarge
 }
 
+enum WorkflowStorageType {
+	OnCluster
+	AccessKey
+	AwsIAM
+}
+
 class Config {
 
 	static [int]   $kubeApiTargetPortDefault = 443
@@ -54,7 +60,7 @@ class Config {
 	static [int]   $volumeSizeGiBDefault = 0           # new default to support system size override when > 0
 	static [int]   $externalDatabasePortDefault = 3306
 
-	static [string]   $thisVersion = "1.3"
+	static [string]   $thisVersion = "1.4"
 
 	static [string[]] $protectedFields = @(
 		'sigRepoUsername',
@@ -181,6 +187,10 @@ class Config {
 	[bool]         $skipMinIO
 	[bool]         $skipNetworkPolicies
 	[bool]         $skipTls
+
+	[string]       $workflowStorageType
+	[string]       $serviceAccountToolService
+	[string]       $serviceAccountWorkflow
 
 	[int]          $toolServiceReplicas
 
@@ -330,6 +340,10 @@ class Config {
 		# v1.3 fields
 		$this.systemSize = [SystemSize]::Unspecified # < 1.3 set CPU and memory independently (unspecified for backward compatibility)
 		$this.useTriageAssistant = $true             # minimum resource size accounts for Triage Assistant
+		# v1.4 fields
+		$this.workflowStorageType = [WorkflowStorageType]::OnCluster # < 1.4 skipMinIO ? [WorkflowStorageType]::AccessKey : [WorkflowStorageType]::OnCluster
+		$this.serviceAccountToolService = ''
+		$this.serviceAccountWorkflow = ''
 	}
 
 	static [Config] FromJsonFile($configJsonFile) {
@@ -347,7 +361,22 @@ class Config {
 		if ($version -gt $currentVersion) {
 			throw "Unable to handle config version: $($configJson.configVersion)"
 		}
-		return [Config]$configJson
+
+		$config = [Config]$configJson
+
+		$v1Dot4 = new-object Management.Automation.SemanticVersion('1.4')
+		$version = new-object Management.Automation.SemanticVersion($config.configVersion)
+
+		if ($version -lt $v1Dot4) {
+			# workflow storage type did not exist before v1.4
+			if ($config.skipMinIO) {
+				$config.workflowStorageType = [WorkflowStorageType]::AccessKey
+			}
+		}
+
+		# override config version obtained on file import
+		$config.configVersion = [Config]::thisVersion
+		return $config
 	}
 
 	[bool]IsElbIngress() {
