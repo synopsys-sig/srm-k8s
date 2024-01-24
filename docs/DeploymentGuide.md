@@ -3253,7 +3253,7 @@ $ helm package cnc # recreate cnc-2023.9.2.tgz
 $ rm -r cnc # delete working chart
 ```
 
->Note: The above procedure uses the "cnc" dependency chart version 2023.6.1.
+>Note: The above procedure uses the "cnc" dependency chart version 2023.9.2.
 
 Avoid re-running the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
 
