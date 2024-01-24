@@ -3246,10 +3246,10 @@ The Scan Farm chart does not include a helm value setting for the job's restart 
 
 ```
 $ cd /path/to/git/srm-k8s/chart/charts
-$ tar xvf cnc-2023.6.1.tgz
-$ vim cnc/templates/cnc-scan-service.yaml # edit job's restartPolicy
-$ mv cnc-2023.6.1.tgz ~ # move original chart elsewhere
-$ helm package cnc # recreate cnc-2023.6.1.tgz
+$ tar xvf cnc-2023.9.2.tgz
+$ vim cnc/templates/cnc-scan-service.yaml # set job's restartPolicy to Never
+$ mv cnc-2023.9.2.tgz ~ # move original chart elsewhere
+$ helm package cnc # recreate cnc-2023.9.2.tgz
 $ rm -r cnc # delete working chart
 ```
 
