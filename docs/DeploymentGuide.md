@@ -109,6 +109,7 @@
 - [Backup and Restore](#backup-and-restore)
   * [About Velero](#about-velero)
   * [Installing Velero](#installing-velero)
+    + [Velero Opt-In or Opt-Out Volume Backup](#velero-opt-in-or-opt-out-volume-backup)
   * [Create a Backup Schedule](#create-a-backup-schedule)
     + [Schedule for On-Cluster Database](#schedule-for-on-cluster-database)
     + [Schedule for External Database](#schedule-for-external-database)
@@ -2106,6 +2107,25 @@ Velero can back up Kubernetes state stored in etcd and Kubernetes volume data. V
 Install the [Velero CLI](https://velero.io/docs/main/basic-install/#install-the-cli) and then follow the Velero installation documentation for your scenario. You can find links to provider-specific documentation in the Setup Instructions column on the [Providers](https://velero.io/docs/main/supported-providers/) page, which includes links to the [Azure](https://github.com/vmware-tanzu/velero-plugin-for-microsoft-azure#setup) and [AWS](https://github.com/vmware-tanzu/velero-plugin-for-aws#setup) instructions. If you're not using a storage provider plugin, [enable file system backup](https://velero.io/docs/main/customize-installation/#enable-file-system-backup) at install time.
 
 > Note: If your Velero backup unexpectedly fails, you may need to increase the amount of memory available to the Velero pod. Use the --velero-pod-mem-limit parameter with the velero install command as described [here](https://velero.io/docs/main/customize-installation/#customize-resource-requests-and-limits).
+
+### Velero Opt-In or Opt-Out Volume Backup
+
+If your Velero configuration requires opt-in (velero.io/backup-name=volume-name) or opt-out (velero.io/backup-volumes-excludes=volume-name) volume annotations, you can [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by specifying pod annotations as shown below (opt-in example).
+
+```
+web:
+  podAnnotations:
+    backup.velero.io/backup-volumes: appdata-volume-name
+
+mariadb:
+  slave:
+    annotations:
+      backup.velero.io/backup-volumes: backup-volume-name
+
+minio:
+  podAnnotations:
+    backup.velero.io/backup-volumes: minio-volume-name
+``` 
 
 ## Create a Backup Schedule
 
