@@ -2110,7 +2110,7 @@ Install the [Velero CLI](https://velero.io/docs/main/basic-install/#install-the-
 
 ### Velero Opt-In or Opt-Out Volume Backup
 
-If your Velero configuration requires opt-in (velero.io/backup-name=volume-name) or opt-out (velero.io/backup-volumes-excludes=volume-name) volume annotations, you can [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by specifying pod annotations as shown below (opt-in example).
+If your Velero configuration requires opt-in (velero.io/backup-name=volume-name) or opt-out (velero.io/backup-volumes-excludes=volume-name) volume annotations, you can [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by specifying pod annotations as shown below (opt-in example). Replace the volume name placeholders with your volume names.
 
 ```
 web:
@@ -2125,7 +2125,7 @@ mariadb:
 minio:
   podAnnotations:
     backup.velero.io/backup-volumes: minio-volume-name
-``` 
+```
 
 ## Create a Backup Schedule
 
