@@ -1943,11 +1943,12 @@ kubectl -n srm create secret generic srm-ldap-private-props --from-file=srm-ldap
 5. Reference your srm-ldap-private-props Kubernetes secret by adding a new entry to your srm-extra-props.yaml file.
 
 ```
-codedxProps:
-  extra:
-  - key: srm-ldap-private-props
-    type: secret
-    name: srm-ldap-private-props
+web:
+  props:
+    extra:
+    - key: srm-ldap-private-props
+      type: secret
+      name: srm-ldap-private-props
 ```
 
 >Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
