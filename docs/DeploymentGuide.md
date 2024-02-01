@@ -1871,8 +1871,9 @@ networkPolicy:
 
 ```
 helm -n srm upgrade --reset-values --install srm ... -f /path/to/srm-extra-props.yaml
-
 ```
+
+>Note: Append `-f /path/to/srm-extra-props.yaml` to the end of your helm command to ensure your changes override other values files in the helm command.
 
 ## Specify Extra SAML Configuration
 
