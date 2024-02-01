@@ -1875,6 +1875,8 @@ helm -n srm upgrade --reset-values --install srm ... -f /path/to/srm-extra-props
 
 >Note: Append `-f /path/to/srm-extra-props.yaml` to the end of your helm command to ensure your changes override other values files in the helm command.
 
+Remember from now on to always reference your srm-extra-props.yaml file when you run the helm upgrade command.
+
 ## Specify Extra SAML Configuration
 
 Selecting SAML authentication in the Helm Prep Wizard will generate a config.json file with the following fields configured (field values are for illustrative purposes):
