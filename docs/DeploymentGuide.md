@@ -2527,6 +2527,12 @@ Edit run-migrate.ps1 by replacing /path/to/git/codedx-kubernetes/setup/steps/../
 /path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' ...
 ```
 
+Before continuing, verify that the `-codeDxAdminPwd` parameter value matches the current admin password for your Code Dx instance. If the password matches the initial admin password, update the parameter by specifying the current password.
+
+```
+/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' -codeDxAdminPwd 'current-admin-password-goes-here' ... 
+```
+
 Invoke your run-migrate.ps1 script to generate a config.json file.
 
 ```
@@ -2965,6 +2971,10 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | cnc | Software Risk Manager Scan Farm |
 
 ## Values
+
+The following table lists the Software Risk Manager Helm chart values. Run `helm show values srm --repo https://synopsys-sig.github.io/srm-k8s` to see the values for the latest chart.
+
+>Note: You can run `helm show values srm --repo https://synopsys-sig.github.io/srm-k8s --version 1.15.0` to see the values for a specific chart version, like 1.15.0 in the example.
 
 | Key | Type | Default/Example | Description |
 |:---|:---|:---|:---|
