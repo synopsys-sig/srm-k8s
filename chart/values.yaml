@@ -61,7 +61,7 @@ networkPolicy:
     egress:
       extraPorts:
         # -- the TCP ports allowed for egress from the web component
-        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999]
+        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 8443]
         # -- the UDP ports allowed for egress from the web component
         udp: [53, 389, 636, 3269]
 
@@ -72,6 +72,9 @@ openshift:
 web:
   # @ignore
   affinity: {}
+
+  # -- the optional context path for the web component
+  appName: 
 
   authentication:
     saml:
@@ -113,7 +116,7 @@ web:
     # -- the Docker image repository name for the SRM web workload
     repository: codedx/codedx-tomcat
     # -- the Docker image version for the SRM web workload
-    tag: v2023.12.4
+    tag: v2023.12.6
     # -- the K8s Docker image pull policy for the SRM web workload
     pullPolicy: IfNotPresent
 
@@ -325,7 +328,7 @@ mariadb:
     # -- the Docker image repository name for the MariaDB workload
     repository: codedx/codedx-mariadb
     # -- the Docker image version for the MariaDB workload
-    tag: v1.28.0
+    tag: v1.29.0
     # -- the K8s Docker image pull policy for the MariaDB workload
     pullPolicy: IfNotPresent
     # -- the K8s image pull secret to use for MariaDB Docker images

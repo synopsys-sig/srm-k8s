@@ -13,10 +13,8 @@ spec:
   - ports:
     - port: {{ required "kubeapi-server target/pod port must be defined" .Values.networkPolicy.k8sApiPort }}
       protocol: TCP
-    - port: 53
-      protocol: TCP
-    - port: 53
-      protocol: UDP
+  {{- include "srm-to.netpolicy.egress.ports.tcp" . | nindent 2 }}
+  {{- include "srm-to.netpolicy.egress.ports.udp" . | nindent 2 }}
   - ports:
     {{- if .Values.web.tlsSecret }}
     - port: 8443

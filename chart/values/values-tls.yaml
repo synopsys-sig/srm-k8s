@@ -1,5 +1,8 @@
 #
-# Follow the instructions at https://cert-manager.io/docs/usage/kube-csr/ to install cert-manager kube-csr
+# Follow the instructions at https://cert-manager.io/docs/usage/kube-csr/ to install cert-manager kube-csr - you can
+# find an example at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#cert-manager-self-signed-ca-example
+#
+# (the commands below are also available at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#helm-tls-values-values-tlsyaml)
 #
 # $ export CERT_MANAGER_NAMESPACE='cert-manager'
 # $ export SRM_NAMESPACE='srm'
@@ -16,6 +19,9 @@
 # $ # Fetch CA cert from cert-manager (replace ca-key-pair accordingly)
 # $ kubectl -n $CERT_MANAGER_NAMESPACE get secret ca-key-pair -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
 # 
+# $ # Create SRM namespace (if necessary)
+# $ kubectl create ns $SRM_NAMESPACE
+#
 # $ # Create CA ConfigMap
 # $ kubectl -n $SRM_NAMESPACE create configmap $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
 # 

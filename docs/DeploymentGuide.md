@@ -70,8 +70,9 @@
     + [MinIO](#minio)
 - [Password Pre-work](#password-pre-work)
 - [Network Policies](#network-policies)
-- [TLS Connections](#tls-connections)
+- [TLS Pre-work](#tls-pre-work)
   * [Cert-Manager](#cert-manager)
+  * [Cert-Manager Self-signed CA Example](#cert-manager-self-signed-ca-example)
 - [Licensing](#licensing)
 - [Installation - Quick Start](#installation---quick-start)
   * [Core Quick Start](#core-quick-start)
@@ -100,6 +101,7 @@
     + [Rerun Helm](#rerun-helm)
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
+  * [Specify Custom Context Path](#specify-custom-context-path)
   * [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
     + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
@@ -156,6 +158,7 @@
   * [Scan Farm Feature Troubleshooting](#scan-farm-feature-troubleshooting)
     + [Scan Farm Migration Job Fails](#scan-farm-migration-job-fails)
 - [Appendix](#appendix)
+  * [Helm TLS Values (values-tls.yaml)](#helm-tls-values-values-tlsyaml)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Scan Farm Wizard](#scan-farm-wizard)
 
@@ -1390,15 +1393,71 @@ How many passwords you must set will depend on how you deploy Software Risk Mana
 
 The Software Risk Manager deployment supports network policies for non-Scan Farm components.
 
-# TLS Connections
+# TLS Pre-work
 
 The Software Risk Manager deployment includes optional support for TLS connections between non-Scan Farm components by using Kubernetes Certificate Signing Requests (CSR).
 
+If you plan to enable TLS connections, you must have access to your CA public key and know your CSR signer name before you run the Helm Prep Wizard (see [Full Installation](#installation---full)).
+
 ## Cert-Manager
 
-You can use the cert-manager support for Kubernetes CSRs, which is in an experimental state, to issue certificates for Software Risk Manager components. Follow the cert-manager kube-csr [installation instructions](https://cert-manager.io/docs/usage/kube-csr/) and then define either an Issuer or ClusterIssuer [resource](https://cert-manager.io/docs/configuration/).
+You can use the cert-manager support for Kubernetes CSRs, which is in an experimental state, to issue certificates for Software Risk Manager Core and Tool Orchestration components. Follow the cert-manager kube-csr [installation instructions](https://cert-manager.io/docs/usage/kube-csr/) and then define either an Issuer or ClusterIssuer [resource](https://cert-manager.io/docs/configuration/).
 
-Refer to the comments at the top of [values-tls.yaml](https://github.com/synopsys-sig/srm-k8s/blob/main/chart/values/values-tls.yaml) for how to create certificate resources.
+Refer to the comments at either the top of [values-tls.yaml](https://github.com/synopsys-sig/srm-k8s/blob/main/chart/values/values-tls.yaml) or the [Helm TLS Values (values-tls.yaml) appendix](#helm-tls-values-values-tlsyaml) for how to create related certificate resources.
+
+## Cert-Manager Self-signed CA Example
+
+This cert-manager 1.14.2 example shows one way to use cert-manager to issue certificates for the Core and Tool Orchestration features. It creates a cluster-scoped ClusterIssuer using a self-signed CA.
+
+1. Install cert-manager v1.14.2:
+
+```
+$ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.2/cert-manager.crds.yaml
+$ helm repo add jetstack https://charts.jetstack.io --force-update
+$ helm repo update
+$ helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.14.2 --set featureGates="ExperimentalCertificateSigningRequestControllers=true"
+```
+
+2. Create a signing key and certificate with the common name Private CA:
+
+```
+$ openssl genrsa -out ca.key 2048
+$ openssl req -x509 -new -key ca.key -subj "/CN=Private CA" -days 3650 -out ca.crt
+```
+
+3. Create a Kubernetes Secret named ca-key-pair in the cert-manager namespace:
+
+```
+$ kubectl -n cert-manager create secret tls ca-key-pair --cert=ca.crt --key=ca.key
+```
+
+4. Create a new file named clusterissuer.yaml with the following contents:
+
+```
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: ca-issuer
+spec:
+  ca:
+    secretName: ca-key-pair
+```
+
+5. Run the following command to create the ca-issuer ClusterIssuer:
+
+```
+kubectl apply -f ./clusterissuer.yaml
+```
+
+6. Wait for the following command to show a Ready status:
+
+```
+kubectl get clusterissuer ca-issuer -o wide
+```
+
+When you run the Helm Prep Wizard (see [Full Installation](#installation---full)) and enable TLS on the Configure TLS screen, specify `clusterissuers.cert-manager.io/ca-issuer` for your CSR signer name and enter the path to your ca.crt for your Kubernetes CA cert.
+
+>Note: The wizard will include an installation note referencing additional pre-work documented in the values-tls.yaml file.
 
 # Licensing
 
@@ -1571,6 +1630,8 @@ helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
 helm repo update
 helm dependency update /path/to/git/srm-k8s/chart
 helm -n srm upgrade --reset-values --install srm -f "/path/to/.k8s-srm/chart-values-combined/values-combined.yaml" --timeout 30m0s /path/to/git/srm-k8s/chart
+
+INFO: If you use an srm-extra-props.yaml file, include '-f /path/to/srm-extra-props.yaml' as your helm command's last values file parameter.
 ```
 
 - The optional `K8s Installation Notes` section will include steps you should take before creating K8s resources and running helm.
@@ -1579,6 +1640,8 @@ helm -n srm upgrade --reset-values --install srm -f "/path/to/.k8s-srm/chart-val
 - The `Required Helm Commands` section includes the helm commands you must run to deploy (or upgrade) SRM.
 
 See the next section if you want to deploy Software Risk Manager using GitOps, specifically the Flux software. Otherwise, run the commands generated by the Helm Prep Script to deploy Software Risk Manager in your desired configuration.
+
+>Note: If you decide to [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props), remember to append the `-f /path/to/srm-extra-props.yaml` parameter to the helm upgrade command generated by the Helm Prep Script. If your srm-extra-props.yaml file is found alongside your config.json file, the `-f /path/to/srm-extra-props.yaml` parameter will be included automatically.
 
 ### Fetch Initial Admin Password
 
@@ -1875,6 +1938,8 @@ helm -n srm upgrade --reset-values --install srm ... -f /path/to/srm-extra-props
 
 >Note: Append `-f /path/to/srm-extra-props.yaml` to the end of your helm command to ensure your changes override other values files in the helm command.
 
+If you store your srm-extra-props.yaml file alongside your config.json file, the Helm Prep Script will automatically include the `-f /path/to/srm-extra-props.yaml` parameter.
+
 Remember from now on to always reference your srm-extra-props.yaml file when you run the helm upgrade command.
 
 ## Specify Extra SAML Configuration
@@ -1955,6 +2020,44 @@ web:
 ```
 
 >Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
+
+## Specify Custom Context Path
+
+By default, Software Risk Manager is accessible at `/srm`. For backward compatibility, requests to `/codedx/api` and `/codedx/x` will be rewritten to `/srm/api` and `/srm/x` respectively, and requests to `/codedx` will be redirected to /srm.
+
+You can change Software Risk Manager's context path by setting the web.appName Helm property. URL rewrites and redirects from /codedx get disabled when using a custom context path. Here's an example srm-extra-props.yaml that changes the default context path from `/srm` to `/mysrm`:
+
+```
+web:
+  appName: mysrm
+```
+
+>Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
+
+If you are using the Ingress-NGINX controller, refer to this ingress resource example that uses path-based/fanout routing to make Software Risk Manager available at `/mysrm`:
+
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  name: srm
+  namespace: srm
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: srm-web
+            port:
+              number: 9090
+        path: /mysrm
+        pathType: Prefix
+```
 
 ## Tool Orchestration Add-in Tool Configuration
 
@@ -3018,7 +3121,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | mariadb.image.pullSecrets | list | `[]` | the K8s image pull secret to use for MariaDB Docker images |
 | mariadb.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the MariaDB Docker image |
 | mariadb.image.repository | string | `"codedx/codedx-mariadb"` | the Docker image repository name for the MariaDB workload |
-| mariadb.image.tag | string | `"v1.28.0"` | the Docker image version for the MariaDB workload |
+| mariadb.image.tag | string | `"v1.29.0"` | the Docker image version for the MariaDB workload |
 | mariadb.master.masterCaConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt Command: kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt |
 | mariadb.master.masterTlsSecret | string | `nil` | the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | mariadb.master.nodeSelector | object | `{}` | the node selector to use for the MariaDB primary database workload |
@@ -3067,6 +3170,8 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | minio.tolerations | list | `[]` | the pod tolerations for the MinIO component |
 | networkPolicy.enabled | bool | `false` | whether to enable network policies for SRM components that support network policy |
 | networkPolicy.k8sApiPort | int | `443` | the port for the K8s API, required when using the Tool Orchestration feature |
+| networkPolicy.to.egress.extraPorts.tcp | list | `[53,443]` | the TCP ports allowed for egress from the tool service component |
+| networkPolicy.to.egress.extraPorts.udp | list | `[53]` | the UDP ports allowed for egress from the tool service component |
 | networkPolicy.web.egress.extraPorts.tcp | list | `[22,53,80,389,443,636,7990,7999]` | the TCP ports allowed for egress from the web component |
 | networkPolicy.web.egress.extraPorts.udp | list | `[53,389,636,3269]` | the UDP ports allowed for egress from the web component |
 | openshift.createSCC | bool | `false` | whether to create SecurityContextConstraint resources, which is required when using OpenShift |
@@ -3082,7 +3187,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v1.31.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v1.32.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -3131,7 +3236,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2023.12.4"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2023.12.6"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=90.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
@@ -3147,6 +3252,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.podSecurityContext.runAsUser | int | `1000` | the uid for the SRM web pod |
 | web.priorityClass.create | bool | `false` | whether to create a PriorityClass resource for the web component |
 | web.priorityClass.value | int | `10100` | the web component priority value, which must be set relative to other Tool Orchestration component priority values |
+| web.props.context.path | string | `/srm` | the optional context path for the web component |
 | web.props.extra | list | `[]` | the list of extra resources containing SRM prop settings |
 | web.props.limits.analysis.concurrent | int | `2` | the value of the SRM prop analysis.concurrent-analysis-limit, which determines the maximum number of analyses to run concurrently |
 | web.props.limits.database.poolSize | int | `5` | the size of the database connection pool |
@@ -3294,6 +3400,73 @@ Avoid re-running the `helm dependency update` command until you have inspected t
 # Appendix
 
 Refer to these sections for additional Software Risk Manager documentation.
+
+## Helm TLS Values (values-tls.yaml)
+
+When you run the Helm Prep Wizard and enable TLS on the Configure TLS screen, the wizard will include an installation note referencing the below pre-work from the values-tls.yaml file. You must run the applicable commands below before running the helm command generated by the Helm Prep Script.
+
+```
+$ export CERT_MANAGER_NAMESPACE='cert-manager'
+$ export SRM_NAMESPACE='srm'
+$ export SRM_RELEASE_NAME='srm'
+$ export CERT_SIGNER='clusterissuers.cert-manager.io/ca-issuer'
+
+$ export CA_CONFIGMAP_NAME='srm-ca-configmap'
+$ export SRM_WEB_SECRET_NAME='srm-web-tls-secret'
+$ export SRM_DB_SECRET_NAME='srm-db-tls-secret'
+$ export SRM_TO_SECRET_NAME='srm-to-tls-secret'
+$ export SRM_MINIO_SECRET_NAME='srm-minio-tls-secret'
+$ export SRM_WEB_CACERTS_SECRET_NAME='srm-web-cacerts-secret'
+
+$ # Fetch CA cert from cert-manager (replace ca-key-pair accordingly)
+$ kubectl -n $CERT_MANAGER_NAMESPACE get secret ca-key-pair -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
+
+$ # Create SRM namespace (if necessary)
+$ kubectl create ns $SRM_NAMESPACE
+ 
+$ # Create CA ConfigMap
+$ kubectl -n $SRM_NAMESPACE create configmap $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
+ 
+$ # Add ca.crt to cacerts file (your config.json caCertsFilePath parameter value)
+$ keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
+
+$ # Create cacerts Secret
+$ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=/path/to/cacerts --from-literal cacerts-password=changeit
+
+$ # Start pwsh session
+$ pwsh
+PS> $global:PSNativeCommandArgumentPassing='Legacy'
+PS> Install-Module guided-setup
+
+PS> # Create SRM web certificate
+PS> $webSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-web"
+PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $env:SRM_NAMESPACE
+ 
+PS> # Create SRM web Secret
+PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
+ 
+PS> # Create primary DB certificate (required for deployments using an on-cluster MariaDB)
+PS> $dbSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'mariadb'
+PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $env:SRM_NAMESPACE
+ 
+PS> # Create DB Secret (required for deployments using an on-cluster MariaDB)
+PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
+ 
+PS> # Create TO certificate (required for deployments using Tool Orchestration)
+PS> $toSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-to"
+PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $env:SRM_NAMESPACE
+ 
+PS> # Create TO Secret (required for deployments using Tool Orchestration)
+PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
+ 
+PS> # Create MinIO certificate (required for deployments using an on-cluster, built-in MinIO)
+PS> $minioSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'minio'
+PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $env:SRM_NAMESPACE
+ 
+PS> # Create MinIO Secret (required for deployments using an on-cluster, built-in MinIO)
+PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_MINIO_SECRET_NAME './minio-tls.crt' './minio-tls.key'
+
+```
 
 ## Helm Prep Wizard
 

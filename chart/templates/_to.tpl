@@ -187,6 +187,22 @@ Returns the workflow NetworkPolicy name.
 {{- end -}}
 
 {{/*
+Create NetworkPolicy TCP port ranges.
+*/}}
+{{- define "srm-to.netpolicy.egress.ports.tcp" -}}
+{{- $portData := dict "ports" .Values.networkPolicy.to.egress.extraPorts.tcp "protocol" "TCP" -}}
+{{- include "netpolicy.ports" $portData -}}
+{{- end -}}
+
+{{/*
+Create NetworkPolicy UDP port ranges.
+*/}}
+{{- define "srm-to.netpolicy.egress.ports.udp" -}}
+{{- $portData := dict "ports" .Values.networkPolicy.to.egress.extraPorts.udp "protocol" "UDP" -}}
+{{- include "netpolicy.ports" $portData -}}
+{{- end -}}
+
+{{/*
 Duplicates of a Minio template helper so we can reference Minio's service name
 */}}
 

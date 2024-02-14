@@ -187,3 +187,24 @@ Create NetworkPolicy UDP port ranges.
 {{- $portData := dict "ports" .Values.networkPolicy.web.egress.extraPorts.udp "protocol" "UDP" -}}
 {{- include "netpolicy.ports" $portData -}}
 {{- end -}}
+
+{{/*
+Determine the web context path.
+*/}}
+{{- define "srm-web.appName" -}}
+{{- default "srm" .Values.web.appName -}}
+{{- end -}}
+
+{{/*
+Determine the web readiness path.
+*/}}
+{{- define "srm-web.readinessProbePath" -}}
+{{- printf "%s/x/system-status/ready" (include "srm-web.appName" .) }}
+{{- end -}}
+
+{{/*
+Determine the web liveness path.
+*/}}
+{{- define "srm-web.livenessProbePath" -}}
+{{- printf "%s/x/system-status/alive" (include "srm-web.appName" .) }}
+{{- end -}}

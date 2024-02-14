@@ -3,8 +3,8 @@ name: srm
 description: Software Risk Manager
 type: application
 icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
-version: 1.16.0
-appVersion: "2023.12.4"
+version: 1.18.0
+appVersion: "2023.12.6"
 
 dependencies:
 - name: mariadb

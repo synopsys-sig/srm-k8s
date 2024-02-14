@@ -33,7 +33,7 @@ certificate authority.
 	}
 
 	[bool]CanRun(){
-		return -not $this.config.externalDatabaseTrustCert
+		return -not $this.config.externalDatabaseTrustCert -and $this.config.skipTLS
 	}
 }
 

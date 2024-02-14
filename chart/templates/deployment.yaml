@@ -31,14 +31,6 @@ spec:
       serviceAccountName: {{ include "srm-web.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.web.podSecurityContext | nindent 8 }}
-      {{- if .Values.nodeSelectors }}
-      nodeSelector:
-      {{- toYaml .Values.web.nodeSelectors | trim | nindent 8 }}
-      {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations:
-      {{- toYaml .Values.web.tolerations | trim | nindent 8 }}
-      {{- end }}
       containers:
         - name: srm
           env:
@@ -50,11 +42,13 @@ spec:
               value: /opt/tomcat/temp
             - name: SUPERUSER_NAME
               value: "admin"
+            - name: SRM_WEBAPP_NAME
+              value: "{{ include "srm-web.appName" . }}"
           image: "{{ .Values.web.image.registry }}/{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
           imagePullPolicy: {{ .Values.web.image.pullPolicy }}
           readinessProbe:
             httpGet:
-              path: /codedx/x/system-status/ready
+              path: "{{ include "srm-web.readinessProbePath" . }}"
               {{- if .Values.web.tlsSecret }}
               scheme: HTTPS
               port: 8443
@@ -64,7 +58,7 @@ spec:
             initialDelaySeconds: 10
           livenessProbe:
             httpGet:
-              path: /codedx/x/system-status/alive
+              path: "{{ include "srm-web.livenessProbePath" . }}"
               {{- if .Values.web.tlsSecret }}
               scheme: HTTPS
               port: 8443

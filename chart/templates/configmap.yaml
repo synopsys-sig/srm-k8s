@@ -40,6 +40,7 @@ data:
     CATALINA_OPTS='{{ include "srm-web.props.system-properties" . }}'
     CATALINA_OPTS="$CATALINA_OPTS {{ default "" .Values.web.javaOpts }}"
     CATALINA_OPTS="$CATALINA_OPTS -Dcodedx.autoupdate=true"
+    CATALINA_OPTS="$CATALINA_OPTS -Dsrm.webapp-name={{ include "srm-web.appName" . }}"
     keystoreKeyFile='{{ include "srm-web.cacerts.password.path" . }}'
     if [ -f $keystoreKeyFile ] && [ -s $keystoreKeyFile ]; then
       keystoreKey=$(<$keystoreKeyFile)
@@ -108,4 +109,4 @@ data:
     storage-service.url = {{ include "srm-sf.storageSvcUrl" . }}
     coverity.version-to-run = {{ .Values.web.scanfarm.sast.version }}
     blackduck.version-to-run = {{ .Values.web.scanfarm.sca.version }}
-  {{- end }}  
+  {{- end }}

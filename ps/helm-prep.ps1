@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.9.0
+.VERSION 1.10.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -257,8 +257,8 @@ try {
 	$chartPath = Join-Path $PSScriptRoot '../chart'
 	$chartFullPath = [IO.Path]::GetFullPath($chartPath)
 	Write-Host "`n----------------------`nRequired Helm Commands`n----------------------"
-	Write-Host "helm repo add codedx https://codedx.github.io/codedx-kubernetes"
-	Write-Host "helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative"
+	Write-Host "helm repo add codedx https://codedx.github.io/codedx-kubernetes --force-update"
+	Write-Host "helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative --force-update"
 	Write-Host "helm repo update"
 	Write-Host "helm dependency update ""$chartFullPath"""
 	Write-Host "helm -n $($config.namespace) upgrade --reset-values --install $($config.releaseName)" -NoNewline
@@ -294,7 +294,16 @@ try {
 	if (-not $config.skipScanFarm) {
 		Write-Host " --timeout 30m0s" -NoNewline
 	}
-	Write-Host " ""$chartFullPath""`n`n"
+
+	$optionalExtraPropsFile = Get-ConfigFileFullPath $configPath 'srm-extra-props.yaml'
+	if ($null -ne $optionalExtraPropsFile) {
+		$postscript += "INFO: Your helm command references the srm-extra-props.yaml ($optionalExtraPropsFile) found alongside your config.json file ($configPath)."
+		Write-Host " -f ""$optionalExtraPropsFile""" -NoNewline
+	} else {
+		$postscript += "INFO: If you use an srm-extra-props.yaml file, include '-f /path/to/srm-extra-props.yaml' as your helm command's last values file parameter."
+	}
+
+	Write-Host " ""$chartFullPath""`n"
 
 	$postscript | ForEach-Object {
 		Write-Host "$_`n"

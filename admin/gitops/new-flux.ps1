@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.11
+.VERSION 1.13
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -14,7 +14,7 @@ param (
 	[Parameter(Mandatory=$true)][string] $namespace,
 	[Parameter(Mandatory=$true)][string] $releaseName,
 	[string]   $helmChartRepoUrl = 'https://synopsys-sig.github.io/srm-k8s',
-	[string]   $helmChartVersion = '1.16.0',
+	[string]   $helmChartVersion = '1.18.0',
 	[string[]] $extraValuesFiles = @(),
 	[switch]   $useSealedSecrets,
 	[string]   $sealedSecretsNamespace = 'flux-system',
@@ -115,10 +115,13 @@ Get-ChildItem $workDirChartResources -Filter '*.yaml' | ForEach-Object {
 	Copy-Item -LiteralPath $_ -Destination $kindDir
 }
 
+$secretsDirectory = Join-Path $fluxDir 'Secret'
+$hasSecretResources = Test-Path $secretsDirectory -PathType Container
+
 # Optionally use Bitnami's Sealed Secrets, replacing related resources
-if ($useSealedSecrets) {
+if ($hasSecretResources -and $useSealedSecrets) {
 	
-	Get-ChildItem (Join-Path $fluxDir 'Secret') -Filter '*.yaml' | ForEach-Object {
+	Get-ChildItem $secretsDirectory -Filter '*.yaml' | ForEach-Object {
 
 		Write-Verbose "Running kubeseal on $_..."
 		$sealedSecretsDir = New-ResourceDirectory $fluxDir 'SealedSecret'
@@ -130,6 +133,12 @@ if ($useSealedSecrets) {
 
 		Write-Verbose "Removing $_..."
 		Remove-Item $_ -Force # Replace $_ with SealedSecret resource
+	}
+
+	$remainingSecrets = Get-ChildItem $secretsDirectory -Filter '*.yaml'
+	if ($remainingSecrets.Length -eq 0) {
+		Write-Verbose "Finished creating resources for SealedSecrets - removing empty directory ($secretsDirectory)..."
+		Remove-Item $secretsDirectory
 	}
 }
 $valuesFiles = @()
@@ -146,7 +155,17 @@ if (-not $config.skipTls) {
 
 $valuesFiles += (Join-Path $workDirChartValuesCombined 'values-combined.yaml')
 
-$valuesFiles += $extraValuesFiles
+if ($extraValuesFiles.Length -eq 0) {
+
+	# Automatically add an srm-extra-props.yaml found in the work directory
+	$optionalSrmExtraProps = Join-Path $workDir 'srm-extra-props.yaml'
+	if (Test-Path $optionalSrmExtraProps -PathType Leaf) {
+		Write-Verbose "Automatically adding $optionalSrmExtraProps..."
+		$valuesFiles += $optionalSrmExtraProps
+	}
+} else {
+	$valuesFiles += $extraValuesFiles
+}
 
 $configMapDir = New-ResourceDirectory $fluxDir 'ConfigMap'
 
@@ -207,19 +226,19 @@ spec:
 # values:
 #   web:
 #     image:
-#       tag: web-tag
+#       tag: 'web-tag'
 #   mariadb:
 #     image:
-#       tag: db-tag
+#       tag: 'db-tag'
 #   to:
 #     image:
-#       tag: tool-orchestration-tag
+#       tag: 'tool-orchestration-tag'
 #   minio:
 #     image:
-#       tag: minio-tag
+#       tag: 'minio-tag'
 #   argo:
 #     images:
-#       tag: workflow-tag
+#       tag: 'workflow-tag'
 "@ | Out-File (Join-Path (New-ResourceDirectory $fluxDir 'HelmRelease') 'release.yaml') -NoNewline
 
 @"
@@ -229,3 +248,4 @@ metadata:
   name: $namespace
 "@ | Out-File (Join-Path (New-ResourceDirectory $fluxDir 'Namespace') 'namespace.yaml') -NoNewline
 
+Write-Verbose "Finished creating GitOps resources in directory $fluxDir"
