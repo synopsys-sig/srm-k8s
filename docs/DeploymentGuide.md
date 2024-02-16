@@ -94,18 +94,17 @@
     + [Flux Steps:](#flux-steps)
     + [Bitnami Sealed Secrets Steps:](#bitnami-sealed-secrets-steps)
   * [Software Risk Manager Deployment](#software-risk-manager-deployment)
-- [Customizing Software Risk Manager (props)](#customizing-software-risk-manager-props)
-  * [Proxy Server Example](#proxy-server-example)
-    + [Public Property Values](#public-property-values)
-    + [Private Property Values](#private-property-values)
-    + [Rerun Helm](#rerun-helm)
+- [Customizing Software Risk Manager](#customizing-software-risk-manager)
+  * [Specify Web Properties (codedx.props)](#specify-web-properties-codedxprops)
+    + [Public Web Properties Proxy Example](#public-web-properties-proxy-example)
+    + [Private Web Properties Proxy Example](#private-web-properties-proxy-example)
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
   * [Specify Custom Context Path](#specify-custom-context-path)
-  * [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
-    + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
-    + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
-    + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
+- [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
+  * [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
+  * [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
+  * [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
 - [Maintenance](#maintenance)
   * [Software Risk Manager Admin Password Reset](#software-risk-manager-admin-password-reset)
 - [Backup and Restore](#backup-and-restore)
@@ -283,7 +282,7 @@ Software Risk Manager uses internet access in the background for some activities
 
 Software Risk Manager does not require internet access; however, internet access is highly recommended to ensure full functionality.
 
-To disable background internet access by Software Risk Manager, [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by setting `codedx.offline-mode = true`. The default is false. Note that this will not disable any internet access that may occur due to user action or configuration settings, such as Tool Connector, Git, or Issue Tracker configurations.
+To disable background internet access by Software Risk Manager, [customize your Software Risk Manager deployment](#customizing-software-risk-manager) by setting `codedx.offline-mode = true`. The default is false. Note that this will not disable any internet access that may occur due to user action or configuration settings, such as Tool Connector, Git, or Issue Tracker configurations.
 
 When internet access is enabled, Software Risk Manager will perform the following actions:
 
@@ -427,7 +426,7 @@ When using Tool Orchestration without external object storage, a single, dynamic
 
 By default, Software Risk Manager will automatically remove old analyses and related storage from the tool service. Related tool results and findings will be retained when workflow storage gets cleaned up. Workflow cleanup is enabled by default, allowing storage for 100 completed analyses to exist in a success or failure state, with a maximum of five completed analyses per project.
 
-Additional analyses beyond the limits will remove the storage for the oldest analysis. To adjust workflow cleanup behavior, [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by setting these parameters:
+Additional analyses beyond the limits will remove the storage for the oldest analysis. To adjust workflow cleanup behavior, [customize your Software Risk Manager deployment](#customizing-software-risk-manager) by setting these parameters:
 
 ```
 - tws.storage.cleanup.enabled = true
@@ -663,7 +662,7 @@ kubectl apply -f ./srm-web-appdata-job.yaml
 kubectl -n srm get job srm-web-appdata
 ```
 
-14) If you already have an srm-extra-props.yaml file, merge the below content into your existing file. Otherwise, create your srm-extra-props.yaml file (see [Customizing Software Risk Manager (props)](#customizing-software-risk-manager-props)) and add the following content:
+14) If you already have an srm-extra-props.yaml file, merge the below content into your existing file. Otherwise, create your srm-extra-props.yaml file (see [Customizing Software Risk Manager](#customizing-software-risk-manager)) and add the following content:
 
 ```
 web:
@@ -671,7 +670,7 @@ web:
     existingClaim: srm-web-appdata
 ```
 
-15) Refer to [Customizing Software Risk Manager (props)](#customizing-software-risk-manager-props) for how to rerun helm with your srm-extra-props.yaml file.
+15) Refer to [Customizing Software Risk Manager](#customizing-software-risk-manager) for how to rerun helm with your srm-extra-props.yaml file.
  
 # Scan Farm Pre-work
 
@@ -1641,7 +1640,7 @@ INFO: If you use an srm-extra-props.yaml file, include '-f /path/to/srm-extra-pr
 
 See the next section if you want to deploy Software Risk Manager using GitOps, specifically the Flux software. Otherwise, run the commands generated by the Helm Prep Script to deploy Software Risk Manager in your desired configuration.
 
->Note: If you decide to [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props), remember to append the `-f /path/to/srm-extra-props.yaml` parameter to the helm upgrade command generated by the Helm Prep Script. If your srm-extra-props.yaml file is found alongside your config.json file, the `-f /path/to/srm-extra-props.yaml` parameter will be included automatically.
+>Note: If you decide to [customize your Software Risk Manager deployment](#customizing-software-risk-manager), remember to append the `-f /path/to/srm-extra-props.yaml` parameter to the helm upgrade command generated by the Helm Prep Script. If your srm-extra-props.yaml file is found alongside your config.json file, the `-f /path/to/srm-extra-props.yaml` parameter will be included automatically.
 
 ### Fetch Initial Admin Password
 
@@ -1832,17 +1831,36 @@ Below is an example showing config.json and srm-extra-props, renamed from srm-ex
 │           └───HelmRepository
 ```
 
-# Customizing Software Risk Manager (props)
+# Customizing Software Risk Manager
 
-You can change Software Risk Manager's behavior by specifying Software Risk Manager configuration properties. There are two types of property values you may want to configure. Private property values are those with values that should be protected such as passwords, and they get stored in a Kubernetes Secret. Public property values are loaded from a Kubernetes ConfigMap.
+You can use a Helm values file to customize your Software Risk Manager deployment. Add custom helm property values to a file named `srm-extra-props.yaml`, and store this file alongside your config.json file when using the Helm Prep Script. You should include any custom chart settings and any web component property values you would specify in a [Software Risk Manager "props" file like codedx.props](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/config-files.html).
 
-The following sections describe how to set both public and private properties by configuring Software Risk Manager to use a proxy server. This example assumes that you have already run the Helm Prep Wizard.
+If you store your `srm-extra-props.yaml` file alongside your config.json file generated by the Helm Prep Wizard, when you run your `run-helm-prep.ps1` script, the Helm Prep Script will automatically include `-f /path/to/srm-extra-props.yaml` in the `helm upgrade` command it generates.
 
-## Proxy Server Example
+```
+$ pwsh /path/to/run-helm-prep.ps1
+  ...
+  ...
+  helm -n srm upgrade --reset-values --install srm ... -f /path/to/srm-extra-props.yaml
+```
 
-The following steps will configure a [proxy server](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/CodeDxConfiguration/proxy.html) for Software Risk Manager using both public and private property values.
+If you store the file elsewhere or you deployed using a Quick Start, include `-f /path/to/srm-extra-props.yaml` as the last parameter when you run `helm upgrade`:
 
-### Public Property Values
+```
+helm -n srm upgrade --reset-values --install srm ... -f /path/to/srm-extra-props.yaml
+```
+
+>Note: Append `-f /path/to/srm-extra-props.yaml` to the end of your helm command to ensure your changes override other values files in the helm command.
+
+## Specify Web Properties (codedx.props)
+
+You can change the behavior of Software Risk Manager's web component by adding configuration properties to your `srm-extra-props.yaml` file. The Software Risk Manager Helm chart will add your properties to the Kubernetes equivalent of a `codedx.props` file.
+
+There are two types of `codedx.props` property values you may want to configure. Private property values are those that should be protected, such as passwords, and they get stored in a Kubernetes Secret. Public property values are stored and loaded from a Kubernetes ConfigMap.
+
+To explain the configuration of public and private properties, the following example shows how to configure a [proxy server](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/proxy.html) for Software Risk Manager. When you are finished configuring the public and private proxy configuration, rerun `helm upgrade` as described in the previous section.
+
+### Public Web Properties Proxy Example
 
 The steps in this section show you how to configure public property values by specifying values for proxy.host and proxy.port.
 
@@ -1878,12 +1896,12 @@ networkPolicy:
   web:
     egress:
       extraPorts:
-        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 3128]
+        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 8443, 3128]
 ```
 
 >Note: Your egress extraPorts list may differ depending on installed features, so append 3128 as appropriate.
 
-### Private Property Values
+### Private Web Properties Proxy Example
 
 The steps in this section show you how to configure private property values by specifying the proxy.username and proxy.password values.
 
@@ -1894,13 +1912,13 @@ proxy.username = codedx
 proxy.password = password
 ```
 
-2. If necessary, pre-create the Kubernetes Software Risk Manager namespace you specified during the Helm Prep Wizard.
+2. If necessary, pre-create the Kubernetes Software Risk Manager namespace.
 
 ```
 kubectl create ns srm
 ```
 
-3. Generate a Kubernetes Secret named `srm-proxy-private-props` in the Software Risk Manager namespace. For example, if your Code Dx namespace is srm, run the following command from the directory containing srm-proxy-creds-props:
+3. Generate a Kubernetes Secret named `srm-proxy-private-props` in the Software Risk Manager namespace. For example, if your Software Risk Manager namespace is srm, run the following command from the directory containing srm-proxy-creds-props:
 
 ```
 kubectl -n srm create secret generic srm-proxy-private-props --from-file=srm-proxy-private-props
@@ -1925,22 +1943,8 @@ networkPolicy:
   web:
     egress:
       extraPorts:
-        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 3128]
+        tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 8443, 3128]
 ```
-
-### Rerun Helm
-
-1. Your run-help-prep.ps1 script outputs the helm command you should run to deploy Software Risk Manager. You can include your srm-extra-props.yaml file by appending `-f /path/to/srm-extra-props.yaml` to the helm command generated by your run-help-prep.ps1 script:
-
-```
-helm -n srm upgrade --reset-values --install srm ... -f /path/to/srm-extra-props.yaml
-```
-
->Note: Append `-f /path/to/srm-extra-props.yaml` to the end of your helm command to ensure your changes override other values files in the helm command.
-
-If you store your srm-extra-props.yaml file alongside your config.json file, the Helm Prep Script will automatically include the `-f /path/to/srm-extra-props.yaml` parameter.
-
-Remember from now on to always reference your srm-extra-props.yaml file when you run the helm upgrade command.
 
 ## Specify Extra SAML Configuration
 
@@ -1958,7 +1962,7 @@ Selecting SAML authentication in the Helm Prep Wizard will generate a config.jso
   ...
 ```
 
-Running helm-prep.ps1 with a config.json file like the above will generate an Software Risk Manager props file with the following SAML properties:
+Running helm-prep.ps1 with a config.json file like the above will generate a Software Risk Manager props file with the following SAML properties:
 
 - auth.saml2.identityProviderMetadataPath
 - auth.saml2.entityId
@@ -1968,7 +1972,7 @@ Running helm-prep.ps1 with a config.json file like the above will generate an So
 
 If you want to configure additional SAML properties described in the Software Risk Manager Install Guide, add them to your srm-extra-props.yaml file. 
 
->Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
+>Note: Refer to the [Customizing Software Risk Manager](#customizing-software-risk-manager) section if you are unfamiliar with an srm-extra-props.yaml file.
 
 Here's an example srm-extra-props.yaml with two SAML-specific props:
 
@@ -1996,7 +2000,7 @@ auth.ldap.systemPassword = ************
 auth.ldap.authenticationMechanism = simple
 ```
 
-3. If necessary, pre-create the Kubernetes Software Risk Manager namespace you specified during the Helm Prep Wizard.
+3. If necessary, pre-create the Kubernetes Software Risk Manager namespace.
 
 ```
 kubectl create ns srm
@@ -2019,7 +2023,7 @@ web:
       name: srm-ldap-private-props
 ```
 
->Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
+>Note: Refer to the [Customizing Software Risk Manager](#customizing-software-risk-manager) section if you are unfamiliar with an srm-extra-props.yaml file.
 
 ## Specify Custom Context Path
 
@@ -2032,7 +2036,7 @@ web:
   appName: mysrm
 ```
 
->Note: Refer to the "Customizing Software Risk Manager (props)" section if you are unfamiliar with an srm-extra-props.yaml file.
+>Note: Refer to the [Customizing Software Risk Manager](#customizing-software-risk-manager) section if you are unfamiliar with an srm-extra-props.yaml file.
 
 If you are using the Ingress-NGINX controller, refer to this ingress resource example that uses path-based/fanout routing to make Software Risk Manager available at `/mysrm`:
 
@@ -2059,7 +2063,9 @@ spec:
         pathType: Prefix
 ```
 
-## Tool Orchestration Add-in Tool Configuration
+>Note: Synopsys Bridge requires an /srm context path, so do not use a custom context path if you plan to use Synopsys Bridge.
+
+# Tool Orchestration Add-in Tool Configuration
 
 There are four types of ConfigMaps that can contain resource requirements:
 
@@ -2109,7 +2115,7 @@ ProjectID is the integer value representing the Software Risk Manager project id
   - An initial character that is neither a number nor a lowercase letter must be preceded by the letter "s."
   - A name whose length is greater than 253, must be truncated to 253 characters.
 
-### Add-in Example 1 - Project Resource Requirement
+## Add-in Example 1 - Project Resource Requirement
 
 To create a resource requirement for all tool runs of a Software Risk Manager project represented by ID 21, create a file named cdx-toolsvc-project-21-resource-requirements.yaml and enter the following data:
 
@@ -2132,7 +2138,7 @@ Run the following command to create the ConfigMap resource, replacing the namesp
 kubectl -n cdx-svc create -f ./cdx-toolsvc-project-21-resource-requirements.yaml
 ```
 
-### Add-in Example 2 - Global Tool Resource Requirement
+## Add-in Example 2 - Global Tool Resource Requirement
 
 To create a Global Tool resource requirement for ESLint, create a file named cdx-toolsvc-eslint-resource-requirements.yaml and enter the following data:
 
@@ -2154,7 +2160,7 @@ Run the following command to create the configmap resource, replacing the namesp
 kubectl -n cdx-svc create -f ./cdx-toolsvc-eslint-resource-requirements.yaml
 ```
 
-### Add-in Example 3 - Node Selector
+## Add-in Example 3 - Node Selector
 
 To create a Global Tool resource requirement for running a tool named MyTool on cluster nodes labeled with `canrunmytool=yes`, create a file named cdx-toolsvc-mytool-resource-requirements.yaml and enter the following data:
 
@@ -2217,7 +2223,7 @@ Install the [Velero CLI](https://velero.io/docs/main/basic-install/#install-the-
 
 ### Velero Opt-In or Opt-Out Volume Backup
 
-If your Velero configuration requires opt-in (velero.io/backup-name=volume-name) or opt-out (velero.io/backup-volumes-excludes=volume-name) volume annotations, you can [customize your Software Risk Manager deployment](#customizing-software-risk-manager-props) by specifying pod annotations as shown below (opt-in example). Replace the volume name placeholders with your volume names.
+If your Velero configuration requires opt-in (velero.io/backup-name=volume-name) or opt-out (velero.io/backup-volumes-excludes=volume-name) volume annotations, you can [customize your Software Risk Manager deployment](#customizing-software-risk-manager) by specifying pod annotations as shown below (opt-in example). Replace the volume name placeholders with your volume names.
 
 ```
 web:
@@ -2642,7 +2648,7 @@ Invoke your run-migrate.ps1 script to generate a config.json file.
 $ pwsh /path/to/run-migrate.ps1
 ```
 
->Note: You should specify a new, unique namespace and release name to avoid conflating legacy Code Dx Kubernetes resources with Software Risk Manager ones. You can reuse your Code Dx license when prompted for an Software Risk Manager Web license.
+>Note: You should specify a new, unique namespace and release name to avoid conflating legacy Code Dx Kubernetes resources with Software Risk Manager ones. You can reuse your Code Dx license when prompted for a Software Risk Manager Web license.
 
 Address any warnings or instructions printed by the migration script. When complete, invoke the generated run-helm-prep.ps1 file to stage the resources required for your Software Risk Manager deployment.
 
