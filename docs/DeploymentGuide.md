@@ -107,6 +107,7 @@
   * [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
 - [Maintenance](#maintenance)
   * [Software Risk Manager Admin Password Reset](#software-risk-manager-admin-password-reset)
+  * [Expand Volume Size](#expand-volume-size)
 - [Backup and Restore](#backup-and-restore)
   * [About Velero](#about-velero)
   * [Installing Velero](#installing-velero)
@@ -2200,6 +2201,23 @@ Failing to update your admin Kubernetes Secret resource when using the Scan Farm
 3. [Lock config.json](#configuration-file-protection)
 4. Rerun your run-helm-prep.ps1 script
 5. Run the command(s) listed under Required K8s Resources
+
+## Expand Volume Size
+
+Before expanding the volume size of a Software Risk Manager volume, verify that you are using a [storage class configured for volume expansion](https://kubernetes.io/docs/concepts/storage/storage-classes/#allow-volume-expansion). The number of volumes you have in your Software Risk Manage deployment depends on what features you installed and how they were configured. This section assumes that you installed both the Core and Tool Orchestration features, opting for on-cluster database and object storage workloads, but you can ignore content that does not apply to your deployment.
+
+Expanding the on-cluster MariaDB database volumes requires special care because the workload resources use immutable database size references. Follow these steps to handle the necessary pre-work for MariaDB:
+
+1. Scale the StatefulSet resources for the master and replica (if installed) to 0
+2. Delete the StatefulSet resources for the master and replica (if installed), but do *not* delete the related PVC resources
+3. Edit the PVC resources for the master, replica (if installed), and replica backup (if installed), setting the storage capacity to the new size. If using the System Size feature, refer to the System Size tables to determine the new sizes.
+4. Invoke the describe command on each PVC to review resize-related Kubernetes events and conditions to know when to move on.
+
+If you used the Helm Prep Script and the System Size feature, edit your config.json by changing the value of the systemSize field and rerun your run-helm-prep.ps1 script and related helm commands.
+
+If you used the Helm Prep Script and did not use the System Size feature, edit your config.json by changing these fields: `webVolumeSizeGiB`, `dbVolumeSizeGiB`, `dbSlaveVolumeSizeGiB`, `dbSlaveBackupVolumeSizeGiB`, and `minioVolumeSizeGiB`. Then rerun your run-helm-prep.ps1 script and related helm commands.
+
+If you used the Quick Start deployment, either include the following helm chart values in your srm-extra-props.yaml file or specify them with "--set" parameters, and rerun your helm command: `web.persistence.size`, `mariadb.master.persistence.size`, `mariadb.slave.persistence.size`, `mariadb.slave.persistence.backup.size`, and `minio.persistence.size`.
 
 # Backup and Restore
 
