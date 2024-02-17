@@ -10,14 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
-	'./mock.ps1' | ForEach-Object {
-		Write-Debug "'$PSCommandPath' is including file '$_'"
-		$path = Join-Path $PSScriptRoot $_
-		if (-not (Test-Path $path)) {
-			Write-Error "Unable to find file script dependency at $path. Please download the entire srm-k8s GitHub repository and rerun the downloaded copy of this script."
-		}
-		. $path | out-null
-	}
+	. (Join-Path $PSScriptRoot './mock.ps1')
 }
 
 Describe 'Specifying workflow storage' -Tag 'storage' {
@@ -72,7 +65,7 @@ Describe 'Specifying workflow storage' -Tag 'storage' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		   . (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 
@@ -138,7 +131,7 @@ Describe 'Specifying workflow storage' -Tag 'storage' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		   . (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 
@@ -196,7 +189,7 @@ Describe 'Specifying workflow storage' -Tag 'storage' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		   . (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 

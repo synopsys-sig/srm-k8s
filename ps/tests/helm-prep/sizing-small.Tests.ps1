@@ -214,7 +214,7 @@ Describe 'Specifying Small system size...' -Tag 'size' {
 		$licenseFilePath = Join-Path $TestDrive 'srm-web-license'
 		Write-Output $null > $licenseFilePath
 
-		../../helm-prep.ps1 -configPath $configJsonPath
+		. (Join-Path $PSScriptRoot ../../helm-prep.ps1) -configPath $configJsonPath
 
 		$valuesPath = Join-Path $TestDrive 'chart-values-combined/values-combined.yaml'
 
@@ -429,7 +429,7 @@ Describe 'Specifying Small system size...' -Tag 'size' {
 		$licenseFilePath = Join-Path $TestDrive 'srm-web-license'
 		Write-Output $null > $licenseFilePath
 
-		../../helm-prep.ps1 -configPath $configJsonPath
+		. (Join-Path $PSScriptRoot ../../helm-prep.ps1) -configPath $configJsonPath
 
 		$valuesPath = Join-Path $TestDrive 'chart-values-combined/values-combined.yaml'
 

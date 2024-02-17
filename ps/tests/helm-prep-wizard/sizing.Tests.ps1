@@ -10,14 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
-	'./mock.ps1' | ForEach-Object {
-		Write-Debug "'$PSCommandPath' is including file '$_'"
-		$path = Join-Path $PSScriptRoot $_
-		if (-not (Test-Path $path)) {
-			Write-Error "Unable to find file script dependency at $path. Please download the entire srm-k8s GitHub repository and rerun the downloaded copy of this script."
-		}
-		. $path | out-null
-	}
+	. (Join-Path $PSScriptRoot './mock.ps1')
 }
 
 Describe 'Specifying no system size' -Tag 'size' {
@@ -62,7 +55,7 @@ Describe 'Specifying no system size' -Tag 'size' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		. (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 		$config = [Config]::FromJsonFile($configFile)
@@ -128,7 +121,7 @@ Describe 'Specifying no system size' -Tag 'size' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		   . (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 
@@ -194,7 +187,7 @@ Describe 'Specifying Medium system size' -Tag 'size' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		   . (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 
@@ -240,7 +233,7 @@ Describe 'Specifying Medium system size' -Tag 'size' {
 			$true
 	   	} -ParameterFilter { 'srm-web-license' -contains [IO.Path]::GetFileName($path) }
 
-		. ../../../helm-prep-wizard.ps1
+		   . (Join-Path $PSScriptRoot ../../../helm-prep-wizard.ps1)
 
 		$configFile = Join-Path $TestDrive 'config.json'
 
