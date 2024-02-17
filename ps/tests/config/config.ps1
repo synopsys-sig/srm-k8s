@@ -7,9 +7,11 @@ if (-not $?) {
 	exit 1
 }
 
-. (Join-Path $PSScriptRoot '../../keyvalue.ps1')
-. (Join-Path $PSScriptRoot '../../build/protect.ps1')
-. (Join-Path $PSScriptRoot '../../config.ps1')
+BeforeAll {
+	. (Join-Path $PSScriptRoot '../../keyvalue.ps1')
+	. (Join-Path $PSScriptRoot '../../build/protect.ps1')
+	. (Join-Path $PSScriptRoot '../../config.ps1')
+}
 
 Describe 'Lock config' -Tag 'config' {
 
