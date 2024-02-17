@@ -11,6 +11,9 @@ function New-MasterDatabaseVolumeSizeConfig($config) {
 	$storageSizeGiB = $config.dbVolumeSizeGiB
 	if (-not $storageSizeGiB -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$storageSizeGiB = "96"
+			}
 			([SystemSize]::Small) {
 				$storageSizeGiB = "192"
 			}
@@ -39,6 +42,9 @@ function New-SubordinateDatabaseVolumeSizeConfig($config) {
 	$storageSizeGiB = $config.dbSlaveVolumeSizeGiB
 	if (-not $storageSizeGiB -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$storageSizeGiB = "96"
+			}
 			([SystemSize]::Small) {
 				$storageSizeGiB = "192"
 			}
@@ -57,6 +63,9 @@ function New-SubordinateDatabaseVolumeSizeConfig($config) {
 	$backupStorageSizeGiB = $config.dbSlaveBackupVolumeSizeGiB
 	if (-not $backupStorageSizeGiB -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$backupStorageSizeGiB = "288"
+			}
 			([SystemSize]::Small) {
 				$backupStorageSizeGiB = "576"
 			}
@@ -87,6 +96,9 @@ function New-StorageVolumeSizeConfig($config) {
 	$storageSizeGiB = $config.minioVolumeSizeGiB
 	if (-not $storageSizeGiB -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$storageSizeGiB = "32"
+			}
 			([SystemSize]::Small) {
 				$storageSizeGiB = "64"
 			}

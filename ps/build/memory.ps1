@@ -12,6 +12,9 @@ function New-MasterDatabaseMemoryConfig($config) {
 	$memory = $config.dbMasterMemoryReservation
 	if (-not $memory -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$memory = "8192Mi"
+			}
 			([SystemSize]::Small) {
 				$memory = "16384Mi"
 			}
@@ -41,6 +44,9 @@ function New-SubordinateDatabaseMemoryConfig($config) {
 	$memory = $config.dbSlaveMemoryReservation
 	if (-not $memory -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$memory = "4096Mi"
+			}
 			([SystemSize]::Small) {
 				$memory = "8192Mi"
 			}
@@ -79,6 +85,9 @@ function New-StorageMemoryConfig($config) {
 	$memory = $config.minioMemoryReservation
 	if (-not $memory -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$memory = "2560Mi"
+			}
 			([SystemSize]::Small) {
 				$memory = "5120Mi"
 			}
@@ -107,6 +116,9 @@ function New-WorkflowMemoryConfig($config) {
 	$memory = $config.workflowMemoryReservation
 	if (-not $memory -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$memory = "250Mi"
+			}
 			([SystemSize]::Small) {
 				$memory = "500Mi"
 			}

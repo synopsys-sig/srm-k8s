@@ -16,7 +16,7 @@
                     "type": "string",
                     "default": "",
                     "title": "size",
-                    "pattern": "^(Unspecified|Small|Medium|Large|ExtraLarge)$"
+                    "pattern": "^(Unspecified|ExtraSmall|Small|Medium|Large|ExtraLarge)$"
                 },
                 "version": {
                     "type": "string",

@@ -41,6 +41,7 @@ enum ScanFarmStorageType {
 
 enum SystemSize {
 	Unspecified
+	ExtraSmall
 	Small
 	Medium
 	Large

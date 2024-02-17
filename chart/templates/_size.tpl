@@ -2,7 +2,22 @@
 {{-     if (eq nil .Values.sizing.reference) -}}
 {{-         $ref := dict -}}
 {{-         $size := .Values.sizing.size -}}
-{{-         if (eq $size "Small") -}}
+{{-         if (eq $size "ExtraSmall") -}}
+{{-             $ref = dict 
+                    "webCPU" "2000m"
+                    "webMemory" "8192Mi"
+                    "webStorage" "32Gi"
+                    "webConcurrentAnalyses" "4"
+                    "webConnectionPoolSize" "6"
+                    "webJobLimitCPU" "2000"
+                    "webJobLimitMemory" "2000"
+                    "webJobLimitDB" "2000"
+                    "webJobLimitDisk" "2000"
+                    "toolServiceCPU" "500m"
+                    "toolServiceMemory" "512Mi"
+                    "toolServiceReplicas" "1"
+-}}
+{{-         else if (eq $size "Small") -}}
 {{-             $ref = dict 
                     "webCPU" "4000m"
                     "webMemory" "16384Mi"

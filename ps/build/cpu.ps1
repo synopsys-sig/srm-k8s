@@ -33,6 +33,9 @@ function New-MasterDatabaseCPUConfig($config) {
 	$cpu = $config.dbMasterCPUReservation
 	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$cpu = "2000m"
+			}
 			([SystemSize]::Small) {
 				$cpu = "4000m"
 			}
@@ -62,6 +65,9 @@ function New-SubordinateDatabaseCPUConfig($config) {
 	$cpu = $config.dbSlaveCPUReservation
 	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$cpu = "1000m"
+			}
 			([SystemSize]::Small) {
 				$cpu = "2000m"
 			}
@@ -100,6 +106,9 @@ function New-StorageCPUConfig($config) {
 	$cpu = $config.minioCPUReservation
 	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$cpu = "1000m"
+			}
 			([SystemSize]::Small) {
 				$cpu = "2000m"
 			}
@@ -128,6 +137,9 @@ function New-WorkflowCPUConfig($config) {
 	$cpu = $config.workflowCPUReservation
 	if (-not $cpu -and $config.IsSystemSizeSpecified()) {
 		switch ($config.systemSize) {
+			([SystemSize]::ExtraSmall) {
+				$cpu = "250m"
+			}
 			([SystemSize]::Small) {
 				$cpu = "500m"
 			}
