@@ -993,34 +993,45 @@ If using a cloud-hosted node pool, specify the node label and taint with your no
 
 The PostgreSQL license is available [here](https://www.postgresql.org/about/licence/). The Bitnami PostgreSQL Helm chart license is available [here](https://github.com/bitnami/charts/tree/main/bitnami/postgresql#license).
 
-Set the database name and the PostgreSQL password using the postgresql.auth.database and postgresql.auth.postgresPassword Helm chart parameters.
+Allocate storage capacity and specify an instance size that meets the CPU and memory requirements in the Scan Farm Database Requirements section. The following is an example of the PostgreSQL chart parameters for version 11.6.2 that customizes PostgreSQL to meet Scan Farm requirements:
 
-Allocate storage capacity and specify an instance size that meets the CPU and memory requirements in the Scan Farm Database Requirements section.
+```
+primary:
+  persistence:
+    size: 5Gi
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+```
+
+>Note: The chart notes explain how to obtain the initial password.
 
 ### Bitnami Redis Chart Pre-work
 
 The Redis license is available [here](https://redis.io/docs/about/license/). The Bitnami Redis Helm chart license is available [here](https://github.com/bitnami/charts/tree/main/bitnami/redis#license).
 
-Set the Redis architecture to standalone using the redis.architecture Helm chart parameter. You can enable authentication using the redis.auth.enabled chart parameter after setting the auth.existingSecret and auth.existingSecretPasswordKey parameters by referencing a Kubernetes Secret resource with the authentication password. The following is an example of the redis.commonConfiguration and redis.master chart parameters that customize Redis to meet Scan Farm requirements:
+Set the Redis architecture to standalone using the redis.architecture Helm chart parameter. You can enable authentication using the redis.auth.enabled chart parameter after setting the auth.existingSecret and auth.existingSecretPasswordKey parameters by referencing a Kubernetes Secret resource with the authentication password. The following is an example of the Redis chart parameters for version 17.3.17 that customizes Redis to meet Scan Farm requirements:
 
 ```
-redis:
-  architecture: standalone
-
-  auth:
-    enabled: true
-    existingSecret: "redis-password"
-    existingSecretPasswordKey: "password"
-
-  commonConfiguration: |-
-    save ""
-    appendonly no
-    maxmemory 1gb
-    maxmemory-policy noeviction
-  master:
-    persistence:
-      enabled: false
+architecture: standalone
+auth:
+  enabled: true
+commonConfiguration: |-
+  save ""
+  appendonly no
+  maxmemory 1gb
+  maxmemory-policy noeviction
+master:
+  persistence:
+    enabled: false
+  resources:
+    limits:
+      cpu: 1
+      memory: 1100Mi
 ```
+
+>Note: The chart notes explain how to obtain the initial password.
 
 Set the redis.tls Helm chart configuration based on whether you plan to enable TLS for your Redis instance. You can find the Redis TLS certificate in its pod at /opt/bitnami/redis/certs/tls.crt.
 
@@ -1028,13 +1039,34 @@ Set the redis.tls Helm chart configuration based on whether you plan to enable T
 
 The MinIO software is licensed under the [GNU Affero General Public License v3.0](https://github.com/minio/minio/blob/master/LICENSE) or a commercial enterprise license. The Bitnami MinIO Helm chart license is available [here](https://github.com/bitnami/charts/tree/main/bitnami/minio#license).
 
+The following is an example of the MinIO chart parameters for version 11.10.24 that customizes Redis to meet Scan Farm requirements (refer to the requirements section to identify the storage size suitable for your environment):
+
+```
+provisioning:
+  enabled: true
+  buckets:
+  - name:  "storage"
+    region: us-east-1
+  - name: "cache"
+    region: us-east-1
+    lifecycle:
+    - id: cache
+      disabled: false
+      expiry:
+        days: 8
+persistence:
+  size: 100Gi
+```
+
+>Note: The chart notes explain how to obtain the initial password.
+
 Set MinIO's root username and password using the minio.auth.rootUser and minio.auth.rootPassword Helm chart parameters. You can define default buckets for the Storage Service and Cache Service using the minio.defaultBuckets chart parameter, or you can create them by hand after installing MinIO.  
 
-You must configure a lifecycle policy on the cache bucket. You can use the following command with an "srm" mc alias you can define using the MinIO endpoint and root credential, replacing the cache-bucket name and day count (must be greater than, not equal to, 7) as necessary:
+You must configure a lifecycle policy on the cache bucket. If you did not configure the policy during deployment, you can use the following command with an "srm" mc alias you can define using the MinIO endpoint and root credential, replacing the cache-bucket name and day count (must be greater than, not equal to, 7) as necessary:
 
 ```
 $ mc alias set srm <MinIO endpoint> <MinIO root username> <MinIO root password>
-$ mc ilm add --expiry-days 30 srm/cache-bucket
+$ mc ilm add --expiry-days 8 srm/cache-bucket
 ```
 
 If your Scan Farm storage runs on the same cluster where you plan to install Software Risk Manager, the Software Risk Manager web component can access your storage using the in-cluster storage URL. This optional optimization works only when both components run on the same cluster.
