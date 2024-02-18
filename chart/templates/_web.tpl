@@ -58,7 +58,7 @@ Determine the URL of the SRM web service.
 {{- if .Values.web.tlsSecret -}}
 {{- $protocol = "https" -}}
 {{- end -}}
-{{- $protocol -}}://{{- include "srm-web.fullname" . -}}:{{- .Values.web.service.port -}}/srm
+{{- $protocol -}}://{{- include "srm-web.fullname" . -}}:{{- .Values.web.service.port -}}/{{- include "srm-web.appName" . -}}
 {{- end -}}
 
 {{/*

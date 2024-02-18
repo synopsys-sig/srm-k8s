@@ -3,7 +3,7 @@
 http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
 {{- end }}
 {{- else }}
-Here's the port-forward command to access the SRM web service at http://localhost:{{ .Values.web.service.port }}/srm
+Here's the port-forward command to access the SRM web service at http://localhost:{{ .Values.web.service.port }}/{{ include "srm-web.appName" . }}
 $ kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "srm-web.fullname" . }} {{ .Values.web.service.port }}
 {{- end }}
 
