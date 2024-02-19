@@ -1005,6 +1005,12 @@ primary:
       cpu: 1000m
 ```
 
+If you store the above YAML in a file named postgresql.yaml, you can run helm like this:
+
+```
+helm -n srm upgrade --create-namespace --install --repo https://charts.bitnami.com/bitnami --version 11.6.2 postgresql postgresql -f postgresql.yaml
+```
+
 >Note: The chart notes explain how to obtain the initial password.
 
 ### Bitnami Redis Chart Pre-work
@@ -1029,6 +1035,12 @@ master:
     limits:
       cpu: 1
       memory: 1100Mi
+```
+
+If you store the above YAML in a file named redis.yaml, you can run helm like this:
+
+```
+helm -n srm upgrade --create-namespace --install --repo https://charts.bitnami.com/bitnami --version 17.3.17 redis redis -f redis.yaml
 ```
 
 >Note: The chart notes explain how to obtain the initial password.
@@ -1056,6 +1068,12 @@ provisioning:
         days: 8
 persistence:
   size: 100Gi
+```
+
+If you store the above YAML in a file named minio.yaml, you can run helm like this:
+
+```
+helm -n srm upgrade --create-namespace --install --repo https://charts.bitnami.com/bitnami --version 11.10.24 minio minio -f minio.yaml
 ```
 
 >Note: The chart notes explain how to obtain the initial password.
