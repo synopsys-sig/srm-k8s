@@ -2071,6 +2071,29 @@ web:
 
 >Note: Refer to the [Customizing Software Risk Manager](#customizing-software-risk-manager) section if you are unfamiliar with an srm-extra-props.yaml file.
 
+If you use SAML authentication, you must also update the web.authentication.saml.hostBasePath chart parameter by specifying your custom context path. Here is an example for the `/mysrm` context path where you would replace the `<hostname>` placeholder:
+
+```
+web:
+  appName: mysrm
+  authentication: 
+    saml: 
+      hostBasePath: https://<hostname>/mysrm
+```
+
+If you use the Scan Farm feature, you must also update the `cnc.scanfarm.srm.url` helm chart parameter. Here is an example for the `/mysrm` context path where you would replace `srm-web` as necessary:
+
+```
+web:
+  appName: mysrm
+cnc:
+  scanfarm:
+    srm:
+      url: http://srm-web:9090/mysrm
+```
+
+>Note: Synopsys Bridge requires an /srm context path, so do not use a custom context path if you plan to use Synopsys Bridge.
+
 If you are using the Ingress-NGINX controller, refer to this ingress resource example that uses path-based/fanout routing to make Software Risk Manager available at `/mysrm`:
 
 ```
@@ -2095,8 +2118,6 @@ spec:
         path: /mysrm
         pathType: Prefix
 ```
-
->Note: Synopsys Bridge requires an /srm context path, so do not use a custom context path if you plan to use Synopsys Bridge.
 
 # Tool Orchestration Add-in Tool Configuration
 
