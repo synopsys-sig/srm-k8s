@@ -6,7 +6,7 @@ The Feature column indicates the feature associated with the parameter. The Helm
 
 Refer to the [lock/unlock scripts](../admin/config) to edit protected config.json fields.
 
-![config.json version: 1.1.0](https://img.shields.io/badge/config.json%20version-1.1.0-informational?style=flat-square)
+![config.json version: 1.4.0](https://img.shields.io/badge/config.json%20version-1.4.0-informational?style=flat-square)
 
 |Parameter|Feature|Description|Example|Since|
 |:---|:---|:---|:---|:---|
@@ -72,6 +72,9 @@ Refer to the [lock/unlock scripts](../admin/config) to edit protected config.jso
 ||||||
 |scanFarmStorageHasInClusterUrl|Scan Farm MinIO Storage|whether the storage system has an in-cluster URL||1.0|
 |scanFarmStorageInClusterUrl|Scan Farm MinIO Storage|the storage system in-cluster URL||1.0|
+|scanFarmStorageIsProxied|Scan Farm|whether the web URL proxies storage|true|1.2|
+|scanFarmStorageContextPath|Scan Farm|context path for proxied storage||1.2|
+|scanFarmStorageExternalUrl|Scan Farm|off-cluster object storage URL||1.2|
 ||||||
 |useGeneratedPwds|Core|whether to generate specific SRM passwords||1.0|
 |mariadbRootPwd|On-Cluster DB|root password for the on-cluster database||1.0|
@@ -92,12 +95,16 @@ Refer to the [lock/unlock scripts](../admin/config) to edit protected config.jso
 |scanFarmType|Scan Farm|type of Scan Farm deployment|None; Sast; Sca; All|1.0|
 ||||||
 |skipDatabase|Core|whether to use the on-cluster database||1.0|
-|useTriageAssistant|ML|whether to use the SRM ML feature||1.0|
+|useTriageAssistant|ML|whether to use the SRM ML feature (deprecated with 1.3)|true|1.0|
 |skipScanFarm|Scan Farm|whether to install the SRM scan farm||1.0|
 |skipToolOrchestration|Tool Orchestration|whether to install the Tool Orchestration feature||1.0|
 |skipMinIO|Tool Orchestration|whether to use MinIO for workflow storage||1.0|
 |skipNetworkPolicies|Network Policy|whether to use Network Policies for specific components||1.0|
 |skipTls|TLS|whether to use TLS for specific components||1.0|
+||||||
+|workflowStorageType|Tool Orchestration|type of workflow storage to use (see WorkflowStorageType enum)|OnCluster|1.4|
+|serviceAccountToolService|Tool Orchestration|named service account for tool service||1.4|
+|serviceAccountWorkflow|Tool Orchestration|named service account for all tool workflows||1.4|
 ||||||
 |toolServiceReplicas|Tool Orchestration|number of tool service replicas||1.0|
 ||||||
@@ -196,6 +203,8 @@ Refer to the [lock/unlock scripts](../admin/config) to edit protected config.jso
 |minioVolumeSizeGiB|Tool Orchestration|size of MinIO volume||1.0|
 |storageClassName|Tool Orchestration|name of storage class for all volumes||1.0|
 ||||||
+|systemSize|Core & Tool Orchestration|size of Core/Tool Orchestration components (see SystemSize enum)|Unspecified|1.3|
+||||||
 |useNodeSelectors|Core|whether to use node selectors||1.0|
 |webNodeSelector|Core|node selector for SRM Web||1.0|
 |masterDatabaseNodeSelector|On-Cluster DB|node selector for On-Cluster primary database||1.0|
@@ -221,7 +230,12 @@ Refer to the [lock/unlock scripts](../admin/config) to edit protected config.jso
 |configVersion|Config|config.json file format version||1.1|
 |isLocked|Config|whether some config.json field values are encrypted||1.1|
 |salts|Config|salts used to encrypt specific config.json field values||1.1|
-||||||
-|scanFarmStorageIsProxied|Scan Farm|whether to proxy object storage by using SRM's hostname|false|1.2|
-|scanFarmStorageContextPath|Scan Farm|optional context path for proxied object storage|upload|1.2|
-|scanFarmStorageExternalUrl|Scan Farm|non-proxied object storage URL||1.2|
+
+## Tests
+
+You can run the following command to execute tests in the ps/tests directory:
+
+```
+. .\external\powershell-algorithms\data-structures.ps1
+$results = Invoke-Pester tests -PassThru
+```

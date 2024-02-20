@@ -541,7 +541,10 @@ class Config {
 				$field = $_
 				if (-not [string]::IsNullOrEmpty($this.$_)) {
 					$salt = $this.salts | Where-Object { $_.key -eq $field } | ForEach-Object { $_.value }
-					$this.$_ = Unprotect-StringValue $configPwd $salt $this.$_
+					# unprotect this value if it was previously protected
+					if ($null -ne $salt) {
+						$this.$_ = Unprotect-StringValue $configPwd $salt $this.$_
+					}
 				}
 			}
 			$this.isLocked = $false

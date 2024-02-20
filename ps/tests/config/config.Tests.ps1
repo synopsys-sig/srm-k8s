@@ -140,4 +140,33 @@ Describe 'Unlock config' -Tag 'config' {
 		'password' -eq $config.adminPwd | Should -BeTrue
 		$config.salts.Count -eq 0 | Should -BeTrue
 	}
+
+	It 'should support partially protected config' {
+
+		$config = new-object Config
+		$config.workDir = '/dir'
+		$config.adminPwd = 'password'
+
+		'password' -eq $config.adminPwd | Should -BeTrue
+
+		$config.Lock('password')
+
+		$config.isLocked | Should -BeTrue
+		'password' -eq $config.adminPwd | Should -BeFalse
+		'password' -eq [Text.Encoding]::ASCII.GetString([Convert]::FromBase64String($config.adminPwd)) | Should -BeFalse
+
+		$config.salts.Count -eq 1 | Should -BeTrue
+		$config.salts[0].key -eq 'adminPwd' | Should -BeTrue
+		$config.salts[0].value.Length -gt 0 | Should -BeTrue
+
+		# add unprotected field to locked config
+		$config.mariadbRootPwd = 'password'
+
+		$config.Unlock('password')
+
+		$config.isLocked | Should -BeFalse
+		'password' -eq $config.adminPwd | Should -BeTrue
+		'password' -eq $config.mariadbRootPwd | Should -BeTrue
+		$config.salts.Count -eq 0 | Should -BeTrue
+	}
 }
