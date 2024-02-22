@@ -8,6 +8,7 @@
   * [Tool Orchestration Feature](#tool-orchestration-feature)
 - [Requirements](#requirements)
   * [Kubernetes Requirements](#kubernetes-requirements)
+  * [Helm Requirements](#helm-requirements)
   * [System Size](#system-size)
   * [Core Feature Requirements](#core-feature-requirements)
     + [Core Web Workload Requirements](#core-web-workload-requirements)
@@ -211,6 +212,10 @@ Refer to what follows for the supported or tested versions of software that comp
 ## Kubernetes Requirements
 
 The Software Risk Manager deployment supports Kubernetes versions 1.22 through 1.28 and was tested with OpenShift 4.13.
+
+## Helm Requirements
+
+The Software Risk Manager deployment requires [helm](https://github.com/helm/helm/releases) version 3.8.0 or later.
 
 ## System Size
 
