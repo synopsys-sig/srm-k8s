@@ -102,10 +102,10 @@
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
   * [Specify Custom Context Path](#specify-custom-context-path)
-- [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
-  * [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
-  * [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
-  * [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
+  * [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
+    + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
+    + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
+    + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
 - [Maintenance](#maintenance)
   * [Software Risk Manager Admin Password Reset](#software-risk-manager-admin-password-reset)
   * [Expand Volume Size](#expand-volume-size)
@@ -2142,7 +2142,7 @@ spec:
         pathType: Prefix
 ```
 
-# Tool Orchestration Add-in Tool Configuration
+## Tool Orchestration Add-in Tool Configuration
 
 There are four types of ConfigMaps that can contain resource requirements:
 
@@ -2192,7 +2192,7 @@ ProjectID is the integer value representing the Software Risk Manager project id
   - An initial character that is neither a number nor a lowercase letter must be preceded by the letter "s."
   - A name whose length is greater than 253, must be truncated to 253 characters.
 
-## Add-in Example 1 - Project Resource Requirement
+### Add-in Example 1 - Project Resource Requirement
 
 To create a resource requirement for all tool runs of a Software Risk Manager project represented by ID 21, create a file named cdx-toolsvc-project-21-resource-requirements.yaml and enter the following data:
 
@@ -2215,7 +2215,7 @@ Run the following command to create the ConfigMap resource, replacing the namesp
 kubectl -n cdx-svc create -f ./cdx-toolsvc-project-21-resource-requirements.yaml
 ```
 
-## Add-in Example 2 - Global Tool Resource Requirement
+### Add-in Example 2 - Global Tool Resource Requirement
 
 To create a Global Tool resource requirement for ESLint, create a file named cdx-toolsvc-eslint-resource-requirements.yaml and enter the following data:
 
@@ -2237,7 +2237,7 @@ Run the following command to create the configmap resource, replacing the namesp
 kubectl -n cdx-svc create -f ./cdx-toolsvc-eslint-resource-requirements.yaml
 ```
 
-## Add-in Example 3 - Node Selector
+### Add-in Example 3 - Node Selector
 
 To create a Global Tool resource requirement for running a tool named MyTool on cluster nodes labeled with `canrunmytool=yes`, create a file named cdx-toolsvc-mytool-resource-requirements.yaml and enter the following data:
 
