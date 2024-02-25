@@ -102,6 +102,10 @@
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
   * [Specify Custom Context Path](#specify-custom-context-path)
+  * [Scan Farm Job Resources](#scan-farm-job-resources)
+    + [SCA - Buildless Scan](#sca---buildless-scan)
+    + [SCA - Bridge-based Scan](#sca---bridge-based-scan)
+    + [SAST Scan](#sast-scan)
   * [Tool Orchestration Add-in Tool Configuration](#tool-orchestration-add-in-tool-configuration)
     + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
@@ -379,13 +383,14 @@ Below are the default CPU and memory assigned to Scan Farm pods.
 
 | Pod | CPU | Memory |
 |:-|:-:|:-:|
-| Scan Service      | 100m  | 128Mi   |
-| Cache Service     | 500m  | 1000Mi  |
-| Storage Service   | 100m  | 128Mi   |
-| Coverity Scan Job | 6500m | 26000Mi |
-| SCA Scan Job      | 1500m | 1500Mi  |
+| Scan Service                     | 100m  |   128Mi |
+| Cache Service                    | 500m  |  1000Mi |
+| Storage Service                  | 100m  |   128Mi |
+| SAST Scan Job                    | 6500m | 26000Mi |
+| SCA Scan Job (buildless scan)    | 1500m |  1500Mi |
+| SCA Scan Job (Bridge-based scan) | 1500m |   500Mi |
 
->Note: The SCA Scan Job resources are fixed at 1.5 vCPUs and 1500Mi of memory. You cannot currently change the resource limits for SCA scan pods.
+>Note: Refer to the [Scan Farm Job Resources](#scan-farm-job-resources) section for how to customize resource requirements for Scan Farm jobs.
 
 ## Tool Orchestration Feature Requirements
 
@@ -2140,6 +2145,106 @@ spec:
               number: 9090
         path: /mysrm
         pathType: Prefix
+```
+
+## Scan Farm Job Resources
+
+You can change the CPU and memory required for SAST and SCA scan jobs. Custom sizes are applied using helm chart values that alter Scan Service environment variables.
+
+### SCA - Buildless Scan
+
+To control the amount of CPU and memory used for SCA buildless scans, add the following content to your srm-extra-props.yaml file:
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      BLACKDUCKSCAN_CPU: cpu-in-millicores
+      BLACKDUCKSCAN_MEM: memory-in-mebibytes
+```
+
+For example, to configure three vCPUs (3000m) and 3500Mi of memory, specify the following values:
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      BLACKDUCKSCAN_CPU: 3000
+      BLACKDUCKSCAN_MEM: 3500
+```
+
+The above configuration will run on the default node pool (see [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)), so your CPU and memory configuration must not exceed the capacity of nodes in that pool. If you want to use a custom node pool with higher capacity nodes, use the below configuration after creating a node pool with the label pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      BLACKDUCKSCAN_LABEL: "custom"
+      BLACKDUCKSCAN_CPU: cpu-in-millicores
+      BLACKDUCKSCAN_MEM: memory-in-mebibytes
+```
+
+### SCA - Bridge-based Scan
+
+To control the amount of CPU and memory used for SCA scans started with Bridge, add the following content to your srm-extra-props.yaml file:
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      BLACKDUCKBDIO_CPU: cpu-in-millicores
+      BLACKDUCKBDIO_MEM: memory-in-mebibytes
+```
+
+For example, to configure two vCPUs (2000m) and 2500Mi of memory, specify the following values:
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      BLACKDUCKBDIO_CPU: 2000
+      BLACKDUCKBDIO_MEM: 2500
+```
+
+The above configuration will run on the default node pool (see [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)), so your CPU and memory configuration must not exceed the capacity of nodes in that pool. If you want to use a custom node pool with higher capacity nodes, use the below configuration after creating a node pool with the label pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      BLACKDUCKBDIO_LABEL: "custom"
+      BLACKDUCKBDIO_CPU: cpu-in-millicores
+      BLACKDUCKBDIO_MEM: memory-in-mebibytes
+```
+
+### SAST Scan
+
+To control the amount of CPU and memory used for SAST scans, add the following content to your srm-extra-props.yaml file:
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      COVCAPTURE_DEFAULTPOOLTYPE: "custom"
+      COVANALYSIS_DEFAULTPOOLTYPE: "custom"
+      CUSTOMNODEPOOL_LABEL: "custom"
+      CUSTOMNODEPOOL_CPU: cpu-in-millicores
+      CUSTOMNODEPOOL_MEM: memory-in-mebibytes
+```
+
+>Note: The above configuration references a "custom" CUSTOMNODEPOOL_LABEL, which requires a node pool having pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
+
+For example, to configure four vCPUs (4000m) and 8000Mi of memory, specify the following values after creating a custom node pool that can support workloads of that size.
+
+```
+cnc:
+  cnc-scan-service:
+    environment:
+      COVCAPTURE_DEFAULTPOOLTYPE: "custom"
+      COVANALYSIS_DEFAULTPOOLTYPE: "custom"
+      CUSTOMNODEPOOL_LABEL: "custom"
+      CUSTOMNODEPOOL_CPU: 4000
+      CUSTOMNODEPOOL_MEM: 8000
 ```
 
 ## Tool Orchestration Add-in Tool Configuration
