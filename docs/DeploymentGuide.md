@@ -1586,7 +1586,14 @@ The deployment scripts in the [srm-k8s GitHub repository](https://github.com/syn
 
 ### Windows Prerequisites
 
-Ensure you can run PowerShell Core scripts on Windows by switching your PowerShell Execution Policy to RemoteSigned (recommended) or Unrestricted. You must run the Set-ExecutionPolicy -ExecutionPolicy RemoteSigned command from an elevated/administrator Command Prompt.
+Ensure you can run PowerShell Core scripts on Windows by switching your PowerShell Execution Policy to RemoteSigned (recommended) or Unrestricted. To do so, you must run the Set-ExecutionPolicy -ExecutionPolicy RemoteSigned command from an elevated/administrator Command Prompt:
+
+```
+1. Locate Command Prompt in your Start menu
+2. Click `Run as administrator`
+3. Start PowerShell Core by running `pwsh`
+4. Run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+```
 
 ### PowerShell Module
 
