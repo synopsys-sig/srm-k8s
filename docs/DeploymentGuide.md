@@ -1590,9 +1590,9 @@ Ensure you can run PowerShell Core scripts on Windows by switching your PowerShe
 
 ```
 1. Locate Command Prompt in your Start menu
-2. Click `Run as administrator`
-3. Start PowerShell Core by running `pwsh`
-4. Run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+2. Click "Run as administrator"
+3. C:\> pwsh
+4. PS C:\> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 ```
 
 ### PowerShell Module
