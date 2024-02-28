@@ -8,7 +8,7 @@ function New-WebCPUConfig($config) {
 	# https://community.synopsys.com/s/article/Code-Dx-Hikari-connection-pooling-settings-and-connection-timeout
 	$poolSize = $cpuCount * 3
 
-	# https://community.synopsys.com/s/article/Code-Dx-Notes-on-Performance
+	# https://community.synopsys.com/s/article/SRM-Notes-on-Performance
 	$limit = $cpuCount * 1000
 
 	@"
