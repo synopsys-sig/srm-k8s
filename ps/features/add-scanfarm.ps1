@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.1.0
+.VERSION 1.1.1
 .GUID b89cccc3-6d33-4c1e-b78f-91b24d456d28
 .AUTHOR Synopsys
 #>
@@ -42,6 +42,16 @@ Write-Host 'Loading...' -NoNewline
 }
 
 $config = [Config]::FromJsonFile($configPath)
+
+$workDirectory = $config.workDir
+$configDirectory = Split-Path (Resolve-Path $configPath)
+
+$isConfigInWorkDirectory = $workDirectory -eq $configDirectory
+
+if (-not $isConfigInWorkDirectory) {
+	# wizard writes the updated config.json to the work directory
+	Write-Error "Unable to continue because your config.json file must reside in your work directory. Move your config.json file from '$configDirectory' to '$workDirectory' before retrying."
+}
 
 if ($config.isLocked) {
 
