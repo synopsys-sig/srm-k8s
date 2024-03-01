@@ -245,7 +245,7 @@ the information you have provided thus far:
 - auth.hostBasePath
 
 You can find the entire list of SRM SAML properties at 
-https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/CodeDxConfiguration/saml-props.html
+https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/saml-props.html
 
 To configure additional SAML properties, follow these instructions:
 https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#specify-extra-saml-configuration
