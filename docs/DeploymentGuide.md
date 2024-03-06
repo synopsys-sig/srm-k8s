@@ -2065,6 +2065,8 @@ auth.ldap.systemPassword = ************
 auth.ldap.authenticationMechanism = simple
 ```
 
+Note: If you plan to use LDAPS, switch `ldap://` to `ldaps://`, and, if necessary, add your LDAP server certificate to the web component's cacerts file.
+
 3. If necessary, pre-create the Kubernetes Software Risk Manager namespace.
 
 ```
