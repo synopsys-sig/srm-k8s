@@ -107,9 +107,10 @@
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
     + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
 - [Maintenance](#maintenance)
-  * [Software Risk Manager Admin Password Reset](#software-risk-manager-admin-password-reset)
+  * [Admin Password Reset](#admin-password-reset)
   * [Expand Volume Size](#expand-volume-size)
   * [Reset Replication](#reset-replication)
+  * [Web Logging](#web-logging)
 - [Backup and Restore](#backup-and-restore)
   * [About Velero](#about-velero)
   * [Installing Velero](#installing-velero)
@@ -2269,7 +2270,7 @@ kubectl -n cdx-svc create -f ./cdx-toolsvc-mytool-resource-requirements.yaml
 
 Refer to this section for details on operating your Software Risk Manager deployment.
 
-## Software Risk Manager Admin Password Reset
+## Admin Password Reset
 
 Updating the administrator password for your Software Risk Manager deployment is a two-step process:
 
@@ -2380,6 +2381,60 @@ Terminal 1 (Start web workload):
 
 33. kubectl -n srm scale --replicas=1 deployment/srm-web
 34.	exit # terminal
+
+## Web Logging
+
+The Software Risk Manager Web component writes log messages to its log file and standard out using [Logback](https://logback.qos.ch/manual/introduction.html). The component's Logback configuration file gets mounted at /opt/codedx/logback.xml and looks like this:
+
+```
+<configuration>
+  <appender name="logFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${codedx.log.dir}/codedx.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- rollover daily -->
+      <fileNamePattern>${codedx.log.dir}/codedx-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- or whenever the file size reaches 100MB -->
+        <maxFileSize>100MB</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <!-- keep 7 days worth of history -->
+      <maxHistory>7</maxHistory>
+      <cleanHistoryOnStart>true</cleanHistoryOnStart>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-5level %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+  <logger name="net.liftweb" level="WARN" />
+  <root level="INFO">
+    <appender-ref ref="logFile" />
+    <appender-ref ref="stdout" />
+  </root>
+</configuration>
+```
+You can alter the configuration file with the following procedure:
+
+1. Save your configuration file to /path/to/srm-k8s/work-dir/logback.xml
+
+2. Create a new ConfigMap containing your configuration file by running the following command, replacing the namespace as necessary:
+
+```
+kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=/path/to/srm-k8s/work-dir/logback.xml
+```
+
+3. If you already have an srm-extra-props.yaml file, merge the below content into your existing file. Otherwise, create your srm-extra-props.yaml file (see [Customizing Software Risk Manager](#customizing-software-risk-manager)) and add the following content:
+
+```
+web:
+  loggingConfigMap: srm-web-logging-cfgmap
+```
+
+4. Refer to [Customizing Software Risk Manager](#customizing-software-risk-manager) for how to rerun helm with your srm-extra-props.yaml file.
 
 # Backup and Restore
 
