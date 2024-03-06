@@ -2419,12 +2419,12 @@ The Software Risk Manager Web component writes log messages to its log file and 
 ```
 You can alter the configuration file with the following procedure:
 
-1. Save your configuration file to /path/to/srm-k8s/work-dir/logback.xml
+1. Save your configuration file to /path/to/srm-k8s-work-dir/logback.xml
 
 2. Create a new ConfigMap containing your configuration file by running the following command, replacing the namespace as necessary:
 
 ```
-kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=/path/to/srm-k8s/work-dir/logback.xml
+kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=/path/to/srm-k8s-work-dir/logback.xml
 ```
 
 3. If you already have an srm-extra-props.yaml file, merge the below content into your existing file. Otherwise, create your srm-extra-props.yaml file (see [Customizing Software Risk Manager](#customizing-software-risk-manager)) and add the following content:
