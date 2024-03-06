@@ -109,6 +109,7 @@
 - [Maintenance](#maintenance)
   * [Software Risk Manager Admin Password Reset](#software-risk-manager-admin-password-reset)
   * [Expand Volume Size](#expand-volume-size)
+  * [Reset Replication](#reset-replication)
 - [Backup and Restore](#backup-and-restore)
   * [About Velero](#about-velero)
   * [Installing Velero](#installing-velero)
@@ -2301,6 +2302,84 @@ If you used the Helm Prep Script and the System Size feature, edit your config.j
 If you used the Helm Prep Script and did not use the System Size feature, edit your config.json by changing these fields: `webVolumeSizeGiB`, `dbVolumeSizeGiB`, `dbSlaveVolumeSizeGiB`, `dbSlaveBackupVolumeSizeGiB`, and `minioVolumeSizeGiB`. Then rerun your run-helm-prep.ps1 script and related helm commands.
 
 If you used the Quick Start deployment, either include the following helm chart values in your srm-extra-props.yaml file or specify them with "--set" parameters, and rerun your helm command: `web.persistence.size`, `mariadb.master.persistence.size`, `mariadb.slave.persistence.size`, `mariadb.slave.persistence.backup.size`, and `minio.persistence.size`.
+
+## Reset Replication
+
+You can use an external MariaDB/MySQL database with Software Risk Manager or the on-cluster MariaDB database configuration with an optional replica database supporting system backups.
+
+When replication is enabled, you can run the `SHOW REPLICA STATUS \G;` command on the replica to confirm that data replication is running correctly. If you observe an error with MariaDB replication, you can reset data replication using the below procedure. You will use three terminal windows to reset replication.
+
+>Note: The steps in the following section assume two statefulsets, srm-mariadb-master and srm-mariadb-slave, and an srm-web deployment, all in the srm namespace. They also assume that you have a single replica instance, as you would not want to run RESET MASTER with other replicas in replication.
+
+Terminal 1 (Stop web workload):
+
+1.	kubectl -n srm scale --replicas=0 deployment/srm-web
+
+Terminal 1 (Stop replication on replica):
+
+2.	kubectl -n srm exec -it srm-mariadb-slave-0 -- bash
+3.	mysql -uroot -p
+4.	STOP SLAVE;
+5.	exit # mysql
+6.  exit # pod
+
+Terminal 2 (Prepare for primary backup)
+
+7.	kubectl -n srm exec -it srm-mariadb-master-0 -- bash
+    >Note: Confirm zero database writers
+8.	mysql -uroot -p
+9.	RESET MASTER;
+    >Note: RESET MASTER deletes previous binary log files, creating a new binary log file.
+10.	FLUSH TABLES WITH READ LOCK;
+11. SHOW MASTER STATUS;
+    >Note: Record starting position in master log
+
+Terminal 3 (Create primary backup):
+
+12.	kubectl -n srm exec -it srm-mariadb-master-0 -- bash
+13.	mysqldump -u root -p codedx > /bitnami/mariadb/codedx-dump.sql
+    >Note: The above command assumes you have adequate space at /bitnami/mariadb to store your database backup. Use an alternate path as necessary, and adjust paths in subsequent steps accordingly.
+14.	exit # pod
+15.	exit # terminal
+
+Terminal 2 (Unlock primary tables):
+
+16.	UNLOCK TABLES;
+17.	exit # mysql
+
+Terminal 1 (Move primary backup to replica):
+
+18.	kubectl -n srm cp srm-mariadb-master-0:/bitnami/mariadb/codedx-dump.sql ./codedx-dump.sql
+19.	kubectl -n srm cp ./codedx-dump.sql srm-mariadb-slave-0:/bitnami/mariadb/codedx-dump.sql
+
+>Note: Above commands are one option for moving the backup from the primary to the replica.
+
+Terminal 2 (Delete primary backup):
+
+20.	kubectl -n srm exec srm-mariadb-master-0 -- rm /bitnami/mariadb/codedx-dump.sql
+21.	exit # terminal
+
+Terminal 1 (Restore replication):
+
+22. kubectl -n srm exec -it srm-mariadb-slave-0 -- bash
+23.	mysql -u root -p codedx < /bitnami/mariadb/codedx-dump.sql
+24.	mysql -uroot -p
+25.	RESET SLAVE;
+    >Note: RESET SLAVE deletes relay log files.
+26. Remove old binary log files by running "SHOW BINARY LOGS;" and "PURGE BINARY LOGS TO 'name';"
+    >Note: If you previously deleted binary log files (mysql-bin.000*) from the file system, remove the contents of the mysql-bin.index text file.
+27.	CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000001', MASTER_LOG_POS=position-from-step-11-goes-here;
+    >Note: Replace position-from-step-11-goes-here before running the above command.
+28.	START SLAVE;
+29.	SHOW SLAVE STATUS \G;
+30.	exit # mysql
+31.	rm /bitnami/mariadb/codedx-dump.sql
+32.	exit # pod
+
+Terminal 1 (Start web workload):
+
+33. kubectl -n srm scale --replicas=1 deployment/srm-web
+34.	exit # terminal
 
 # Backup and Restore
 
