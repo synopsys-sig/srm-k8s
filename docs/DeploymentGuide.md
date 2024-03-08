@@ -1574,7 +1574,7 @@ Your first Software Risk Manager Kubernetes deployment is a four-step process:
 - Run Helm Prep Script
 - Invoke helm/kubectl Commands
 
->Note: Software Risk Manager upgrades require three steps; you will not re-run the Help Prep Wizard when upgrading Software Risk Manager.
+>Note: Software Risk Manager upgrades require three steps; you will not rerun the Help Prep Wizard when upgrading Software Risk Manager.
 
 ## Prerequisites
 
@@ -1868,7 +1868,7 @@ The flux-v2 directory contains the Kubernetes resources you can commit to your g
 │           └───HelmRepository
 ```
 
-Consider adding your *locked* config.json file and any files it references to your GitOps repository. Making your config.json file available to others will let them re-generate your work directory files and re-run new-flux.ps1 if and when that's required.
+Consider adding your *locked* config.json file and any files it references to your GitOps repository. Making your config.json file available to others will let them re-generate your work directory files and rerun new-flux.ps1 if and when that's required.
 
 Be sure to run kubeseal by hand before adding extra Kubernetes secret resources referenced indirectly by config.json. You should drop the ".yaml" file extension from extra Helm values files to prevent Flux from trying to generate a related Kubernetes resource.
 
@@ -2281,7 +2281,7 @@ Updating the administrator password for your Software Risk Manager deployment is
 
 You can change your admin password using the web application or the API. To update using the web application, log on using your admin credential, visit /srm/me, click Password, and update your password. Alternatively, set a new password using the API at /x/profile/password.
 
-Failing to update your admin Kubernetes Secret resource when using the Scan Farm feature will block future Software Risk Manager upgrades. While you can temporarily update the resource by hand, the Helm Prep script will revert your update if you do not also update config.json, so consider updating config.json and regenerating your Kubernetes Secret resource(s) by re-running the script:
+Failing to update your admin Kubernetes Secret resource when using the Scan Farm feature will block future Software Risk Manager upgrades. While you can temporarily update the resource by hand, the Helm Prep script will revert your update if you do not also update config.json, so consider updating config.json and regenerating your Kubernetes Secret resource(s) by rerunning the script:
 
 1. [Unlock config.json](#configuration-file-protection)
 2. Edit config.json by updating the `adminPwd` parameter
@@ -2744,7 +2744,7 @@ An upgrade occurs with this four-step process:
 
 2. If you previously pulled Software Risk Manager Docker images from the Synopsys Docker registry or you copied Docker images from Docker Hub to your private Docker registry, refer to the [registry deployment script](deploy/registry.md) to re-pull/push required Docker images.
 
-3. Re-run the Helm Prep Script
+3. Rerun the Helm Prep Script
    ```
    $ cd /path/to/srm-k8s-work-dir # the directory you entered into the Helm Prep Wizard - see your config.json's workDir field
    $ pwsh ./run-helm-prep.ps1
@@ -2758,7 +2758,7 @@ The TLS configuration for the Scan Farm Cache Service and the optional inter-com
 
 ## Adding the Scan Farm Feature
 
-You can add the Scan Farm feature to an existing Software Risk Manager deployment, provided that you are using the latest deployment model (srm-k8s, not codedx-kubernetes). You will update your config.json file by running the Add Scan Farm Wizard and then re-running the Helm Prep Script via your run-helm-prep.ps1 script.
+You can add the Scan Farm feature to an existing Software Risk Manager deployment, provided that you are using the latest deployment model (srm-k8s, not codedx-kubernetes). You will update your config.json file by running the Add Scan Farm Wizard and then rerunning the Helm Prep Script via your run-helm-prep.ps1 script.
 
 You should complete all of the Scan Farm pre-work before running the add-scanfarm.ps1 script.
 
@@ -3646,7 +3646,7 @@ $ rm -r cnc # delete working chart
 
 >Note: The above procedure uses the "cnc" dependency chart version 2023.9.2.
 
-Avoid re-running the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
+Avoid rerunning the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
 
 # Appendix
 
