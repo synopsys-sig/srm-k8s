@@ -363,7 +363,7 @@ The Scan Farm requires a separate node pool that supports nodes with 6.5 vCPUs a
 
 When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Synopsys SIG (Software Integrity Group) private Docker registry (SIG repo) and push them to your private registry. This includes the Docker images for all the features you plan to install, not just Scan Farm-related ones. 
 
-You can use a private registry hosted by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own (see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md for details).
+You can use a private registry hosted by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own (see [registry.md](deploy/registry.md) for details).
 
 ### Scan Farm Ingress Requirements
 
@@ -1460,7 +1460,7 @@ If you plan to enable TLS connections, you must have access to your CA public ke
 
 You can use the cert-manager support for Kubernetes CSRs, which is in an experimental state, to issue certificates for Software Risk Manager Core and Tool Orchestration components. Follow the cert-manager kube-csr [installation instructions](https://cert-manager.io/docs/usage/kube-csr/) and then define either an Issuer or ClusterIssuer [resource](https://cert-manager.io/docs/configuration/).
 
-Refer to the comments at either the top of [values-tls.yaml](https://github.com/synopsys-sig/srm-k8s/blob/main/chart/values/values-tls.yaml) or the [Helm TLS Values (values-tls.yaml) appendix](#helm-tls-values-values-tlsyaml) for how to create related certificate resources.
+Refer to the comments at either the top of [values-tls.yaml](../chart/values/values-tls.yaml) or the [Helm TLS Values (values-tls.yaml) appendix](#helm-tls-values-values-tlsyaml) for how to create related certificate resources.
 
 ## Cert-Manager Self-signed CA Example
 
@@ -1599,7 +1599,7 @@ Ensure you can run PowerShell Core scripts on Windows by switching your PowerShe
 
 ### PowerShell Module
 
-The Helm Prep Wizard has a dependency on a Synopsys PowerShell module published to the [PowerShell Gallery](https://www.powershellgallery.com/packages/guided-setup) and [NuGet Repository](https://www.nuget.org/packages/guided-setup). The wizard will automatically download and install the module when it starts. If you would prefer to download and install the module by hand, refer to the [manual installation note](https://github.com/synopsys-sig/srm-k8s/blob/main/.install-guided-setup-module.ps1#L12) in the module installation script.
+The Helm Prep Wizard has a dependency on a Synopsys PowerShell module published to the [PowerShell Gallery](https://www.powershellgallery.com/packages/guided-setup) and [NuGet Repository](https://www.nuget.org/packages/guided-setup). The wizard will automatically download and install the module when it starts. If you would prefer to download and install the module by hand, refer to the [manual installation note](../.install-guided-setup-module.ps1#L12) in the module installation script.
 
 ## Clone GitHub Repository
 
@@ -2612,7 +2612,7 @@ During Step 2, you will run the admin/restore-db.ps1 script to restore the Softw
 
 At this point, you can find the database backup corresponding to the backup you want to restore. Refer to the Verify Backup section for the command to list backup files on a MariaDB slave database instance. Note the name of the database backup that coincides with the Velero backup you restored (e.g., '20200523-020200-Full'). You will enter this name when prompted by the restore-db.ps1 script.
 
-You must add both the helm and kubectl programs to your path before running the restore database script. Start a new PowerShell Core 7 session and change directory to where you downloaded the setup scripts from the [srm-k8s](https://github.com/synopsys-sig/srm-k8s).
+You must add both the helm and kubectl programs to your path before running the restore database script. Start a new PowerShell Core 7 session and change directory to where you downloaded the setup scripts from the [srm-k8s repository](https://github.com/synopsys-sig/srm-k8s).
 
 ```
 /$ pwsh
@@ -2721,28 +2721,36 @@ Terminal 4:
 
 # Upgrades
 
-Software Risk Manager has four major releases typically spaced evenly throughout the year. Minor releases are published on the second Tuesday of each month, with hotfixes released as needed. Updates get advertised with a notification in the Software Risk Manager web interface.
+Software Risk Manager has four major releases typically spaced evenly throughout the year. Minor releases are published on the second Tuesday of each month, with hotfixes released as needed. Updates to the Software Risk Manager Core feature get advertised with a notification in the Software Risk Manager web interface.
 
-You will not rerun the Helm Prep Wizard to upgrade Software Risk Manager. An upgrade occurs with a three-step process:
+The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) is updated with each Software Risk Manager release. Additional Kubernetes-specific releases may occur between planned Software Risk Manager releases. Each release has a version number based on [Semantic Versioning](https://semver.org/) with release notes published on the [releases page](https://github.com/synopsys-sig/srm-k8s/releases). 
 
-- Pull latest from this GitHub Repository
-- Re-run Helm Prep Script
-- Re-invoke helm/kubectl Commands
+>Note: It is essential to read release notes associated with releases introducing breaking changes.
 
-The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) repository gets updated with each Software Risk Manager deployment. Future Software Risk Manager upgrades start by updating your clone of the repository by fetching the latest commits (git pull). If you open your run-helm-prep.ps1 script, you'll notice how it points to the Helm Prep Script in your repo clone, allowing you to run the Helm Prep Script associated with a specific Software Risk Manager version.
+The Helm chart version number (i.e., the chart's version field) will always reference an associated srm-k8s release, and the chart's appVersion field will always reference the version number of the associated Software Risk Manager Core feature.
 
-Re-running your run-helm-prep.ps1 script will generate the latest kubectl/helm commands for the Software Risk Manager version you're upgrading to. Invoking those commands will upgrade your Software Risk Manager software.
+A Software Risk Manager upgrade typically starts by updating your repository clone. If you open your run-helm-prep.ps1 script, you'll notice how it points to the Helm Prep Script in your repo clone. Rerunning your run-helm-prep.ps1 script reruns the Helm Prep script version associated with the Software Risk Manager version you're upgrading to, and that will generate kubectl/helm commands suitable for your upgraded instance.
 
-```
-$ cd /path/to/srm-k8s
-$ git pull
-$ cd /path/to/srm-k8s-work-dir # selected during Helm Prep Wizard
-$ pwsh ./run-helm-prep.ps1
-$ optionally re-pull/push Software Risk Manager Docker images (see note)
-$ run helm/kubectl commands
-```
+>Note: You will not rerun the Helm Prep Wizard when upgrading Software Risk Manager.
 
->Note: If you previously pulled Software Risk Manager Docker images from the Synopsys Docker registry, re-pull/push the Docker images for the upgraded Software Risk Manager version before running your helm command.
+An upgrade occurs with this four-step process:
+
+1. Pull the latest from this GitHub Repository
+   ```
+   $ cd /path/to/git/srm-k8s
+   $ git pull
+   ```
+   >Note: The above command assumes you are upgrading to the latest version. You can update to a specific version by running `git checkout version-number` instead.
+
+2. If you previously pulled Software Risk Manager Docker images from the Synopsys Docker registry or you copied Docker images from Docker Hub to your private Docker registry, refer to the [registry deployment script](deploy/registry.md) to re-pull/push required Docker images.
+
+3. Re-run the Helm Prep Script
+   ```
+   $ cd /path/to/srm-k8s-work-dir # the directory you entered into the Helm Prep Wizard - see your config.json's workDir field
+   $ pwsh ./run-helm-prep.ps1
+   ```
+
+4. Follow the instructions printed by the Helm Prep script and rerun the printed helm/kubectl commands
 
 ## TLS
 
@@ -3418,7 +3426,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | networkPolicy.web.egress.extraPorts.tcp | list | `[22,53,80,389,443,636,7990,7999]` | the TCP ports allowed for egress from the web component |
 | networkPolicy.web.egress.extraPorts.udp | list | `[53,389,636,3269]` | the UDP ports allowed for egress from the web component |
 | openshift.createSCC | bool | `false` | whether to create SecurityContextConstraint resources, which is required when using OpenShift |
-| sizing.size | string | `Small` | whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size) |
+| sizing.size | string | `Small` | whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see [System Size](#system-size)) |
 | sizing.version | string | `v1.0` | the version of the sizing guidance |
 | to.caConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt |
 | to.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM Tool Orchestration Docker images |
