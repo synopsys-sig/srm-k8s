@@ -27,6 +27,5 @@ spec:
   selector:
     matchLabels:
       {{- include "srm-to.selectorLabels" . | nindent 6 }}
-      component: service
 {{- end -}}
 {{- end -}}

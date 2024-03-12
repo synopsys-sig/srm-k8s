@@ -11,5 +11,5 @@ spec:
   maxUnavailable: 0
   selector:
     matchLabels:
-      {{- include "srm-web.labels" . | nindent 6 }}
+      {{- include "srm-web.selectorLabels" . | nindent 6 }}
 {{- end }}
