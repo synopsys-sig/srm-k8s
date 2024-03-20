@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.16
+.VERSION 1.17.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -14,7 +14,7 @@ param (
 	[Parameter(Mandatory=$true)][string] $namespace,
 	[Parameter(Mandatory=$true)][string] $releaseName,
 	[string]   $helmChartRepoUrl = 'https://synopsys-sig.github.io/srm-k8s',
-	[string]   $helmChartVersion = '1.19.1',
+	[string]   $helmChartVersion = '',
 	[string[]] $extraValuesFiles = @(),
 	[switch]   $useSealedSecrets,
 	[string]   $sealedSecretsNamespace = 'flux-system',
@@ -54,11 +54,30 @@ function New-ResourceDirectory([string] $parentPath, [string] $name, [switch] $r
 	$dir
 }
 
+function Get-LatestChartVersion([string] $chartRepo) {
+
+	$tempFile = New-TemporaryFile
+
+	# this assumes that chartRepo has the index.yaml available at https://synopsys-sig.github.io/srm-k8s/index.yaml
+	Invoke-RestMethod "$chartRepo/index.yaml" | Out-File $tempFile.FullName
+
+	$yaml = Get-Yaml $tempFile.FullName
+	$yaml.nodeGraph.vertices[4].FindNeighborByKey('version').keyValue
+}
+
 if ($useSealedSecrets) {
 	Write-Verbose 'Searching for kubeseal program...'
     if ($null -eq (Get-AppCommandPath 'kubeseal')) {
 		Write-ErrorMessageAndExit 'Expected to find kubeseal application - is it in your PATH?'
 	}
+}
+
+if ([string]::IsNullOrWhiteSpace($helmChartVersion)) {
+
+	Write-Verbose 'Helm chart version is unspecified, fetching latest chart version...'
+	$helmChartVersion = Get-LatestChartVersion $helmChartRepoUrl
+
+	Write-Verbose "Using chart version $helmChartVersion..."
 }
 
 $workDirChartResources = Join-Path $workDir 'chart-resources'
@@ -73,7 +92,7 @@ if (-not (Test-Path $configJsonPath -PathType Leaf)) {
 $config = [Config]::FromJsonFile($configJsonPath)
 
 if (-not (Test-Path $workDirChartValuesCombined -PathType Container)) {
-	Write-ErrorMessageAndExit "Unable to continue because an expected directory ($workDirChartValuesCombined) was not found."
+	Write-ErrorMessageAndExit "Unable to continue because an expected directory ($workDirChartValuesCombined) was not found. Did you invoke your run-helm-prep.ps1 script?"
 }
 
 # Flux v2 artifacts will be stored in the 'flux-v2' subdirectory
