@@ -39,6 +39,8 @@ certificate authority.
 
 class CACertsFile : Step {
 
+	[string] $startingCaCertsFilePath;
+
 	static [string] hidden $description = @'
 Specify the path to your Java cacerts file. You can find the cacerts file
 under your Java installation. Use of a cacerts file from a Java 11 JRE 
@@ -47,7 +49,9 @@ install is strongly recommended.
 The cacerts file is not an individual certificate file. Visit the below URL
 and search for "cacerts Certificates File" to learn more:
 https://docs.oracle.com/en/java/javase/11/tools/keytool.html
+'@
 
+	static [string] hidden $cacertsPointerMsg = @'
 Note: You can find a cacerts file in the lib/security directory under
 your Java home directory.
 '@
@@ -57,10 +61,22 @@ your Java home directory.
 		$config,
 		'Java cacerts File Path',
 		[CACertsFile]::description,
-		'Enter the path to your cacerts file') {}
+		'Enter the path to your cacerts file') {
+
+		$this.startingCaCertsFilePath = $config.caCertsFilePath
+	}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		return new-object PathQuestion($prompt,	$false, $false)
+	}
+
+	[string]GetMessage() {
+
+		if ([string]::IsNullOrWhiteSpace($this.startingCaCertsFilePath)) {
+			return [CACertsFile]::description + "`n`n$([CACertsFile]::cacertsPointerMsg)"
+		} else {
+			return [CACertsFile]::description + "`n`nNote: You previously used the cacerts file at $($this.startingCaCertsFilePath)"
+		}
 	}
 
 	[bool]HandleResponse([IQuestion] $question) {
@@ -73,7 +89,7 @@ your Java home directory.
 	}
 
 	[void]Reset(){
-		$this.config.caCertsFilePath = ''
+		$this.config.caCertsFilePath = $this.startingCaCertsFilePath
 	}
 }
 
@@ -152,6 +168,8 @@ you can add the certificates that SRM should trust.
 
 class ExtraCertificates : Step {
 
+	[string[]] $startingTrustedCaCertPathsList
+
 	static [string] hidden $description = @'
 Specify each certificate file you want to add. Press Enter at the prompt when
 you have finished adding certificates.
@@ -162,10 +180,30 @@ you have finished adding certificates.
 		$config,
 		'Extra Certificate Files',
 		[ExtraCertificates]::description,
-		'Enter a certificate file') {}
+		'Enter a certificate file') {
+
+		$this.startingTrustedCaCertPathsList = $config.extraTrustedCaCertPaths
+	}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		return new-object CertificateFileQuestion($prompt, $false)
+	}
+
+	[string]GetMessage() {
+
+		$sb = New-Object Text.StringBuilder
+		if ($this.startingTrustedCaCertPathsList.Count -gt 0) {
+			$sb.Append("Your configuration already references these certificate files (add more below):")
+			$this.startingTrustedCaCertPathsList | ForEach-Object {
+				$sb.Append("`n- $_")
+			}
+		}
+
+		$certDescription = [ExtraCertificates]::description
+		if ($sb.Length -gt 0) {
+			$certDescription += "`n`n$($sb.ToString())"
+		}
+		return $certDescription
 	}
 
 	[bool]Run() {
@@ -192,7 +230,7 @@ you have finished adding certificates.
 			$files += $question.response
 		}
 
-		$this.config.extraTrustedCaCertPaths = $files
+		$this.config.extraTrustedCaCertPaths = $this.startingTrustedCaCertPathsList + $files | Sort-Object -Unique
 		return $true
 	}
 
@@ -205,6 +243,55 @@ you have finished adding certificates.
 	}
 
 	[void]Reset(){
-		$this.config.extraTrustedCaCertPaths = @()
+		$this.config.extraTrustedCaCertPaths = $this.startingTrustedCaCertPathsList
+	}
+}
+
+class WelcomeAddCertificates : Step {
+
+	WelcomeAddCertificates([Config] $config) : base(
+		[WelcomeAddCertificates].Name,
+		$config,
+		'',
+		'',
+		'') {}
+
+	[bool]Run() {
+        Write-Host '  ______       _______         ____    ____  '
+        Write-Host '.'' ____ \     |_   __ \       |_   \  /   _|'
+        Write-Host '| (___ \_|      | |__) |        |   \/   |   '
+        Write-Host ' _.____`.       |  __ /         | |\  /| |   '
+        Write-Host '| \____) |     _| |  \ \_      _| |_\/_| |_  '
+        Write-Host ' \______.''    |____| |___|    |_____||_____|'
+		Write-Host @'
+
+Welcome to the Software Risk Manager Add Certificates Wizard!
+
+This wizard helps you update the SRM Web component by adding
+one or more certificate files to its list of trusted
+certificates.
+
+'@
+		Read-HostEnter
+		return $true
+	}
+}
+
+class AbortAddCertificates : Step {
+
+	AbortAddCertificates([Config] $config) : base(
+		[AbortAddCertificates].Name,
+		$config,
+		'',
+		'',
+		'') {}
+
+	[bool]Run() {
+		Write-Host 'Setup aborted'
+		return $true
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.addExtraCertificates
 	}
 }

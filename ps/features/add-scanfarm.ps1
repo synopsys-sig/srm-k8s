@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.1.1
+.VERSION 1.1.2
 .GUID b89cccc3-6d33-4c1e-b78f-91b24d456d28
 .AUTHOR Synopsys
 #>
@@ -31,8 +31,7 @@ Write-Host 'Loading...' -NoNewline
 '../steps/scanfarm.ps1',
 '../steps/scanfarm-cache.ps1',
 '../steps/scanfarm-db.ps1',
-'../steps/scanfarm-storage.ps1',
-'../steps/welcome.ps1' | ForEach-Object {
+'../steps/scanfarm-storage.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {
@@ -46,7 +45,10 @@ $config = [Config]::FromJsonFile($configPath)
 $workDirectory = $config.workDir
 $configDirectory = Split-Path (Resolve-Path $configPath)
 
-$isConfigInWorkDirectory = $workDirectory -eq $configDirectory
+# use GetFullPath to normalize directory separators (e.g., convert C:\Users\user/.k8s-srm to C:\Users\user\.k8s-srm)
+$workDirectoryFullName   = [IO.Path]::GetFullPath($workDirectory)
+$configDirectoryFullName = [IO.Path]::GetFullPath($configDirectory)
+$isConfigInWorkDirectory = $workDirectoryFullName -eq $configDirectoryFullName
 
 if (-not $isConfigInWorkDirectory) {
 	# wizard writes the updated config.json to the work directory

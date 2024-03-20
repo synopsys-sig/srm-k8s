@@ -127,6 +127,7 @@
 - [Upgrades](#upgrades)
   * [TLS](#tls)
   * [Adding the Scan Farm Feature](#adding-the-scan-farm-feature)
+  * [Trusting Additional Certificates](#trusting-additional-certificates)
 - [Code Dx Deployment Model Migration](#code-dx-deployment-model-migration)
   * [Before you Begin](#before-you-begin)
   * [Clone the srm-k8s GitHub Repository](#clone-the-srm-k8s-github-repository)
@@ -164,6 +165,7 @@
   * [Config.json](#configjson)
   * [Helm TLS Values (values-tls.yaml)](#helm-tls-values-values-tlsyaml)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
+  * [Add Certificates Wizard](#add-certificates-wizard)
   * [Scan Farm Wizard](#scan-farm-wizard)
 
 <!-- tocstop -->
@@ -2759,13 +2761,26 @@ The TLS configuration for the Scan Farm Cache Service and the optional inter-com
 
 ## Adding the Scan Farm Feature
 
-You can add the Scan Farm feature to an existing Software Risk Manager deployment, provided that you are using the latest deployment model (srm-k8s, not codedx-kubernetes). You will update your config.json file by running the Add Scan Farm Wizard and then rerunning the Helm Prep Script via your run-helm-prep.ps1 script.
+You can add the Scan Farm feature to an existing Software Risk Manager deployment, provided that you are using the latest deployment model (srm-k8s, not codedx-kubernetes). You will update your config.json file by running the Add Scan Farm Wizard. Next, you will rerun the Helm Prep Script via your run-helm-prep.ps1 script and invoke the recommended helm command.
 
-You should complete all of the Scan Farm pre-work before running the add-scanfarm.ps1 script.
+>Note: The Add Scan Farm Wizard will create a backup of your config.json file by saving a copy with the file extension `.json.bak`.
+
+You should complete all of the [Scan Farm Pre-work](#scan-farm-pre-work) before running the add-scanfarm.ps1 script.
 
 ```
-$ cd /path/to/srm-k8s
+$ cd /path/to/srm-k8s-work-dir # the directory you entered into the Helm Prep Wizard - see your config.json's workDir field
 $ pwsh ps/features/add-scanfarm.ps1 -configPath /path/to/work/directory/config.json
+```
+
+## Trusting Additional Certificates
+
+You can have the Software Risk Manager web pod trust additional certificates by running the Add Trusted Certificates Wizard to update your config.json file before rerunning the Helm Prep Script via your run-helm-prep.ps1 script and invoking the recommended helm command.
+
+>Note: The Add Trusted Certificates Wizard will create a backup of your config.json file by saving a copy with the file extension `.json.bak`.
+
+```
+$ cd /path/to/srm-k8s-work-dir # the directory you entered into the Helm Prep Wizard - see your config.json's workDir field
+$ pwsh ps/features/add-trustedcerts.ps1 -configPath /path/to/work/directory/config.json
 ```
 
 # Code Dx Deployment Model Migration
@@ -3958,6 +3973,12 @@ PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_MINIO_SECRET_NAME 
 Below is a graph showing every Helm Prep Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Helm Prep Wizard Steps](./images/helm-prep-wizard-graph.png)
+
+## Add Certificates Wizard
+
+Below is a graph showing every Add Certificates Wizard step.
+
+![Add Certificates Steps](./images/add-trust-certificates-wizard.png)
 
 ## Scan Farm Wizard
 

@@ -4,9 +4,12 @@ The [Helm Prep Wizard](../helm-prep-wizard.ps1) generates a config.json file tha
 
 ## Tests
 
-You can run the following command to execute tests in the ps/tests directory:
+You can run the following command to execute tests in the ps directory:
 
 ```
-. .\external\powershell-algorithms\data-structures.ps1
-$results = Invoke-Pester tests -PassThru
+$ pwsh
+PS> cd /path/to/srm-k8s/ps
+PS> Import-Module Pester
+PS> . .\external\powershell-algorithms\data-structures.ps1
+PS> $results = Invoke-Pester tests -PassThru
 ```

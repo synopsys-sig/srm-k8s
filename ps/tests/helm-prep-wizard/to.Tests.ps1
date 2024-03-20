@@ -10,7 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
-	. (Join-Path $PSScriptRoot './mock.ps1')
+	. (Join-Path $PSScriptRoot '../wizard-common/mock.ps1')
 }
 
 Describe 'Specifying TO and custom Docker images' -Tag 'size' {
