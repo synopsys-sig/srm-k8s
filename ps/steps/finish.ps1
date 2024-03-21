@@ -75,7 +75,7 @@ SRM using the deployment configuration you specified.
 
 		$runSetupScriptPath = [IO.Path]::GetFullPath((Join-Path $this.config.workDir './run-helm-prep.ps1'))
 		Write-Host "`nWriting $runSetupScriptPath..."
-		"$([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../helm-prep.ps1'))) -configPath '$configJson'" | Out-File $runSetupScriptPath
+		"& '$([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../helm-prep.ps1')))' -configPath '$configJson'" | Out-File $runSetupScriptPath
 
 		$this.PrintNotes()
 		Write-Host "`nGenerate/re-generate helm command and required resource YAMLs by running: `n  pwsh ""$runSetupScriptPath""`n"
