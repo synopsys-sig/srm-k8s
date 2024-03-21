@@ -1,3 +1,8 @@
+<#PSScriptInfo
+.VERSION 1.1.0
+.GUID 0fc2b275-8917-40b1-b05a-87147ed50fb8
+.AUTHOR Synopsys
+#>
 using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
 param (
 	[Parameter(Mandatory=$true)][string] $configPath,
@@ -21,7 +26,8 @@ Set-PSDebug -Strict
 $config = [Config]::FromJsonFile($configPath)
 
 if (-not $config.isLocked) {
-	Write-Error "Config file '$configPath' is already unlocked."
+	Write-Host "There is nothing to do; the config file '$configPath' is already unlocked."
+	Exit
 }
 
 if ([string]::IsNullOrEmpty($configFilePwd)) {
