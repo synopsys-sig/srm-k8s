@@ -2793,7 +2793,7 @@ You can have the Software Risk Manager web pod trust additional certificates by 
 >Note: The Add Trusted Certificates Wizard will create a backup of your config.json file by saving a copy with the file extension `.json.bak`.
 
 ```
-$ cd /path/to/srm-k8s-work-dir # the directory you entered into the Helm Prep Wizard - see your config.json's workDir field
+$ cd /path/to/srm-k8s
 $ pwsh ps/features/add-trustedcerts.ps1 -configPath /path/to/work/directory/config.json
 ```
 
