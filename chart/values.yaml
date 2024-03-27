@@ -121,7 +121,7 @@ web:
     pullPolicy: IfNotPresent
 
   # -- the Java options for the SRM web workload
-  javaOpts: "-XX:MaxRAMPercentage=90.0"
+  javaOpts: "-XX:MaxRAMPercentage=75.0"
 
   # -- the K8s secret name containing the SRM license password with required field license.lic
   # Command:
