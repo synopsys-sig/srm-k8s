@@ -127,6 +127,7 @@
 - [Upgrades](#upgrades)
   * [TLS](#tls)
   * [Adding the Scan Farm Feature](#adding-the-scan-farm-feature)
+  * [Reconfigure the Scan Farm Feature](#reconfigure-the-scan-farm-feature)
   * [Trusting Additional Certificates](#trusting-additional-certificates)
 - [Code Dx Deployment Model Migration](#code-dx-deployment-model-migration)
   * [Before you Begin](#before-you-begin)
@@ -2761,14 +2762,27 @@ The TLS configuration for the Scan Farm Cache Service and the optional inter-com
 
 ## Adding the Scan Farm Feature
 
-You can add the Scan Farm feature to an existing Software Risk Manager deployment, provided that you are using the latest deployment model (srm-k8s, not codedx-kubernetes). You will update your config.json file by running the Add Scan Farm Wizard. Next, you will rerun the Helm Prep Script via your run-helm-prep.ps1 script and invoke the recommended helm command.
+You can add the Scan Farm feature to an existing Software Risk Manager deployment, provided that you are using the latest deployment model (srm-k8s, not codedx-kubernetes). You will update your config.json file by running the Add Scan Farm Wizard. Next, you will rerun the Helm Prep Script via your run-helm-prep.ps1 script and invoke the recommended helm and kubectl commands.
 
 >Note: The Add Scan Farm Wizard will create a backup of your config.json file by saving a copy with the file extension `.json.bak`.
 
 You should complete all of the [Scan Farm Pre-work](#scan-farm-pre-work) before running the add-scanfarm.ps1 script.
 
 ```
-$ cd /path/to/srm-k8s-work-dir # the directory you entered into the Helm Prep Wizard - see your config.json's workDir field
+$ cd /path/to/srm-k8s
+$ pwsh ps/features/add-scanfarm.ps1 -configPath /path/to/work/directory/config.json
+```
+
+## Reconfigure the Scan Farm Feature
+
+You can run the Add Scan Farm Wizard to reconfigure the Scan Farm feature. The wizard will update your config.json file so that you can rerun the Helm Prep Script via your run-helm-prep.ps1 script and invoke the recommended helm and kubectl commands.
+
+>Note: The Add Scan Farm Wizard will create a backup of your config.json file by saving a copy with the file extension `.json.bak`.
+
+You should complete all of the [Scan Farm Pre-work](#scan-farm-pre-work) before running the add-scanfarm.ps1 script.
+
+```
+$ cd /path/to/srm-k8s
 $ pwsh ps/features/add-scanfarm.ps1 -configPath /path/to/work/directory/config.json
 ```
 
