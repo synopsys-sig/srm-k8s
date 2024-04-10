@@ -11,6 +11,9 @@ if (-not $?) {
 
 BeforeAll {
 	. (Join-Path $PSScriptRoot '../wizard-common/mock.ps1')
+	. (Join-Path $PSScriptRoot '../../keyvalue.ps1')
+	. (Join-Path $PSScriptRoot '../../build/protect.ps1')
+	. (Join-Path $PSScriptRoot '../../config.ps1')
 }
 
 Describe 'Specifying workflow storage' -Tag 'storage' {

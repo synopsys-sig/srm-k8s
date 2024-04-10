@@ -116,12 +116,12 @@ web:
     # -- the Docker image repository name for the SRM web workload
     repository: codedx/codedx-tomcat
     # -- the Docker image version for the SRM web workload
-    tag: v2024.3.1
+    tag: v2024.3.2
     # -- the K8s Docker image pull policy for the SRM web workload
     pullPolicy: IfNotPresent
 
   # -- the Java options for the SRM web workload
-  javaOpts: "-XX:MaxRAMPercentage=90.0"
+  javaOpts: "-XX:MaxRAMPercentage=75.0"
 
   # -- the K8s secret name containing the SRM license password with required field license.lic
   # Command:

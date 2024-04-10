@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.7.0
+.VERSION 1.8.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
 .AUTHOR Synopsys
 #>
@@ -47,6 +47,11 @@ Write-Host 'Loading...' -NoNewline
 		Write-Error "Unable to find file script dependency at $path. Please download the entire srm-k8s GitHub repository and rerun the downloaded copy of this script."
 	}
 	. $path | out-null
+}
+
+# Check for keytool (required for validating certs and cacerts file)
+if ($null -eq (Get-AppCommandPath keytool)) {
+	Write-ErrorMessageAndExit "Restart this script after adding Java JRE (specifically Java's keytool program) to your PATH environment variable."
 }
 
 $config = [Config]::new()

@@ -16,6 +16,12 @@ $VerbosePreference = 'Continue'
 
 Set-PSDebug -Strict
 
+# ensure pwsh environment meets requirements
+. $PSScriptRoot/../../.pwsh-check.ps1
+if (-not $?) {
+	Exit $LASTEXITCODE
+}
+
 Write-Host "`nFetching project secrets from namespace $codeDxNamespace..."
 $wfSecrets = kubectl -n $codeDxNamespace get secret -l codedx-orchestration.secretType=workflowSecret -o json | ConvertFrom-Json
 $wfSecrets.items | ForEach-Object { 

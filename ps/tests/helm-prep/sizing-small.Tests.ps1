@@ -11,7 +11,10 @@ if (-not $?) {
 
 BeforeAll {
 	'../../build/yaml.ps1',
-	'../../external/powershell-algorithms/data-structures.ps1' | ForEach-Object {
+	'../../external/powershell-algorithms/data-structures.ps1',
+  '../../keyvalue.ps1',
+  '../../build/protect.ps1',
+  '../../config.ps1' | ForEach-Object {
 		Write-Debug "'$PSCommandPath' is including file '$_'"
 		$path = Join-Path $PSScriptRoot $_
 		if (-not (Test-Path $path)) {

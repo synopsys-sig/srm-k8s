@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.17.0
+.VERSION 1.18.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -26,6 +26,12 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
 
 Set-PSDebug -Strict
+
+# ensure pwsh environment meets requirements
+. $PSScriptRoot/../../.pwsh-check.ps1
+if (-not $?) {
+	Exit $LASTEXITCODE
+}
 
 $global:PSNativeCommandArgumentPassing='Legacy'
 
