@@ -123,18 +123,19 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 
 >Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
 
-### SRM Scan Farm Common Docker images
+### SRM Scan Farm Docker images
 
 If you are not using the SRM Scan Farm feature, skip this section.
 
 The SRM Scan Farm feature requires these Docker images:
 
-- sig-repo.synopsys.com/synopsys/cnc-cache-service:2023.9.2
-- sig-repo.synopsys.com/synopsys/cnc-common-infra:2023.9.2
-- sig-repo.synopsys.com/synopsys/cnc-scan-service:2023.9.2
-- sig-repo.synopsys.com/synopsys/cnc-scan-service-migration:2023.9.2
-- sig-repo.synopsys.com/synopsys/cnc-storage-service:2023.9.2
-- sig-repo.synopsys.com/synopsys/cnc-storage-service-migration:2023.9.2
+- sig-repo.synopsys.com/synopsys/cnc-cache-service:2024.3.0
+- sig-repo.synopsys.com/synopsys/cnc-common-infra:2024.3.0
+- sig-repo.synopsys.com/synopsys/cnc-scan-service:2024.3.0
+- sig-repo.synopsys.com/synopsys/cnc-scan-service-migration:2024.3.0
+- sig-repo.synopsys.com/synopsys/cnc-storage-service:2024.3.0
+- sig-repo.synopsys.com/synopsys/cnc-storage-service-migration:2024.3.0
+- sig-repo.synopsys.com/synopsys/cnc-job-runner:2024.3.0
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
 
@@ -142,72 +143,13 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'cnc-cache-service:2023.9.2',
-'cnc-common-infra:2023.9.2',
-'cnc-scan-service:2023.9.2',
-'cnc-scan-service-migration:2023.9.2',
-'cnc-storage-service:2023.9.2',
-'cnc-storage-service-migration:2023.9.2' | ForEach-Object {
-
-   docker pull "sig-repo.synopsys.com/synopsys/$_"
-   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
-
-   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
-   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
-
-   docker push "$myPrivateRegistryPrefix$_"
-   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
-}
-```
-
->Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
-
-### SRM Scan Farm SAST Docker images
-
-The SRM Scan Farm SAST feature requires these Docker images:
-
-- sig-repo.synopsys.com/synopsys/cnc-cov-capture-linux64-2023.9.2:2023.9.2
-- sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-2023.9.2:2023.9.2
-
->Note: The Coverity capture/analysis Docker image name format is sig-repo.synopsys.com/synopsys/cnc-cov-analysis-linux64-\<cov-version>:version.
-
-You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
-
-```
-$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
-if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
-
-'cnc-cov-capture-linux64-2023.9.2:2023.9.2',
-'cnc-cov-analysis-linux64-2023.9.2:2023.9.2' | ForEach-Object {
-
-   docker pull "sig-repo.synopsys.com/synopsys/$_"
-   if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
-
-   docker tag "sig-repo.synopsys.com/synopsys/$_" "$myPrivateRegistryPrefix$_"
-   if($LASTEXITCODE -ne 0){throw "$_ tag failed"} 
-
-   docker push "$myPrivateRegistryPrefix$_"
-   if($LASTEXITCODE -ne 0){throw "$_ push failed"} 
-}
-```
-
->Note: Your private Docker registry might require creating a repository before adding a Docker image with `docker push`.
-
-### SRM Scan Farm SCA Docker images
-
-The SRM Scan Farm SCA feature requires this Docker image:
-
-- sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-8.9.0:2023.9.2
-
->Note: The Detect Docker image name format is sig-repo.synopsys.com/synopsys/cnc-synopsys-detect-\<detect-version>:version.
-
-You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
-
-```
-$myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
-if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
-
-'cnc-synopsys-detect-8.9.0:2023.9.2' | ForEach-Object {
+'cnc-cache-service:2024.3.0',
+'cnc-common-infra:2024.3.0',
+'cnc-scan-service:2024.3.0',
+'cnc-scan-service-migration:2024.3.0',
+'cnc-storage-service:2024.3.0',
+'cnc-storage-service-migration:2024.3.0',
+'cnc-job-runner:2024.3.0' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -292,15 +234,13 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 'bitnami/minio:2021.4.6-debian-10-r11',
 'codedx/codedx-workflow-controller:v2.17.0',
 'codedx/codedx-argoexec:v2.17.0',
-'cnc-cache-service:2023.9.2',
-'cnc-common-infra:2023.9.2',
-'cnc-scan-service:2023.9.2',
-'cnc-scan-service-migration:2023.9.2',
-'cnc-storage-service:2023.9.2',
-'cnc-storage-service-migration:2023.9.2',
-'cnc-cov-capture-linux64-2023.9.2:2023.9.2',
-'cnc-cov-analysis-linux64-2023.9.2:2023.9.2',
-'cnc-synopsys-detect-8.9.0:2023.9.2' | ForEach-Object {
+'cnc-cache-service:2024.3.0',
+'cnc-common-infra:2024.3.0',
+'cnc-scan-service:2024.3.0',
+'cnc-scan-service-migration:2024.3.0',
+'cnc-storage-service:2024.3.0',
+'cnc-storage-service-migration:2024.3.0',
+'cnc-job-runner:2024.3.0' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 

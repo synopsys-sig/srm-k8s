@@ -201,10 +201,10 @@ web:
   scanfarm:
     sast:
       # -- the SAST component version to use for build-less scans
-      version: 2023.9.2
+      version: 2024.3.0
     sca:
-      # -- the SCA component version to use for build-less scans
-      version: 8.9.0
+      # -- the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable)
+      version: 9.2.0
 
   securityContext:
     # -- whether the SRM web workload uses a read-only filesystem
@@ -294,6 +294,9 @@ cnc:
     retention:
       # @ignore
       enabled: false
+    environment:
+      # -- must match web.scanfarm.sca.version
+      TOOL_DETECT_VERSION: "9.2.0"
 
   # @ignore
   cnc-cache-service:

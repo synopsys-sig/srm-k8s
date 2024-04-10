@@ -3,7 +3,7 @@ name: srm
 description: Software Risk Manager
 type: application
 icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
-version: 1.21.1
+version: 1.22.0
 appVersion: "2024.3.2"
 
 dependencies:
@@ -12,7 +12,7 @@ dependencies:
   repository: https://codedx.github.io/codedx-kubernetes
   condition: features.mariadb
 - name: cnc
-  version: "2023.9.2"
+  version: "2024.3.0"
   repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
   condition: features.scanfarm
 - name: argo

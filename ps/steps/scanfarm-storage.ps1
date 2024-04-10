@@ -34,11 +34,7 @@ You can use the following storage providers:
 			1 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::MinIO }
 			2 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::MinIO }
 			3 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::Gcs }
-			4 { 
-				$this.config.scanFarmStorageType = [ScanFarmStorageType]::Azure
-				Write-Host "`nAzure storage will be available with SRM 2023.12.0"
-				return $false
-			}
+			4 { $this.config.scanFarmStorageType = [ScanFarmStorageType]::Azure }
 		}
 		return $true
 	}	
