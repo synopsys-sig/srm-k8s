@@ -195,7 +195,7 @@ if ($DebugPreference -eq 'Continue') {
 
 try {
 	$vStack = Invoke-GuidedSetup 'SRM - Add Scan Farm Wizard' $s[[WelcomeScanFarm]] ($s[[Finish]],$s[[AbortScanFarm]])
-	Write-StepGraph (Join-Path ($config.workDir ?? './') 'graph.path') $s $vStack
+	Write-StepGraph (Join-Path ($config.workDir ?? './') 'graph.wiz.sf.path') $s $vStack
 } catch {
 	Write-Host "`n`nAn unexpected error occurred: $_`n"
 	Write-Host $_.ScriptStackTrace

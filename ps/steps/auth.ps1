@@ -70,21 +70,24 @@ https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#specif
 class SamlAuthenticationHostBasePath : Step {
 	
 	static [string] hidden $description = @'
-Specify the SAML hostBasePath name to associate with the SRM web application. The SAML 
-IdP will connect to your SRM instance using the SRM Assertion Consumer Service (ACS) 
-endpoint, which will be a URL that is based on your SRM DNS name.
+Your SAML IdP will connect to your SRM instance using the SRM Assertion Consumer Service (ACS) 
+endpoint, a URL that combines your host base path with 'login/callback/saml'.
 
-If your DNS name will be my-srm.synopsys.com accessed via HTTPS, enter this hostBasePath:
+For example, if you will access SRM over HTTPS at my-srm.synopsys.com with an /srm context
+path, enter this as your SAML SRM host base path: https://my-srm.synopsys.com/srm
 
-https://my-srm.synopsys.com/srm
+In the above example, your SAML IdP should permit login redirects to this URL:
+https://my-srm.synopsys.com/srm/login/callback/saml
+
+Note: Do not enter the /login/callback/saml portion here; enter the host base path only.
 '@
 
 	SamlAuthenticationHostBasePath([Config] $config) : base(
 		[SamlAuthenticationHostBasePath].Name, 
 		$config,
-		'SRM SAML hostBasePath',
+		'SAML SRM Host Base Path',
 		[SamlAuthenticationHostBasePath]::description,
-		'Enter SAML hostBasePath') {}
+		'Enter your SAML SRM host base path') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
 		$this.config.samlHostBasePath = ([Question]$question).response
@@ -270,5 +273,82 @@ https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#specif
 
 	[bool]CanRun() {
 		return $this.config.useSaml
+	}
+}
+
+class WelcomeAddSaml : Step {
+
+	WelcomeAddSaml([Config] $config) : base(
+		[WelcomeAddSaml].Name,
+		$config,
+		'',
+		'',
+		'') {}
+
+	[bool]Run() {
+        Write-Host '  ______       _______         ____    ____  '
+        Write-Host '.'' ____ \     |_   __ \       |_   \  /   _|'
+        Write-Host '| (___ \_|      | |__) |        |   \/   |   '
+        Write-Host ' _.____`.       |  __ /         | |\  /| |   '
+        Write-Host '| \____) |     _| |  \ \_      _| |_\/_| |_  '
+        Write-Host ' \______.''    |____| |___|    |_____||_____|'
+		Write-Host @'
+
+Welcome to the Software Risk Manager Add SAML Authentication Wizard!
+
+This wizard helps you update the SRM Web component by adding
+SAML configuration.
+
+'@
+		Read-HostEnter
+		return $true
+	}
+}
+
+class UseSaml : Step {
+
+	static [string] hidden $description = @'
+Software Risk Manager can also be configured to authenticate against a SAML 2.0 IdP (Identity Provider).
+'@
+
+	UseSaml([Config] $config) : base(
+		[UseSaml].Name,
+		$config,
+		'Use SAML Authentication',
+		[UseSaml]::description,
+		'Do you want to configure SAML authentication?') {}
+
+	[IQuestion]MakeQuestion([string] $prompt) {
+		return new-object YesNoQuestion($prompt,
+			'Yes, I want to configure SRM using SAML authentication.',
+			'No, I do not want to configure SRM using SAML authentication.', -1)
+	}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.useSaml = ([YesNoQuestion]$question).choice -eq 0
+		return $true
+	}
+
+	[void]Reset(){
+		$this.config.useSaml = $false
+	}
+}
+
+class AbortAddSaml : Step {
+
+	AbortAddSaml([Config] $config) : base(
+		[AbortAddSaml].Name,
+		$config,
+		'',
+		'',
+		'') {}
+
+	[bool]Run() {
+		Write-Host 'Setup aborted'
+		return $true
+	}
+
+	[bool]CanRun() {
+		return -not $this.config.useSaml
 	}
 }

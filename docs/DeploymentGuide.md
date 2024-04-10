@@ -133,6 +133,7 @@
   * [Adding the Scan Farm Feature](#adding-the-scan-farm-feature)
   * [Reconfigure the Scan Farm Feature](#reconfigure-the-scan-farm-feature)
   * [Trusting Additional Certificates](#trusting-additional-certificates)
+  * [Adding SAML Authentication](#adding-saml-authentication)
 - [Code Dx Deployment Model Migration](#code-dx-deployment-model-migration)
   * [Before you Begin](#before-you-begin)
   * [Clone the srm-k8s GitHub Repository](#clone-the-srm-k8s-github-repository)
@@ -171,6 +172,7 @@
   * [Helm TLS Values (values-tls.yaml)](#helm-tls-values-values-tlsyaml)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Add Certificates Wizard](#add-certificates-wizard)
+  * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
   * [Scan Farm Wizard](#scan-farm-wizard)
 
 <!-- tocstop -->
@@ -2902,6 +2904,17 @@ $ cd /path/to/srm-k8s
 $ pwsh ps/features/add-trustedcerts.ps1 -configPath /path/to/work/directory/config.json
 ```
 
+## Adding SAML Authentication
+
+You can opt for SAML authentication when you run the Helm Prep Wizard. If you did not, you can alter your Software Risk Manager configuration to authenticate users against a SAML 2.0 IdP (Identity Provider) by running the Add SAML Authentication Wizard. The wizard will update your config.json file, allowing you to rerun the Helm Prep Script via your run-helm-prep.ps1 script and invoke the recommended helm command to apply your SAML configuration.
+
+>Note: The Add SAML Authentication Wizard will create a backup of your config.json file by saving a copy with the file extension `.json.bak`.
+
+```
+$ cd /path/to/srm-k8s
+$ pwsh ps/features/add-samlauth.ps1 -configPath /path/to/work/directory/config.json
+```
+
 # Code Dx Deployment Model Migration
 
 Code Dx was renamed the Software Risk Manager with the 2023.8.0 release, which introduced a new deployment model that supports a separately licensed Scan Farm feature with built-in SAST and SCA scanning powered by Coverity and Black Duck.
@@ -4098,6 +4111,12 @@ Below is a graph showing every Helm Prep Wizard step. You only have to visit the
 Below is a graph showing every Add Certificates Wizard step.
 
 ![Add Certificates Steps](./images/add-trust-certificates-wizard.png)
+
+## Add SAML Authentication Wizard
+
+Below is a graph showing every Add SAML Authentication Wizard step. You only have to visit the steps that apply to your SRM deployment.
+
+![Add SAML Authentication Steps](./images/add-saml-auth-wizard-graph.png)
 
 ## Scan Farm Wizard
 

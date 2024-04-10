@@ -1,6 +1,6 @@
 <#PSScriptInfo
-.VERSION 1.1.0
-.GUID 77c562f2-fba7-4c91-8499-e3a8b26e9e7e
+.VERSION 1.0.0
+.GUID 6d09e56c-f2a0-4f56-828e-0a676d08fe6a
 .AUTHOR Synopsys
 #>
 
@@ -21,8 +21,8 @@ Write-Host 'Loading...' -NoNewline
 '../../build/protect.ps1',
 '../../config.ps1',
 '../../steps/step.ps1',
-'../../steps/finish.ps1',
-'../../steps/java.ps1' | ForEach-Object {
+'../../steps/auth.ps1',
+'../../steps/finish.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {
@@ -55,31 +55,32 @@ if ($config.isLocked) {
 	$config.Unlock($configFilePwd)
 }
 
-# Adding extra certificates to trust means updating a local cacerts file
-$config.useDefaultCACerts = $false
-
 # make a backup copy of the config file
 Copy-Item $configPath ([IO.Path]::ChangeExtension($configPath, '.json.bak')) -Force
 
 $graph = New-Object Graph($true)
 
 $s = @{}
-[WelcomeAddCertificates],
-[AddExtraCertificates],
-[AbortAddCertificates],
-[CACertsFile],
-[CACertsFilePassword],
-[ExtraCertificates],
+[AbortAddSaml],
+[Finish],
 [Lock],
-[Finish]
- | ForEach-Object {
+[SamlAppName],
+[SamlAuthenticationHostBasePath],
+[SamlExtraConfig],
+[SamlIdpMetadata],
+[SamlKeystorePwd],
+[SamlPrivateKeyPwd],
+[UseSaml],
+[WelcomeAddSaml] | ForEach-Object {
 	Write-Debug "Creating $_ object..."
 	$s[$_] = new-object -type $_ -args $config
 	Add-Step $graph $s[$_]
 }
 
-Add-StepTransitions $graph $s[[WelcomeAddCertificates]] $s[[AddExtraCertificates]],$s[[AbortAddCertificates]]
-Add-StepTransitions $graph $s[[WelcomeAddCertificates]] $s[[AddExtraCertificates]],$s[[CACertsFile]],$s[[CACertsFilePassword]],$s[[ExtraCertificates]],$s[[Lock]],$s[[Finish]]
+Add-StepTransitions $graph $s[[WelcomeAddSaml]] $s[[UseSaml]],$s[[AbortAddSaml]]
+Add-StepTransitions $graph $s[[WelcomeAddSaml]] $s[[UseSaml]], `
+	$s[[SamlAuthenticationHostBasePath]],$s[[SamlIdpMetadata]],$s[[SamlAppName]],$s[[SamlKeystorePwd]],$s[[SamlPrivateKeyPwd]],$s[[SamlExtraConfig]],
+	$s[[Lock]],$s[[Finish]]
 
 if ($DebugPreference -eq 'Continue') {
 	# Print graph at https://dreampuf.github.io/GraphvizOnline (select 'dot' Engine and use Format 'png-image-element')
@@ -89,8 +90,9 @@ if ($DebugPreference -eq 'Continue') {
 }
 
 try {
-	$vStack = Invoke-GuidedSetup 'SRM - Add Certificates Wizard' $s[[WelcomeAddCertificates]] ($s[[Finish]],$s[[AbortAddCertificates]])
-	Write-StepGraph (Join-Path ($config.workDir ?? './') 'graph.wiz.certs.path') $s $vStack
+	$vStack = Invoke-GuidedSetup 'SRM - Add SAML Authentication Wizard' $s[[WelcomeAddSaml]] ($s[[Finish]],$s[[AbortAddSaml]])
+
+	Write-StepGraph (Join-Path ($config.workDir ?? './') 'graph.wiz.saml.path') $s $vStack
 } catch {
 	Write-Host "`n`nAn unexpected error occurred: $_`n"
 	Write-Host $_.ScriptStackTrace
