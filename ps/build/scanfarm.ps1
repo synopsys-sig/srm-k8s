@@ -66,7 +66,7 @@ features:
   scanfarm: true
 cnc:
   cnc-cache-service:
-    javaOpts: "-Dcom.synopsys.coverity.cache.srm.secure=false"
+    javaOpts: "-Dserver.ssl.enabled-protocols=TLSv1.2,TLSv1.3 -Dcom.synopsys.coverity.cache.srm.secure=false"
   scanfarm:
     enabled: true
     http:
