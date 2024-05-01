@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.10.0
+.VERSION 1.11.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -15,7 +15,16 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
 Set-PSDebug -Strict
 
-Write-Host 'Loading...' -NoNewline
+# Check for kubectl (required to create YAML resources)
+if ($null -eq (Get-AppCommandPath kubectl)) {
+	Write-ErrorMessageAndExit "Restart this script after adding kubectl to your PATH environment variable."
+}
+
+Write-Verbose "Running kubectl dry-run test..."
+Write-Verbose "Note: If the test hangs or prompts for information, verify that your kubectl context is either empty or has a valid configuration."
+New-GenericSecret 'default' 'dry-run-test' -keyValues @{'key'='value'} -dryRun | Out-Null
+
+Write-Host "`nLoading dependencies..."
 
 './external/powershell-algorithms/data-structures.ps1',
 './keyvalue.ps1',
@@ -82,11 +91,6 @@ try {
 			}
 		}
 		$config.Unlock($configFilePwd)	
-	}
-
-	# Check for kubectl (required to create YAML resources)
-	if ($null -eq (Get-AppCommandPath kubectl)) {
-		Write-ErrorMessageAndExit "Restart this script after adding kubectl to your PATH environment variable."
 	}
 
 	$useCustomCacerts = -not [string]::IsNullOrEmpty($config.caCertsFilePath)
