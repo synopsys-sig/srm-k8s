@@ -81,6 +81,8 @@
   * [Fetch Initial Admin Password](#fetch-initial-admin-password)
 - [Installation - Full](#installation---full)
   * [Prerequisites](#prerequisites)
+    + [Linux Prerequisites](#linux-prerequisites)
+    + [macOS Prerequisites](#macos-prerequisites)
     + [Windows Prerequisites](#windows-prerequisites)
     + [PowerShell Module](#powershell-module)
   * [Clone GitHub Repository](#clone-github-repository)
@@ -1589,15 +1591,47 @@ Your first Software Risk Manager Kubernetes deployment is a four-step process:
 
 ## Prerequisites
 
-The deployment scripts in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. Additionally, the scripts in the repository depend on a [Java JRE](https://adoptium.net/temurin/releases/?version=11), specifically, the keytool program, which should be in your PATH.
+The deployment scripts in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. 
 
-- [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview) (not [Windows PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell))
-- [Java JRE](https://adoptium.net/temurin/releases/?version=11) (specifically, keytool in your PATH)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl) (version should match your cluster's Kubernetes version)
+>Note: PowerShell Core differs from Windows PowerShell, which is available on Windows only.
 
->Note: You do not need to be connected to your cluster to run the Helm Prep Wizard or Helm Prep Script because both use client-side kubectl capabilities.
+See the following sections for operating system-specific prerequisites. 
+
+### Linux Prerequisites
+
+Use the following links to install the prerequisite software on your Linux system.
+
+- [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-linux)
+- [Java JRE](https://adoptium.net/temurin/releases/?package=jre&version=11) (specifically, keytool in your PATH)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) (version should match your cluster's Kubernetes version)
+
+The scripts in the repository depend on the `keytool` program, bundled with the Java JRE, and the `kubectl` program, both of which must be included in your PATH.
+
+>Note: You do not need to be connected to your cluster to run the Helm Prep Wizard or Helm Prep Script because both use client-side kubectl capabilities. If your kubectl context is not empty, it should be a valid configuration.
+
+### macOS Prerequisites
+
+Use the following links to install the prerequisite software on your macOS system.
+
+- [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-macos)
+- [Java JRE](https://adoptium.net/temurin/releases/?package=jre&version=11) (specifically, keytool in your PATH)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/) (version should match your cluster's Kubernetes version)
+
+The scripts in the repository depend on the `keytool` program, bundled with the Java JRE, and the `kubectl` program, both of which must be included in your PATH.
+
+>Note: You do not need to be connected to your cluster to run the Helm Prep Wizard or Helm Prep Script because both use client-side kubectl capabilities. If your kubectl context is not empty, it should be a valid configuration.
 
 ### Windows Prerequisites
+
+Use the following links to install the prerequisite software on your Windows system.
+
+- [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows) (not [Windows PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell))
+- [Java JRE](https://adoptium.net/temurin/releases/?package=jre&version=11) (specifically, keytool in your PATH)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/) (version should match your cluster's Kubernetes version)
+
+The scripts in the repository depend on the `keytool` program, bundled with the Java JRE, and the `kubectl` program, both of which must be included in your PATH.
+
+>Note: You do not need to be connected to your cluster to run the Helm Prep Wizard or Helm Prep Script because both use client-side kubectl capabilities. If your kubectl context is not empty, it should be a valid configuration.
 
 Ensure you can run PowerShell Core scripts on Windows by switching your PowerShell Execution Policy to RemoteSigned (recommended) or Unrestricted. To do so, you must run the Set-ExecutionPolicy -ExecutionPolicy RemoteSigned command from an elevated/administrator Command Prompt:
 
