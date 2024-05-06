@@ -75,6 +75,8 @@ data:
         </encoder>
       </appender>
       <logger name="net.liftweb" level="WARN" />
+      <logger name="org.pac4j.saml" level="WARN" />
+      <logger name="org.apache.velocity" level="ERROR" />
       <root level="INFO">
         <appender-ref ref="logFile" />
         <appender-ref ref="stdout" />
