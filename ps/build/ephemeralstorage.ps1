@@ -47,7 +47,7 @@ minio:
 
 function New-WorkflowEphemeralStorageConfig($config) {
 	@"
-argo:
+argo-workflows:
   controller:
     resources:
       limits:

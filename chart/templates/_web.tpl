@@ -7,7 +7,12 @@
 {{- end }}
 
 {{- define "srm-web.db.fullname" -}}
-{{- printf "%s-mariadb" ((include "srm.fullname" .) | trunc 55 | trimSuffix "-") }}
+{{- $name := "mariadb" -}}
+{{- if contains $name .Release.Name -}}
+{{- printf .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 {{- end }}
 
 {{/*

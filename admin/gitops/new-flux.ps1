@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.18.0
+.VERSION 1.20.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -9,16 +9,52 @@
 This script generates Flux v2 artifacts from the output of the Helm Prep Script.
 #>
 
+[CmdletBinding(DefaultParameterSetName = 'Helm')]
 param (
+	[Parameter(ParameterSetName = 'Helm', Position = 0)]
+	[Parameter(ParameterSetName = 'Git', Position = 0)]
 	[string]   $workDir = "$HOME/.k8s-srm",
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[Parameter(Mandatory=$true)][string] $namespace,
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[Parameter(Mandatory=$true)][string] $releaseName,
+
+	[Parameter(ParameterSetName = 'Helm')]
 	[string]   $helmChartRepoUrl = 'https://synopsys-sig.github.io/srm-k8s',
+	
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[string]   $helmChartVersion = '',
+
+	[Parameter(ParameterSetName = 'Git')]
+	[string]   $gitChartRepoUrl = 'https://github.com/synopsys-sig/srm-k8s',
+	[Parameter(ParameterSetName = 'Git')]
+	[string]   $gitChartBranchName = 'main',
+	[Parameter(ParameterSetName = 'Git')]
+	[string]   $gitChartPath = './chart',
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[string[]] $extraValuesFiles = @(),
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[switch]   $useSealedSecrets,
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[string]   $sealedSecretsNamespace = 'flux-system',
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[string]   $sealedSecretsControllerName = 'sealed-secrets-controller',
+
+	[Parameter(ParameterSetName = 'Helm')]
+	[Parameter(ParameterSetName = 'Git')]
 	[string]   $sealedSecretsPublicKeyPath
 )
 
@@ -110,17 +146,9 @@ if (-not $config.skipToolOrchestration) {
 
 	$crd = New-ResourceDirectory $fluxDir 'CRD'
 
-	'argoproj.io_clusterworkflowtemplates.yaml',
-	'argoproj.io_cronworkflows.yaml',
-	'argoproj.io_workfloweventbindings.yaml',
-	'argoproj.io_workflows.yaml',
-	'argoproj.io_workflowtemplates.yaml' | ForEach-Object {
-
-		$url = "https://raw.githubusercontent.com/synopsys-sig/srm-k8s/main/crds/v1/$_"
-
-		Write-Verbose "Downloading $url..."
-		$response = Invoke-WebRequest $url
-		$response.Content | Out-File (Join-Path $crd $_) -NoNewline
+	Get-ChildItem -File $PSScriptRoot/../../crds/v1 | ForEach-Object {
+		Write-Verbose "Copying $_..."
+		Copy-Item $_ $crd
 	}
 }
 
@@ -215,6 +243,10 @@ data:
 	$valuesConfigMapReferences += "  name: helmrelease-values-$valuesId"
 }
 
+switch ($PSCmdlet.ParameterSetName) {
+
+	'Helm' {
+
 @"
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
@@ -261,10 +293,74 @@ spec:
 #   minio:
 #     image:
 #       tag: 'minio-tag'
-#   argo:
+#   argo-workflows:
 #     images:
 #       tag: 'workflow-tag'
 "@ | Out-File (Join-Path (New-ResourceDirectory $fluxDir 'HelmRelease') 'release.yaml') -NoNewline
+
+		break
+	}
+
+	'Git' {
+
+@"
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: srm
+  namespace: $namespace
+spec:
+  interval: 1m
+  url: $gitChartRepoUrl
+  ref:
+    branch: $gitChartBranchName
+"@ | Out-File (Join-Path (New-ResourceDirectory $fluxDir 'GitRepository') 'repo.yaml') -NoNewline
+
+@"
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: srm
+  namespace: $namespace
+spec:
+  releaseName: $releaseName
+  timeout: 30m0s
+  chart:
+    spec:
+      chart: $gitChartPath
+      version: $helmChartVersion
+      sourceRef:
+        kind: GitRepository
+        name: srm
+        namespace: $namespace
+  valuesFrom:
+    $([string]::join("`n    ",$valuesConfigMapReferences))
+  interval: 1m0s
+  install:
+    skipCRDs: true
+# values:
+#   web:
+#     image:
+#       tag: 'web-tag'
+#   mariadb:
+#     image:
+#       tag: 'db-tag'
+#   to:
+#     image:
+#       tag: 'tool-orchestration-tag'
+#   minio:
+#     image:
+#       tag: 'minio-tag'
+#   argo-workflows:
+#     images:
+#       tag: 'workflow-tag'
+"@ | Out-File (Join-Path (New-ResourceDirectory $fluxDir 'HelmRelease') 'release.yaml') -NoNewline
+
+		break
+	}
+
+}
+
 
 @"
 apiVersion: v1

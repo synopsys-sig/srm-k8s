@@ -49,8 +49,8 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: '{{ .Release.Name }}-{{ .Values.argo.controller.name }}'
-      release: {{ .Release.Name | quote }}
+      app.kubernetes.io/name: 'argo-workflows-{{ index .Values "argo-workflows" "controller" "name" }}'
+      app.kubernetes.io/instance: {{ .Release.Name | quote }}
   egress:
   - ports:
     - port: {{ required "kubeapi-server target/pod port must be defined" .Values.networkPolicy.k8sApiPort }}

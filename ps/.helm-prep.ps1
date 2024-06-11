@@ -263,6 +263,7 @@ try {
 	Write-Host "`n----------------------`nRequired Helm Commands`n----------------------"
 	Write-Host "helm repo add codedx https://codedx.github.io/codedx-kubernetes --force-update"
 	Write-Host "helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative --force-update"
+	Write-Host "helm repo add argo-workflows https://argoproj.github.io/argo-helm --force-update"
 	Write-Host "helm repo update"
 	Write-Host "helm dependency update ""$chartFullPath"""
 	Write-Host "helm -n $($config.namespace) upgrade --reset-values --install $($config.releaseName)" -NoNewline

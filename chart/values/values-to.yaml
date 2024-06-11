@@ -40,7 +40,7 @@ mariadb:
       create: true
 
 to:
-  # -- the configmap name containing the CA cert with required field ca.crt
+  # -- the configmap name containing the CA cert with required field ca.crt for SRM web
   caConfigMap:
   # -- the K8s secret name containing the API key for the tool service with required field api-key
   # Command:
@@ -60,14 +60,12 @@ to:
       prepare: 'codedx/codedx-prepare'
       # -- the Docker image repository name for the SRM new-analysis workload
       newAnalysis: 'codedx/codedx-newanalysis'
-      # -- the Docker image repository name for the SRM send-error-results workload
-      sendErrorResults: 'codedx/codedx-error-results'
       # -- the Docker image repository name for the SRM send-results workload
       sendResults: 'codedx/codedx-results'
       # -- the Docker image repository name for the SRM tool service workload
       toolService: 'codedx/codedx-tool-service'
     # -- the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)
-    tag: v1.34.0
+    tag: v2.0.0
   logs:
     # -- the maximum size of a tool service log file
     maxSizeMB: 10
@@ -86,13 +84,6 @@ to:
     # -- the annotations to apply to the SRM tool service account
     annotations: {}
     # -- the name of the service account to use; a name is generated using the fullname template when unset and create is true
-    name:
-  serviceAccountNameWorkflow:
-    # -- whether to create a service account for tool workflows (an existing service account must reference Kubernetes image pull secret as needed)
-    create: true
-    # -- the annotations to apply to the tool workflow service account
-    annotations: {}
-    # -- the name of the tool workflow service account to use; a name is generated using the fullname template when unset and create is true
     name:
   # -- the node selector to use for the tool service
   nodeSelector: {}
@@ -135,6 +126,10 @@ to:
   # Command:
   # kubectl -n srm create secret tls to-tls-secret --cert=path/to/cert-file --key=path/to/key-file
   tlsSecret:
+  workflowController:
+    priorityClass:
+      # -- the Argo priority value, which must be set relative to other Tool Orchestration component priority values (see argo-workflows.priorityClassName)
+      value: 10100
   workflowStorage:
     # -- the workflow storage endpoint to use, either an external endpoint (e.g., AWS, GCP) or the older, bundled MinIO instance. Specify the
     # hostname and port (e.g., hostname:port).
@@ -201,27 +196,27 @@ minio:
   # -- the pod tolerations for the MinIO component
   tolerations: []
 
-argo:
+argo-workflows:
   # depends on https://github.com/codedx/codedx-kubernetes/tree/master/setup/core/crds/v1
   controller:
-    # -- the runtime executor for the Argo workflow
-    containerRuntimeExecutor: pns
-    extraEnv:
-    # -- the list of extra environment variables for the Argo workflow controller
-    - name: 'RECENTLY_STARTED_POD_DURATION'
-      value: '10s'
+    image:
+      # -- the Argo workflow controller Docker image registry
+      registry: docker.io
+      repository: codedx/codedx-workflow-controller
     instanceID:
       # -- whether the Argo workflow controller uses an instance ID
       enabled: true
       # -- whether the Argo workflow controller instance ID uses the release name
       useReleaseName: true
+    # -- the name of the Argo workflow controller
+    name: wc
     # -- the node selector for the Argo workflow controller
     nodeSelector: {}
     pdb:
       # -- whether to create a pod disruption budget for the Argo component (a workflow controller can tolerate occasional downtime)
       enabled: false
-    # -- the Argo priority value, which must be set relative to other Tool Orchestration component priority values
-    priorityClassValue: 10100
+    # -- the Argo priority class name whose value (see to.workflowController) must be set relative to other priority values
+    priorityClassName: srm-wf-controller-pc
     resources:
       limits:
         # -- the required CPU for the Argo workload
@@ -230,27 +225,35 @@ argo:
         memory: 500Mi
     # -- the pod tolerations for the Argo component
     tolerations: []
+    # -- the namespace for the Argo workflow service account
+    workflowNamespaces:
+    - srm
+  workflow:
+    serviceAccount:
+      # -- the annotations to apply to the tool workflow service account
+      annotations: {}
+      # -- whether to create a service account for tool workflows
+      create: true
+      # -- the labels to apply to the tool workflow service account
+      labels: {}
+      # -- the name of the tool workflow service account to use
+      name: "srm-workflow"
+    rbac:
+      create: true
+  crds:
+    install: false
+  executor:
+    image:
+      # -- the Argo executor Docker image registry
+      registry: docker.io
+      repository: codedx/codedx-argoexec
   images:
-    # -- the Docker image repository name for the Argo controller
-    controller: codedx-workflow-controller
-    # -- the Docker image repository name for the Argo executor
-    executor: codedx-argoexec
-    # -- the Docker image repository prefix for the Argo Docker images
-    namespace: codedx
     # -- the K8s image pull secret to use for Argo Docker images
     pullSecrets: []
     #  - name: private-registry
     # -- the Docker image version for the Argo workload
-    tag: v2.17.0
-  # @ignore
-  minio:
-    # @ignore
-    install: false
+    tag: v3.0.0
   # @ignore
   server:
-    # @ignore
-    enabled: false
-  # @ignore
-  ui:
     # @ignore
     enabled: false

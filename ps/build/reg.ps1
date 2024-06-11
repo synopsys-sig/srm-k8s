@@ -12,7 +12,7 @@ function New-DockerImagePullSecretConfig($config) {
 imagePullSecrets:
   - name: $registrySecretName
   
-argo:
+argo-workflows:
   images:
     pullSecrets:
     - name: $registrySecretName

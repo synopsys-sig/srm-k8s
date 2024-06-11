@@ -42,14 +42,6 @@
 {{- printf "%s-to-rolebinding" ((include "srm.fullname" .) | trunc 47 | trimSuffix "-") }}
 {{- end -}}
 
-{{- define "srm-to.workflow.role.name" -}}
-{{- printf "%s-workflow-role" ((include "srm.fullname" .) | trunc 48 | trimSuffix "-") }}
-{{- end -}}
-
-{{- define "srm-to.workflow.rolebindingname" -}}
-{{- printf "%s-to-workflow-rolebinding" ((include "srm.fullname" .) | trunc 38 | trimSuffix "-") }}
-{{- end -}}
-
 {{- define "srm-to.job-labels" -}}
 helm.sh/chart: {{ include "srm.chart" . }}
 {{- if .Chart.AppVersion }}
@@ -91,11 +83,7 @@ Create the name of the TO service account to use
 Create the name of the TO workflow service account to use
 */}}
 {{- define "srm-to.serviceAccountNameWorkflow" -}}
-{{- if .Values.to.serviceAccountNameWorkflow.create }}
-{{- default (printf "%s-workflow" ((include "srm-to.fullname" .) | trunc 53 | trimSuffix "-")) .Values.to.serviceAccountNameWorkflow.name }}
-{{- else }}
-{{- default "default" .Values.to.serviceAccountNameWorkflow.name }}
-{{- end }}
+{{- index .Values "argo-workflows" "workflow" "serviceAccount" "name" -}}
 {{- end }}
 
 {{- define "srm-to.storageEndpoint" -}}

@@ -44,12 +44,17 @@ to:
       helmPreDelete: '$("$($repositoryPrefix)codedx/codedx-cleanup")'
       prepare: '$("$($repositoryPrefix)codedx/codedx-prepare")'
       newAnalysis: '$("$($repositoryPrefix)codedx/codedx-newanalysis")'
-      sendErrorResults: '$("$($repositoryPrefix)codedx/codedx-error-results")'
       sendResults: '$("$($repositoryPrefix)codedx/codedx-results")'
       toolService: '$("$($repositoryPrefix)codedx/codedx-tool-service")'
-argo:
-  images:
-    namespace: '$registryAndRepositoryPrefix/codedx'
+argo-workflows:
+  controller:
+    image:
+      registry: '$($config.dockerRegistry)'
+      repository: '$("$($repositoryPrefix)codedx/codedx-workflow-controller")'
+  executor:
+    image:
+      registry: '$($config.dockerRegistry)'
+      repository: '$("$($repositoryPrefix)codedx/codedx-argoexec")'
 "@ | Out-File (Get-ToDockerImageLocationValuesPath $config)
 
 		if (-not $config.skipMinIO) {
@@ -101,7 +106,7 @@ minio:
 
 		if (-not ([string]::IsNullOrEmpty($config.imageVersionWorkflow))) {
 			@"
-argo:
+argo-workflows:
   images:
     tag: '$($config.imageVersionWorkflow)'
 "@ | Out-File (Get-WorkflowDockerImageVersionValuesPath $config)

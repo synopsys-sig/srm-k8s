@@ -59,8 +59,6 @@ spec:
           - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.prepare }}:{{ .Values.to.image.tag }}"
           - "-imageNameNewAnalysis"
           - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.newAnalysis }}:{{ .Values.to.image.tag }}"
-          - "-imageNameSendErrorResults"
-          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.sendErrorResults }}:{{ .Values.to.image.tag }}"
           - "-imageNameSendResults"
           - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.sendResults }}:{{ .Values.to.image.tag }}"
           {{- if .Values.imagePullSecrets -}}

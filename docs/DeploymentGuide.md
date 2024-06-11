@@ -72,8 +72,9 @@
 - [Password Pre-work](#password-pre-work)
 - [Network Policies](#network-policies)
 - [TLS Pre-work](#tls-pre-work)
+  * [Istio](#istio)
   * [Cert-Manager](#cert-manager)
-  * [Cert-Manager Self-signed CA Example](#cert-manager-self-signed-ca-example)
+    + [Cert-Manager Self-signed CA Example](#cert-manager-self-signed-ca-example)
 - [Licensing](#licensing)
 - [Installation - Quick Start](#installation---quick-start)
   * [Core Quick Start](#core-quick-start)
@@ -172,6 +173,11 @@
 - [Appendix](#appendix)
   * [Config.json](#configjson)
   * [Helm TLS Values (values-tls.yaml)](#helm-tls-values-values-tlsyaml)
+    + [Bash and PowerShell Commands](#bash-and-powershell-commands)
+    + [PowerShell Commands](#powershell-commands)
+  * [Helm Chart Notes](#helm-chart-notes)
+    + [Upgrading to v1.22 - v1.25](#upgrading-to-v122---v125)
+    + [Upgrading to v1.26](#upgrading-to-v126)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
@@ -1465,9 +1471,38 @@ The Software Risk Manager deployment supports network policies for non-Scan Farm
 
 # TLS Pre-work
 
-The Software Risk Manager deployment includes optional support for TLS connections between non-Scan Farm components by using Kubernetes Certificate Signing Requests (CSR).
+The Software Risk Manager deployment includes optional support for TLS connections between non-Scan Farm components by using Kubernetes Certificate Signing Requests (CSR). If you plan to enable TLS connections, you must have access to your CA public key and know your CSR signer name before you run the Helm Prep Wizard (see [Full Installation](#installation---full)).
 
-If you plan to enable TLS connections, you must have access to your CA public key and know your CSR signer name before you run the Helm Prep Wizard (see [Full Installation](#installation---full)).
+## Istio
+
+You can configure an [Istio Service Mesh](https://istio.io/latest/) that provides TLS support. The Core and Tool Orchestration features have been tested with Istio; however, the Tool Orchestration feature's Istio compatibility requires using [Istio's Ambient mode](https://istio.io/latest/blog/2022/introducing-ambient-mesh/).
+
+>Note: Using the Software Risk Manager network policies with Istio enabled is currently unsupported.
+
+You may need to install the Kubernetes Gateway API CRDs: kubectl kustomize "github.com/kubernetes-sigs/gateway-api/config/crd/experimental?ref=v1.1.0" | kubectl apply -f -;
+
+You can deploy Istio in Ambient mode using the [Helm installation instructions](https://istio.io/latest/docs/ambient/install/helm-installation/).
+
+You can add Software Risk Manager components to the mesh using the namespace label `istio.io/dataplane-mode=ambient`. For example, you can run the following command to label the `srm` namespace:
+
+```
+kubectl label namespace srm istio.io/dataplane-mode=ambient
+```
+
+You can enable mTLS between Software Risk Manager components running in the Software Risk Manager namespace by creating a PeerAuthentication policy resource. For example, you can generate a resource from the following YAML for the `srm` namespace:
+
+```
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: srm
+spec:
+  mtls:
+    mode: STRICT
+```
+
+You can install [Prometheus](https://istio.io/latest/docs/ops/integrations/prometheus/) and [Kiali](https://istio.io/latest/docs/ops/integrations/kiali/) to [Visualize Your Mesh](https://istio.io/latest/docs/tasks/observability/kiali/#generating-a-graph). You can then enable the Security badge Display option to see the location of mTLS connections.
 
 ## Cert-Manager
 
@@ -1475,7 +1510,7 @@ You can use the cert-manager support for Kubernetes CSRs, which is in an experim
 
 Refer to the comments at either the top of [values-tls.yaml](../chart/values/values-tls.yaml) or the [Helm TLS Values (values-tls.yaml) appendix](#helm-tls-values-values-tlsyaml) for how to create related certificate resources.
 
-## Cert-Manager Self-signed CA Example
+### Cert-Manager Self-signed CA Example
 
 This cert-manager 1.14.2 example shows one way to use cert-manager to issue certificates for the Core and Tool Orchestration features. It creates a cluster-scoped ClusterIssuer using a self-signed CA.
 
@@ -1566,7 +1601,9 @@ $ kubectl apply -f srm-k8s/crds/v1
 $ helm -n srm upgrade --reset-values --install --create-namespace --repo https://synopsys-sig.github.io/srm-k8s -f srm-k8s/chart/values/values-to.yaml srm srm # --set openshift.createSCC=true
 ```
 
->Note: If you are using OpenShift, remove `#` when running the last command.
+>Note 1: If you are installing in a namespace other than srm, you must specify that namespace by replacing "srm" in the following helm --set command: `argo-workflows.controller.workflowNamespaces={srm}`.
+
+>Note 2: If you are using OpenShift, remove `#` when running the last command.
 
 ## Fetch Initial Admin Password
 
@@ -3501,7 +3538,7 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 
 | Repository | Name | Purpose |
 |:-|:-|:-|
-| https://codedx.github.io/codedx-kubernetes | argo | Tool Orchestration Workflow Controller |
+| https://argoproj.github.io/argo-helm | argo-workflows | Tool Orchestration Workflow Controller |
 | https://codedx.github.io/codedx-kubernetes | mariadb | On-Cluster Software Risk Manager Web database |
 | https://codedx.github.io/codedx-kubernetes | minio | On-Cluster Software Risk Manager Workflow storage |
 | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | cnc | Software Risk Manager Scan Farm |
@@ -3514,21 +3551,20 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 
 | Key | Type | Default/Example | Description |
 |:---|:---|:---|:---|
-| argo.controller.containerRuntimeExecutor | string | `"pns"` | the runtime executor for the Argo workflow |
-| argo.controller.extraEnv[0] | object | `{ "name" : "RECENTLY_STARTED_POD_DURATION" , "value" : "10s" }` | the list of extra environment variables for the Argo workflow controller |
-| argo.controller.instanceID.enabled | bool | `true` | whether the Argo workflow controller uses an instance ID |
-| argo.controller.instanceID.useReleaseName | bool | `true` | whether the Argo workflow controller instance ID uses the release name |
-| argo.controller.nodeSelector | object | `{}` | the node selector for the Argo workflow controller |
-| argo.controller.pdb.enabled | bool | `false` | whether to create a pod disruption budget for the Argo component (a workflow controller can tolerate occasional downtime) |
-| argo.controller.priorityClassValue | int | `10100` | the Argo priority value, which must be set relative to other Tool Orchestration component priority values |
-| argo.controller.resources.limits.cpu | string | `"500m"` | the required CPU for the Argo workload |
-| argo.controller.resources.limits.memory | string | `"500Mi"` | the required memory for the Argo workload |
-| argo.controller.tolerations | list | `[]` | the pod tolerations for the Argo component |
-| argo.images.controller | string | `"codedx-workflow-controller"` | the Docker image repository name for the Argo controller |
-| argo.images.executor | string | `"codedx-argoexec"` | the Docker image repository name for the Argo executor |
-| argo.images.namespace | string | `"codedx"` | the Docker image repository prefix for the Argo Docker images |
-| argo.images.pullSecrets | list | `[]` | the K8s image pull secret to use for Argo Docker images |
-| argo.images.tag | string | `"v2.17.0"` | the Docker image version for the Argo workload |
+| argo-workflows.controller.image.registry | string | `docker.io` | the Argo workflow controller Docker image registry |
+| argo-workflows.controller.instanceID.enabled | bool | `true` | whether the Argo workflow controller uses an instance ID |
+| argo-workflows.controller.instanceID.useReleaseName | bool | `true` | whether the Argo workflow controller instance ID uses the release name |
+| argo-workflows.controller.name | string | `wc` | the name of the Argo workflow controller |
+| argo-workflows.controller.nodeSelector | object | `{}` | the node selector for the Argo workflow controller |
+| argo-workflows.controller.pdb.enabled | bool | `false` | whether to create a pod disruption budget for the Argo component (a workflow controller can tolerate occasional downtime) |
+| argo-workflows.controller.priorityClassName | string | `srm-wf-controller-pc` | the Argo priority class name whose value (see to.workflowController) must be set relative to other priority values |
+| argo-workflows.controller.resources.limits.cpu | string | `"500m"` | the required CPU for the Argo workload |
+| argo-workflows.controller.resources.limits.memory | string | `"500Mi"` | the required memory for the Argo workload |
+| argo-workflows.controller.tolerations | list | `[]` | the pod tolerations for the Argo component |
+| argo-workflows.controller.workflowNamespaces | list | `[]` | the namespace for the Argo workflow service account |
+| argo-workflows.executor.image.registry | string | `docker.io` | the Argo executor Docker image registry |
+| argo-workflows.images.pullSecrets | list | `[]` | the K8s image pull secret to use for Argo Docker images |
+| argo-workflows.images.tag | string | `"v3.0.0"` | the Docker image version for the Argo workload |
 | cnc.cnc-common-infra.cleanupSchedule | string | `"*/55 * * * *"` | the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob |
 | cnc.imagePullPolicy | string | `"Always"` | the image pull policy for scan farm components |
 | cnc.scanfarm.srm.port | string | `"9090"` | the port number of the SRM web service |
@@ -3554,7 +3590,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | mariadb.image.pullSecrets | list | `[]` | the K8s image pull secret to use for MariaDB Docker images |
 | mariadb.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the MariaDB Docker image |
 | mariadb.image.repository | string | `"codedx/codedx-mariadb"` | the Docker image repository name for the MariaDB workload |
-| mariadb.image.tag | string | `"v1.30.0"` | the Docker image version for the MariaDB workload |
+| mariadb.image.tag | string | `"v1.31.0"` | the Docker image version for the MariaDB workload |
 | mariadb.master.masterCaConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt Command: kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt |
 | mariadb.master.masterTlsSecret | string | `nil` | the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | mariadb.master.nodeSelector | object | `{}` | the node selector to use for the MariaDB primary database workload |
@@ -3610,17 +3646,16 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | openshift.createSCC | bool | `false` | whether to create SecurityContextConstraint resources, which is required when using OpenShift |
 | sizing.size | string | `Small` | whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see [System Size](#system-size)) |
 | sizing.version | string | `v1.0` | the version of the sizing guidance |
-| to.caConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt |
+| to.caConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt for SRM web |
 | to.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM Tool Orchestration Docker images |
 | to.image.repository.helmPreDelete | string | `"codedx/codedx-cleanup"` | the Docker image repository name for the SRM cleanup workload |
 | to.image.repository.newAnalysis | string | `"codedx/codedx-newanalysis"` | the Docker image repository name for the SRM new-analysis workload |
 | to.image.repository.prepare | string | `"codedx/codedx-prepare"` | the Docker image repository name for the SRM prepare workload |
-| to.image.repository.sendErrorResults | string | `"codedx/codedx-error-results"` | the Docker image repository name for the SRM send-error-results workload |
 | to.image.repository.sendResults | string | `"codedx/codedx-results"` | the Docker image repository name for the SRM send-results workload |
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v1.34.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v2.0.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -3637,9 +3672,6 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | to.serviceAccount.annotations | object | `{}` | the annotations to apply to the SRM tool service account |
 | to.serviceAccount.create | bool | `true` | whether to create a service account for the tool service |
 | to.serviceAccount.name | string | `nil` | the name of the service account to use; a name is generated using the fullname template when unset and create is true |
-| to.serviceAccountNameWorkflow.annotations | object | `{}` | the annotations to apply to the SRM tool workflow service account |
-| to.serviceAccountNameWorkflow.create | bool | `true` | whether to create a service account for the tool workflow service |
-| to.serviceAccountNameWorkflow.name | string | `nil` | the name of the workflow service account to use; a name is generated using the fullname template when unset and create is true |
 | to.tlsSecret | string | `nil` | the K8s secret name for tool service TLS with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls to-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | to.toSecret | string | `nil` | the K8s secret name containing the API key for the tool service with required field api-key Command: kubectl -n srm create secret generic tool-service-pd --from-literal api-key=password |
 | to.tolerations | list | `[]` | the pod tolerations for the tool service component |
@@ -3652,8 +3684,9 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | to.tools.podTolerationValue | string | `nil` | the pod toleration key value to use for tool pods |
 | to.tools.requests.tool.cpu | string | `"500m"` | the default CPU request for the tool workloads |
 | to.tools.requests.tool.memory | string | `"500Mi"` | the default memory request for the tool workloads |
+| to.workflowController.priorityClass.value | int | `10100` | the Argo priority value, which must be set relative to other Tool Orchestration component priority values (see argo-workflows.priorityClassName) |
 | to.workflowStorage.bucketName | string | `"code-dx-storage"` | the name of workflow storage bucket that will store workflow files. This should be an existing bucket when the account associated  with the storage credentials cannot create the bucket on its own. |
-| to.workflowStorage.configMapName | string | `""` | the K8s configmap name that contains certificate data that should be explicitly trusted when connecting to workflow storage. Use configMapName when the workflow storage server's certificate was not issued by a well known CA. |
+| to.workflowStorage.configMapName | string | `""` | the K8s configmap name that contains certificate data that should be explicitly trusted when connecting to workflow storage - use configMapName when the workflow storage server's certificate was not issued by a well-known CA. |
 | to.workflowStorage.configMapPublicCertKeyName | string | `""` | the key name in the configMapName ConfigMap containing the certificate data. |
 | to.workflowStorage.endpoint | string | `nil` | the workflow storage endpoint to use, either an external endpoint (e.g., AWS, GCP) or the older, bundled MinIO instance. Specify the hostname and port (e.g., hostname:port). |
 | to.workflowStorage.endpointSecure | string | `nil` | whether the endpoint is secured with HTTPS. |
@@ -3669,7 +3702,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2024.3.5"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2024.6.0"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=75.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
@@ -3697,7 +3730,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.resources.limits.cpu | string | `"4000m"` | the required CPU for the web workload (must be >= 2 vCPUs) |
 | web.resources.limits.ephemeral-storage | string | `"2868Mi"` | the ephemeral storage for the web workload |
 | web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
-| web.scanfarm.sast.version | string | `"2024.3.0"` | the SAST component version to use for build-less scans |
+| web.scanfarm.sast.version | string | `"2024.3.0"` | the SAST component version to use |
 | web.scanfarm.sca.version | string | `"9.2.0"` | the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable) |
 | web.securityContext.readOnlyRootFilesystem | bool | `true` | whether the SRM web workload uses a read-only filesystem |
 | web.service.annotations | object | `{}` | the annotations to apply to the SRM web service |
@@ -4069,7 +4102,15 @@ Refer to the [lock/unlock scripts](../admin/config) to edit [protected config.js
 
 ## Helm TLS Values (values-tls.yaml)
 
-When you run the Helm Prep Wizard and enable TLS on the Configure TLS screen, the wizard will include an installation note referencing the below pre-work from the values-tls.yaml file. You must run the applicable commands below before running the helm command generated by the Helm Prep Script.
+When you run the Helm Prep Wizard and enable TLS via cert-manager on the Configure TLS screen, the wizard will include an installation note referencing the below pre-work from the values-tls.yaml file. You must run the applicable commands below before running the helm command generated by the Helm Prep Script.
+
+The [next section](#bash-and-powershell-commands) contains initial Bash shell commands followed by PowerShell commands. If you do not have Bash available, refer to the [following section](#powershell-commands) for a procedure that only uses PowerShell commands.
+
+### Bash and PowerShell Commands
+
+Here are the Bash and PowerShell commands you should run after adjusting variable values for your deployment:
+
+>Note: You do not need to run these commands if you plan to use the commands in the next section.
 
 ```
 $ export CERT_MANAGER_NAMESPACE='cert-manager'
@@ -4092,7 +4133,12 @@ $ kubectl create ns $SRM_NAMESPACE
  
 $ # Create CA ConfigMap
 $ kubectl -n $SRM_NAMESPACE create configmap $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
- 
+$ # Create CA Secret by the same name, which is required for workflows to access object storage
+$ kubectl -n $SRM_NAMESPACE create secret generic $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
+
+$ # Remove any previous srm-ca entry
+$ keytool -delete -keystore /path/to/cacerts -alias 'srm-ca' -noprompt -storepass 'changeit'
+
 $ # Add ca.crt to cacerts file (your config.json caCertsFilePath parameter value)
 $ keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
 
@@ -4104,35 +4150,179 @@ $ pwsh
 PS> $global:PSNativeCommandArgumentPassing='Legacy'
 PS> Install-Module guided-setup
 
+PS> $caPath = Get-ChildItem ./ca.crt | Select-Object -ExpandProperty FullName
+
 PS> # Create SRM web certificate
 PS> $webSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-web"
-PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $env:SRM_NAMESPACE
- 
+PS> New-Certificate $env:CERT_SIGNER $caPath $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $env:SRM_NAMESPACE
+
 PS> # Create SRM web Secret
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
- 
+
 PS> # Create primary DB certificate (required for deployments using an on-cluster MariaDB)
 PS> $dbSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'mariadb'
-PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $env:SRM_NAMESPACE
- 
+PS> New-Certificate $env:CERT_SIGNER $caPath $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $env:SRM_NAMESPACE
+
 PS> # Create DB Secret (required for deployments using an on-cluster MariaDB)
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
- 
+
 PS> # Create TO certificate (required for deployments using Tool Orchestration)
 PS> $toSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-to"
-PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $env:SRM_NAMESPACE
- 
+PS> New-Certificate $env:CERT_SIGNER $caPath $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $env:SRM_NAMESPACE
+
 PS> # Create TO Secret (required for deployments using Tool Orchestration)
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
- 
+
 PS> # Create MinIO certificate (required for deployments using an on-cluster, built-in MinIO)
 PS> $minioSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'minio'
-PS> New-Certificate $env:CERT_SIGNER './ca.crt ' $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $env:SRM_NAMESPACE
- 
+PS> New-Certificate $env:CERT_SIGNER $caPath $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $env:SRM_NAMESPACE
+
 PS> # Create MinIO Secret (required for deployments using an on-cluster, built-in MinIO)
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_MINIO_SECRET_NAME './minio-tls.crt' './minio-tls.key'
 
 ```
+
+### PowerShell Commands
+
+Here are the PowerShell commands you should run after adjusting variable values for your deployment:
+
+>Note: You do not need to run these commands if you plan to use the commands in the previous section.
+
+```
+PS> $CERT_MANAGER_NAMESPACE='cert-manager'
+PS> $SRM_NAMESPACE='srm'
+PS> $SRM_RELEASE_NAME='srm'
+PS> $CERT_SIGNER='clusterissuers.cert-manager.io/ca-issuer'
+
+PS> $CA_CONFIGMAP_NAME='srm-ca-configmap'
+PS> $SRM_WEB_SECRET_NAME='srm-web-tls-secret'
+PS> $SRM_DB_SECRET_NAME='srm-db-tls-secret'
+PS> $SRM_TO_SECRET_NAME='srm-to-tls-secret'
+PS> $SRM_MINIO_SECRET_NAME='srm-minio-tls-secret'
+PS> $SRM_WEB_CACERTS_SECRET_NAME='srm-web-cacerts-secret'
+
+PS> # Fetch CA cert from cert-manager (replace ca-key-pair accordingly)
+PS> kubectl -n $CERT_MANAGER_NAMESPACE get secret ca-key-pair -o jsonpath="{.data.tls\.crt}" | base64 -d > ca.crt
+
+PS> # Create SRM namespace (if necessary)
+PS> kubectl create ns $SRM_NAMESPACE
+ 
+PS> # Create CA ConfigMap
+PS> kubectl -n $SRM_NAMESPACE create configmap $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
+PS> # Create CA Secret by the same name, which is required for workflows to access object storage
+PS> kubectl -n $SRM_NAMESPACE create secret generic $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
+
+PS> # Remove any previous srm-ca entry
+PS> keytool -delete -keystore /path/to/cacerts -alias 'srm-ca' -noprompt -storepass 'changeit'
+
+PS> # Add ca.crt to cacerts file (your config.json caCertsFilePath parameter value)
+PS> keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
+
+PS> # Create cacerts Secret
+PS> kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=/path/to/cacerts --from-literal cacerts-password=changeit
+
+PS> $global:PSNativeCommandArgumentPassing='Legacy'
+PS> Install-Module guided-setup
+
+PS> $caPath = Get-ChildItem ./ca.crt | Select-Object -ExpandProperty FullName
+
+PS> # Create SRM web certificate
+PS> $webSvcName = "$(Get-HelmChartFullname $SRM_RELEASE_NAME 'srm')-web"
+PS> New-Certificate $CERT_SIGNER $caPath $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $SRM_NAMESPACE
+
+PS> # Create SRM web Secret
+PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
+
+PS> # Create primary DB certificate (required for deployments using an on-cluster MariaDB)
+PS> $dbSvcName = Get-HelmChartFullname $SRM_RELEASE_NAME 'mariadb'
+PS> New-Certificate $CERT_SIGNER $caPath $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $SRM_NAMESPACE
+
+PS> # Create DB Secret (required for deployments using an on-cluster MariaDB)
+PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
+
+PS> # Create TO certificate (required for deployments using Tool Orchestration)
+PS> $toSvcName = "$(Get-HelmChartFullname $SRM_RELEASE_NAME 'srm')-to"
+PS> New-Certificate $CERT_SIGNER $caPath $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $SRM_NAMESPACE
+
+PS> # Create TO Secret (required for deployments using Tool Orchestration)
+PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
+
+PS> # Create MinIO certificate (required for deployments using an on-cluster, built-in MinIO)
+PS> $minioSvcName = Get-HelmChartFullname $SRM_RELEASE_NAME 'minio'
+PS> New-Certificate $CERT_SIGNER $caPath $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $SRM_NAMESPACE
+
+PS> # Create MinIO Secret (required for deployments using an on-cluster, built-in MinIO)
+PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_MINIO_SECRET_NAME './minio-tls.crt' './minio-tls.key'
+
+```
+
+## Helm Chart Notes
+
+This section describes important considerations when moving from one SRM Helm chart version to another. If you deployed with the [Full Installation Instructions](#installation---full) instructions, rerunning the Helm Prep Script with your config.json and following the generated instructions will simplify the upgrade process. If you deployed with the [Quick Start Installation Instructions](#installation---quick-start), use the sections below to guide your update.
+
+### Upgrading to v1.22 - v1.25
+
+These chart versions depend on an updated Scan Farm chart with a list of Docker images that differ from the previous version.
+
+- Scan Farm users should note the [changes to the list of Docker images](https://github.com/synopsys-sig/srm-k8s/commit/40de24a7ebb1cc96a8eb0f0660b652ae00c8c523#diff-af237e092dd7904bc46102ce0fd5f2986aacb50543ef5a558db6df195fe119b6) you must copy to your private registry.
+
+### Upgrading to v1.26
+
+This chart version switches the Tool Orchestration feature's Argo dependency from v2 to v3. 
+
+>Note: The Helm Prep Script will handle Argo-related chart configuration adjustments. If you previously deployed using the script, rerun the latest script version and follow its instructions.
+
+- The Argo chart dependency is named `argo-workflow` instead of `argo`, and the related repository is `https://argoproj.github.io/argo-helm` instead of `https://codedx.github.io/codedx-kubernetes`. Any chart customizations referring to `argo` should instead refer to `argo-workflows`. Run the following commands to drop the `argo` repository and add the `argo-workflow` one:
+
+```
+helm repo remove argo
+helm repo add argo-workflows https://argoproj.github.io/argo-helm --force-update
+```
+
+>Note: Visit the [argo-workflows](https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows) site to ensure any custom overrides you may have added are valid for Argo v3.
+
+- Argo v3 uses newer versions of the Argo Custom Resource Definitions (CRDs); run `kubectl apply` on the latest [CRD files](https://github.com/synopsys-sig/srm-k8s/tree/main/crds/v1) to update your Argo v2 CRD definitions. Run the following command to update your Argo CRDs:
+
+```
+kubectl apply -f /path/to/git/srm-k8s/crds/v1
+```
+
+- The Argo v3 chart creates a workflow ServiceAccount resource in a namespace specified using the `argo-workflows.controller.workflowNamespaces` array Helm value.
+
+```
+argo-workflows:
+  controller:
+    workflowNamespaces
+    - srm
+```
+
+- Tool Orchestration deployments with TLS support provided by cert-manager require an extra [TLS Pre-work](#tls-pre-work) step. The extra CA Kubernetes Secret, which has the same name as the currently required Kubernetes ConfigMap, is necessary for workflows to access object storage when the storage is protected by a cert that was not issued by a well-known CA. Run the following command after updating the variable values for your deployment:
+
+```
+kubectl -n $SRM_NAMESPACE create secret generic $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
+```
+
+- Add-in TOML files now support a `request.volume` subtable with the following fields:
+
+```
+[request.volume]
+mountPoint = "/opt/data"
+storageCapacity = "2Gi"
+storageClassName = "name"
+```
+
+>Note: For backward compatibility, the DataDirectory, DataDirectoryStorageCapacity, and DataDirectoryStorageClassName fields of the request table are still supported.
+
+- Add-in TOML files now supports a `request.podsecuritycontext` subtable with the following fields:
+
+```
+[request.podsecuritycontext]
+runAsUser = 1000
+runAsGroup = 1000
+fsGroup = 1000
+```
+
+>Note: For backward compatibility, the DataDirectoryFileSystemGroup field of the request table is still supported.
 
 ## Helm Prep Wizard
 

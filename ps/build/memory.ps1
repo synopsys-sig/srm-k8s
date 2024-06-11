@@ -135,7 +135,7 @@ function New-WorkflowMemoryConfig($config) {
 	}
 
 	@"
-argo:
+argo-workflows:
   controller:
     resources:
       limits:

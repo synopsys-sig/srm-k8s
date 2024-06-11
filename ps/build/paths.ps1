@@ -118,6 +118,10 @@ function Get-ToExternalWorkflowStorageCertK8sPath($config) {
 	Join-Path $config.GetK8sWorkDir() 'wf-storage-cert.k8s.yaml'
 }
 
+function Get-ToExternalWorkflowStorageCertSecretK8sPath($config) {
+	Join-Path $config.GetK8sWorkDir() 'wf-storage-cert-secret.k8s.yaml'
+}
+
 function Get-ToExternalWorkflowStoragePath($config) {
 	Join-Path $config.GetValuesWorkDir()  'to.external-workflow-storage.values.yaml'
 }
@@ -148,6 +152,14 @@ function Get-ToConfigValuesPath($config) {
 
 function Get-ToConfigMinIOValuesPath($config) {
 	Join-Path $config.GetValuesWorkDir() 'to-config-minio.values.yaml'
+}
+
+function Get-ToConfigPriorityClassValuesPath($config) {
+	Join-Path $config.GetValuesWorkDir() 'to-config-pc.values.yaml'
+}
+
+function Get-ToConfigWorkflowNamespaceValuesPath($config) {
+	Join-Path $config.GetValuesWorkDir() 'to-config-wf-ns.values.yaml'
 }
 
 function Get-ToCredentialValuesPath($config) {

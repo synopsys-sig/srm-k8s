@@ -55,8 +55,7 @@ allowedCapabilities:
 defaultAddCapabilities: []
 fsGroup:
   type: RunAsAny
-groups:
-- system:serviceaccounts:{{ .Release.Namespace }}
+groups: []
 readOnlyRootFilesystem: false
 requiredDropCapabilities:
 - MKNOD
@@ -66,6 +65,8 @@ seLinuxContext:
   type: MustRunAs
 supplementalGroups:
   type: RunAsAny
+users:
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "srm-to.serviceAccountNameWorkflow" . }}
 volumes:
 - configMap
 - emptyDir

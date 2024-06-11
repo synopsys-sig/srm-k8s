@@ -74,27 +74,47 @@ to:
   serviceAccount:
     create: false
     name: $($config.serviceAccountToolService)
-  serviceAccountNameWorkflow:
-    create: false
-    name: $($config.serviceAccountWorkflow)
+argo-workflows:
+  workflow:
+    serviceAccount:
+      create: false
+      name: $($config.serviceAccountWorkflow)
 "@ | Out-File (Get-ToExternalWorkflowStorageServiceAccountPath $config)
 	}
 
 	if (-not $config.externalWorkflowStorageTrustCert) {
-		return
-	}
 
-	$wfConfigMapName = Get-ToStorageCertConfigMapName $config
-	New-ConfigMap $config.namespace $wfConfigMapName -fileKeyValues @{
-		"wf-storage.pem"=$config.externalWorkflowStorageCertChainPath
-	} -dryRun | Out-File (Get-ToExternalWorkflowStorageCertK8sPath $config)
+		# zero out the default TLS configuration found in values-tls.yaml, the values-combined.yaml file
+		# appears after values-tls.yaml in the generated helm command, so these overrides will apply
+		@"
+to:
+  workflowStorage:
+    configMapName:
+    configMapPublicCertKeyName:
+"@ | Out-File (Get-ToExternalCertWorkflowStoragePath $config)
 
-	$yaml += @"
+	} else {
+
+		# reference trusted CA chain optionally required for workflow storage
+		$wfConfigMapName = Get-ToStorageCertConfigMapName $config
+		New-ConfigMap $config.namespace $wfConfigMapName -fileKeyValues @{
+			"wf-storage.pem"=$config.externalWorkflowStorageCertChainPath
+		} -dryRun | Out-File (Get-ToExternalWorkflowStorageCertK8sPath $config)
+
+		# a K8s Secret resource with the same name as the ConfigMap is required
+		# for workflow steps to use a trusted cert chain
+		New-GenericSecret $config.namespace $wfConfigMapName -fileKeyValues @{
+			"wf-storage.pem" = $config.externalWorkflowStorageCertChainPath
+		} -dryRun | Out-File (Get-ToExternalWorkflowStorageCertSecretK8sPath $config)
+	
+		@"
 to:
   workflowStorage:
     configMapName: $wfConfigMapName
     configMapPublicCertKeyName: wf-storage.pem
 "@ | Out-File (Get-ToExternalCertWorkflowStoragePath $config)
+
+	}
 }
 
 function New-InternalWorkflowStorage($config) {
@@ -138,4 +158,21 @@ to:
     numReplicas: $($config.toolServiceReplicas)
 "@ | Out-File (Get-ToConfigValuesPath $config)
 	}
+
+	# incorporate chart name into argo-workflows controller priority class name
+	$chartFullName = Get-HelmChartFullname $config.releaseName 'srm'
+	$controllerPriorityClassNamePrefix = $chartFullName.substring(0, ([Math]::Min($chartFullName.length, 45))).TrimEnd('-')
+	$controllerPriorityClassName = "$controllerPriorityClassNamePrefix-wf-controller-pc"
+	@"
+argo-workflows:
+  controller:
+    priorityClassName: $controllerPriorityClassName
+"@ | Out-File (Get-ToConfigPriorityClassValuesPath $config)
+
+	@"
+argo-workflows:
+  controller:
+    workflowNamespaces:
+    - "$($config.namespace)"
+"@ | Out-File (Get-ToConfigWorkflowNamespaceValuesPath $config)
 }

@@ -156,7 +156,7 @@ function New-WorkflowCPUConfig($config) {
 	}
 
 	@"
-argo:
+argo-workflows:
   controller:
     resources:
       limits:

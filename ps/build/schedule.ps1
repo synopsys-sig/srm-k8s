@@ -37,7 +37,7 @@ minio:
 
 function New-WorkflowNodeSelectorConfig($config) {
 	@"
-argo:
+argo-workflows:
   controller:
     nodeSelector: $(Format-NodeSelector $config.workflowControllerNodeSelector.ToTuple())
 "@ | Out-File (Get-WorkflowNodeSelectorValuesPath $config)
@@ -103,7 +103,7 @@ minio:
 
 function New-WorkflowTolerationConfig($config) {
 	@"
-argo:
+argo-workflows:
   controller:
     tolerations: $(Format-PodTolerationNoScheduleNoExecute $config.workflowControllerNoScheduleExecuteToleration.ToTuple())
 "@ | Out-File (Get-WorkflowTolerationValuesPath $config)
