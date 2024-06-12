@@ -1583,6 +1583,8 @@ The Quick Start installation method described in the next section does not accep
 
 You can follow the Quick Start instructions if you want to deploy Software Risk Manager using default settings and either the Core or Tool Orchestration features. If you want to customize your deployment or use the Scan Farm feature, you cannot use the Quick Start deployment method.
 
+The Software Risk Manager Helm chart creates multiple Kubernetes Secret resources. Refer to [Good practices for Kubernetes Secrets](https://kubernetes.io/docs/concepts/security/secrets-good-practices/) for configuration recommendations and for how to [configure encryption at rest](https://kubernetes.io/docs/concepts/security/secrets-good-practices/#configure-encryption-at-rest).
+
 ## Core Quick Start
 
 Run the following commands to install Software Risk Manager Core using the default configuration:
@@ -1627,6 +1629,8 @@ Your first Software Risk Manager Kubernetes deployment is a four-step process:
 - Invoke helm/kubectl Commands
 
 >Note: Software Risk Manager upgrades require three steps; you will not rerun the Help Prep Wizard when upgrading Software Risk Manager.
+
+The Software Risk Manager Helm chart creates multiple Kubernetes Secret resources. Refer to [Good practices for Kubernetes Secrets](https://kubernetes.io/docs/concepts/security/secrets-good-practices/) for configuration recommendations and for how to [configure encryption at rest](https://kubernetes.io/docs/concepts/security/secrets-good-practices/#configure-encryption-at-rest).
 
 ## Prerequisites
 
