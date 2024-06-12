@@ -1471,7 +1471,7 @@ The Software Risk Manager deployment supports network policies for non-Scan Farm
 
 # TLS Pre-work
 
-The Software Risk Manager deployment includes optional support for TLS connections between non-Scan Farm components by using Kubernetes Certificate Signing Requests (CSR). If you plan to enable TLS connections, you must have access to your CA public key and know your CSR signer name before you run the Helm Prep Wizard (see [Full Installation](#installation---full)).
+The Software Risk Manager deployment includes optional support for TLS connections between non-Scan Farm components using Istio or Kubernetes Certificate Signing Requests (CSR).
 
 ## Istio
 
@@ -1507,6 +1507,8 @@ You can install [Prometheus](https://istio.io/latest/docs/ops/integrations/prome
 ## Cert-Manager
 
 You can use the cert-manager support for Kubernetes CSRs, which is in an experimental state, to issue certificates for Software Risk Manager Core and Tool Orchestration components. Follow the cert-manager kube-csr [installation instructions](https://cert-manager.io/docs/usage/kube-csr/) and then define either an Issuer or ClusterIssuer [resource](https://cert-manager.io/docs/configuration/).
+
+If you plan to enable TLS connections with Cert-Manager, you must have access to your CA public key and know your CSR signer name before you run the Helm Prep Wizard (see [Full Installation](#installation---full)).
 
 Refer to the comments at either the top of [values-tls.yaml](../chart/values/values-tls.yaml) or the [Helm TLS Values (values-tls.yaml) appendix](#helm-tls-values-values-tlsyaml) for how to create related certificate resources.
 
