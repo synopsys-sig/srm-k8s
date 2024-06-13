@@ -20,6 +20,9 @@ sizing:
   # -- the version of the sizing guidance
   version: v1.0
 
+# -- labels added to SRM pods of the Core and TO features
+podLabels: {}
+
 ingress:
   # -- whether to enable an SRM ingress (required for the Scan Farm feature)
   enabled: false
@@ -337,6 +340,8 @@ mariadb:
     # -- the K8s image pull secret to use for MariaDB Docker images
     pullSecrets: []
     #  - private-registry
+  # -- labels added to database pod(s)
+  podLabels: {}
   serviceAccount:
     # -- whether to create a service account for the MariaDB service
     create: true

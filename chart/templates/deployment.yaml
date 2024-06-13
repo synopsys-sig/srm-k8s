@@ -22,6 +22,9 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- include "srm-web.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}

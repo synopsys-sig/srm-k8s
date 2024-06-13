@@ -171,6 +171,8 @@ minio:
   nodeSelector: {}
   # -- the pod annotations to use for the MinIO pod
   podAnnotations: {}
+  # -- labels added to the MinIO pod
+  podLabels: {}
   persistence:
     # -- the size of the MinIO persistent volume 
     size: 64Gi
@@ -198,6 +200,8 @@ minio:
 
 argo-workflows:
   # depends on https://github.com/codedx/codedx-kubernetes/tree/master/setup/core/crds/v1
+  # -- labels added to all Argo resources
+  commonLabels: {}
   controller:
     image:
       # -- the Argo workflow controller Docker image registry
