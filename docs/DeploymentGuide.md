@@ -328,7 +328,7 @@ This section covers the requirements you must satisfy with the external dependen
 
 ### Scan Farm Database Requirements
 
-The Scan Farm feature depends on a PostgreSQL database supporting versions 10.16–14.5. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
+The Scan Farm feature depends on a PostgreSQL database supporting versions 12 to 15, including all minor versions. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
 
 ### Scan Farm Cache Requirements
 
@@ -1035,7 +1035,7 @@ primary:
 If you store the above YAML in a file named postgresql.yaml, you can run helm like this:
 
 ```
-helm -n srm upgrade --create-namespace --install --repo https://charts.bitnami.com/bitnami --version 11.6.2 postgresql postgresql -f postgresql.yaml
+helm -n srm upgrade --create-namespace --install --repo https://charts.bitnami.com/bitnami --version 12.12.10 postgresql postgresql -f postgresql.yaml
 ```
 
 >Note: The chart notes explain how to obtain the initial password.
