@@ -113,6 +113,7 @@
     + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
     + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
+  * [Add Extra Pod Labels](#add-extra-pod-labels)
 - [Maintenance](#maintenance)
   * [Admin Password Reset](#admin-password-reset)
   * [Expand Volume Size](#expand-volume-size)
