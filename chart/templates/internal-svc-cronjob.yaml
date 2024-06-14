@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "srm-sf.svc-job-labels" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.web.scanfarm.regenSchedule }}
+  schedule: {{ .Values.web.scanfarm.key.regenSchedule }}
   jobTemplate:
     spec:
       template:
