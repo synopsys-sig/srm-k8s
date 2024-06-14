@@ -3738,6 +3738,8 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
 | web.scanfarm.sast.version | string | `"2024.3.0"` | the SAST component version to use |
 | web.scanfarm.sca.version | string | `"9.2.0"` | the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable) |
+| web.scanfarm.key.validForDays | int | 90 | the duration of the Scan Farm API key |
+| web.scanfarm.key.regenSchedule | string | `"0 0 1 * *"` | the Scan Farm API key regeneration period (minute hour day-of-month month day-of-week) |
 | web.securityContext.readOnlyRootFilesystem | bool | `true` | whether the SRM web workload uses a read-only filesystem |
 | web.service.annotations | object | `{}` | the annotations to apply to the SRM web service |
 | web.service.port | int | `9090` | the port number of the SRM web service |
