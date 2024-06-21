@@ -452,8 +452,8 @@ Describe 'Specifying an ignored system size...' -Tag 'size' {
 		$yaml.GetKeyValue(('minio','resources','limits','cpu')) | Should -Be '36000m'
 		$yaml.GetKeyValue(('minio','resources','limits','memory')) | Should -Be '36000Mi'
 
-		$yaml.GetKeyValue(('argo','controller','resources','limits','cpu')) | Should -Be '37000m'
-		$yaml.GetKeyValue(('argo','controller','resources','limits','memory')) | Should -Be '37000Mi'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','cpu')) | Should -Be '37000m'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','memory')) | Should -Be '37000Mi'
 
 		$yaml.GetKeyValue(('web','persistence','size')) | Should -Be '1Gi'
 

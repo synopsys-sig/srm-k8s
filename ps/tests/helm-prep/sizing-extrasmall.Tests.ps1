@@ -454,8 +454,8 @@ Describe 'Specifying ExtraSmall system size...' -Tag 'size' {
 		$yaml.GetKeyValue(('minio','resources','limits','cpu')) | Should -Be '1000m'
 		$yaml.GetKeyValue(('minio','resources','limits','memory')) | Should -Be '2560Mi'
 
-		$yaml.GetKeyValue(('argo','controller','resources','limits','cpu')) | Should -Be '250m'
-		$yaml.GetKeyValue(('argo','controller','resources','limits','memory')) | Should -Be '250Mi'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','cpu')) | Should -Be '250m'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','memory')) | Should -Be '250Mi'
 
 		$yaml.GetKeyValue(('web','persistence','size')) | Should -BeNullOrEmpty
 

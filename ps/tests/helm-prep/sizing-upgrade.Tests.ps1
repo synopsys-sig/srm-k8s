@@ -237,8 +237,8 @@ Describe 'Using a v1.2 config.json file...' {
 	$yaml.GetKeyValue(('minio','resources','limits','cpu')) | Should -Be '2000m'
 	$yaml.GetKeyValue(('minio','resources','limits','memory')) | Should -Be '5120Mi'
 
-	$yaml.GetKeyValue(('argo','controller','resources','limits','cpu')) | Should -BeNullOrEmpty
-	$yaml.GetKeyValue(('argo','controller','resources','limits','memory')) | Should -Be '500Mi'
+	$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','cpu')) | Should -BeNullOrEmpty
+	$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','memory')) | Should -Be '500Mi'
 
 	$yaml.GetKeyValue(('web','persistence','size')) | Should -Be '64Gi'
 
