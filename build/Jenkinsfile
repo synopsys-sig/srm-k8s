@@ -115,16 +115,15 @@ pipeline {
 									webVersion                = currentVersions[0]
 									mariaDBVersion            = currentVersions[1]
 									toolOrchestrationVersion  = currentVersions[2]
-									workflowVersion           = currentVersions[3]
 									restoreDBVersion          = currentVersions[4]
 
-									def isCurrentVersion = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/test-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$workflowVersion' '$restoreDBVersion' }\"")
+									def isCurrentVersion = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/test-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$restoreDBVersion' }\"")
 
 									hasDockerChanges = !(isCurrentVersion.toBoolean())
 									println("Next version is '$nextVersion' (hasNextVersion='$hasNextVersion' hasDockerChanges='$hasDockerChanges')")
 
 									if (!hasNextVersion && !hasDockerChanges) {
-										error("unable to continue because the repository is up to date with the latest versions; webVersion=$webVersion; mariaDBVersion=$mariaDBVersion; toolOrchestrationVersion=$toolOrchestrationVersion; workflowVersion=$workflowVersion; restoreDBVersion=$restoreDBVersion")
+										error("unable to continue because the repository is up to date with the latest versions; webVersion=$webVersion; mariaDBVersion=$mariaDBVersion; toolOrchestrationVersion=$toolOrchestrationVersion; restoreDBVersion=$restoreDBVersion")
 									}
 								}
 							}
@@ -145,7 +144,7 @@ pipeline {
 								timeout(time: 15) {
 
 									// pipeline not triggered by SCM and input response should occur with minimal delay, so invoke input in this stage (leaving container running)
-									input message: "Continue with these versions? Web: $webVersion; MariaDB: $mariaDBVersion; Tool Orchestration: $toolOrchestrationVersion; Workflow: $workflowVersion; RestoreDB: $restoreDBVersion"
+									input message: "Continue with these versions? Web: $webVersion; MariaDB: $mariaDBVersion; Tool Orchestration: $toolOrchestrationVersion; RestoreDB: $restoreDBVersion"
 								}
 							} catch (err) {
 
@@ -177,10 +176,10 @@ pipeline {
 
 									// note: this optionally applies minor version update to chart(s)
 									// chart version(s) should be adjusted manually when hasNextVersion=true and hasDockerChanges=false
-									sh "pwsh ./build/set-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$workflowVersion' '$restoreDBVersion'"
+									sh "pwsh ./build/set-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$restoreDBVersion'"
 									sh 'git add .'
 									sh 'git status'
-									sh "git commit -m 'feat: Update Docker image tags' -m 'Web: $webVersion' -m 'MariaDB: $mariaDBVersion' -m 'Tool Orchestration: $toolOrchestrationVersion' -m 'Workflow: $workflowVersion' -m 'RestoreDB: $restoreDBVersion'"
+									sh "git commit -m 'feat: Update Docker image tags' -m 'Web: $webVersion' -m 'MariaDB: $mariaDBVersion' -m 'Tool Orchestration: $toolOrchestrationVersion' -m 'RestoreDB: $restoreDBVersion'"
 								}
 								chartVersionAfter = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/get-chartversion.ps1 . }\"").trim()
 							}

@@ -3,7 +3,6 @@ param (
 	[Parameter(Mandatory=$true)][string] $webTag,
 	[Parameter(Mandatory=$true)][string] $dbTag,
 	[Parameter(Mandatory=$true)][string] $toTag,
-	[Parameter(Mandatory=$true)][string] $workflowTag,
 	[Parameter(Mandatory=$true)][string] $dbRestoreTag
 )
 
@@ -37,8 +36,7 @@ Push-Location (Join-Path $PSScriptRoot '..')
 $chartTagsSpecified = `
 	(Test-WebChartTag $repoDir $webTag) -and
 	(Test-DatabaseChartTag $repoDir $dbTag) -and
-	(Test-ToolOrchestrationChartTag $repoDir $toTag) -and
-	(Test-WorkflowChartTag $repoDir $workflowTag)
+	(Test-ToolOrchestrationChartTag $repoDir $toTag)
 
 Set-WebChartTag $repoDir $webTag
 Set-WebRegistryDocTag $repoDir $webTag
@@ -51,10 +49,6 @@ Set-DatabaseDeploymentGuideTag $repoDir $dbTag
 Set-ToolOrchestrationChartTag $repoDir $toTag
 Set-ToolOrchestrationRegistryDocTag $repoDir $toTag
 Set-ToolOrchestrationDeploymentGuideTag $repoDir $toTag
-
-Set-WorkflowChartTag $repoDir $workflowTag
-Set-WorkflowRegistryDocTag $repoDir $workflowTag
-Set-WorkflowDeploymentGuideTag $repoDir $workflowTag
 
 if (-not (Test-RestoreDatabaseTag $repoDir $dbRestoreTag)) {
 	Set-RestoreDatabaseTag $repoDir $dbRestoreTag

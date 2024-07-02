@@ -10,10 +10,6 @@ function Set-ToolOrchestrationChartTag([string] $repoDir, [string] $tag) {
 	Set-YamlContentLine (Get-ToolOrchestrationValuesPath $repoDir) '.to.image.tag' $tag
 }
 
-function Set-WorkflowChartTag([string] $repoDir, [string] $tag) {
-	Set-YamlContentLine (Get-ToolOrchestrationValuesPath $repoDir) '.argo-workflows.images.tag' $tag
-}
-
 function Set-ToolOrchestrationRegistryDocTag([string] $repoDir, [string] $tag) {
 
 	$docPath = Get-RegistryDocPath $repoDir
@@ -25,26 +21,6 @@ function Set-ToolOrchestrationRegistryDocTag([string] $repoDir, [string] $tag) {
 		-replace "codedx/codedx-results:v$semVersionPattern","codedx/codedx-results:$tag" `
 		-replace "codedx/codedx-tool-service:v$semVersionPattern","codedx/codedx-tool-service:$tag" `
 		-replace "codedx/codedx-cleanup:v$semVersionPattern","codedx/codedx-cleanup:$tag" | Set-Content $docPath
-}
-
-function Set-WorkflowRegistryDocTag([string] $repoDir, [string] $tag) {
-
-	$docPath = Get-RegistryDocPath $repoDir
-
-	$semVersionPattern = Get-SemVerPattern
-	(Get-Content $docPath) `
-		-replace "codedx/codedx-workflow-controller:v$semVersionPattern","codedx/codedx-workflow-controller:$tag" `
-		-replace "codedx/codedx-argoexec:v$semVersionPattern","codedx/codedx-argoexec:$tag" | Set-Content $docPath
-}
-
-function Set-WorkflowDeploymentGuideTag([string] $repoDir, [string] $tag) {
-
-	$docPath = Get-DeploymentGuidePath $repoDir
-
-	$pattern     = '\| argo-workflows.images.tag \| string \| `.+` \| the Docker image version for the Argo workload \|'
-	$replacement = "| argo-workflows.images.tag | string | ``""$tag""`` | the Docker image version for the Argo workload |"
-
-	(Get-Content $docPath) -replace $pattern,$replacement | Set-Content $docPath
 }
 
 function Set-ToolOrchestrationDeploymentGuideTag([string] $repoDir, [string] $tag) {

@@ -50,11 +50,11 @@ argo-workflows:
   controller:
     image:
       registry: '$($config.dockerRegistry)'
-      repository: '$("$($repositoryPrefix)codedx/codedx-workflow-controller")'
+      repository: '$("$($repositoryPrefix)argoproj/workflow-controller")'
   executor:
     image:
       registry: '$($config.dockerRegistry)'
-      repository: '$("$($repositoryPrefix)codedx/codedx-argoexec")'
+      repository: '$("$($repositoryPrefix)argoproj/argoexec")'
 "@ | Out-File (Get-ToDockerImageLocationValuesPath $config)
 
 		if (-not $config.skipMinIO) {
