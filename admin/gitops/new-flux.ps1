@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.20.0
+.VERSION 1.21.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -96,7 +96,7 @@ function New-ResourceDirectory([string] $parentPath, [string] $name, [switch] $r
 	$dir
 }
 
-function Get-LatestChartVersion([string] $chartRepo) {
+function Get-LatestSoftwareRiskManagerChartVersion([string] $chartRepo) {
 
 	$tempFile = New-TemporaryFile
 
@@ -104,7 +104,13 @@ function Get-LatestChartVersion([string] $chartRepo) {
 	Invoke-RestMethod "$chartRepo/index.yaml" | Out-File $tempFile.FullName
 
 	$yaml = Get-Yaml $tempFile.FullName
-	$yaml.nodeGraph.vertices[4].FindNeighborByKey('version').keyValue
+	
+	$entriesNode = $yaml.nodeGraph.vertices[$yaml.rootNodeKey].FindNeighborByKey('entries')
+	$srmNode = $entriesNode.findNeighborbykey("srm")
+	$entriesNode.getNeighbors() | 
+		Where-Object { $_.line -gt $srmNode.line } | 
+		Select-Object -First 1 | 
+		ForEach-Object { $_.FindNeighborByKey('version').keyvalue }
 }
 
 if ($useSealedSecrets) {
@@ -117,7 +123,7 @@ if ($useSealedSecrets) {
 if ([string]::IsNullOrWhiteSpace($helmChartVersion)) {
 
 	Write-Verbose 'Helm chart version is unspecified, fetching latest chart version...'
-	$helmChartVersion = Get-LatestChartVersion $helmChartRepoUrl
+	$helmChartVersion = Get-LatestSoftwareRiskManagerChartVersion $helmChartRepoUrl
 
 	Write-Verbose "Using chart version $helmChartVersion..."
 }

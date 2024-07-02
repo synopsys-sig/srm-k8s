@@ -1,0 +1,256 @@
+
+nextVersion = ''
+hasNextVersion = false
+hasDockerChanges = false
+chartVersionBefore = ''
+chartVersionAfter = ''
+
+def getRepo() {
+
+	checkout([$class: 'GitSCM',
+		branches: scm.branches,
+		browser: scm.browser,
+		doGenerateSubmoduleConfigurations: false,
+		extensions: [
+			[$class: 'RelativeTargetDirectory', relativeTargetDir: 'repo'],
+			[$class: 'PruneStaleBranch'],
+			[$class: 'CleanCheckout']
+		],
+		submoduleCfg: scm.submoduleCfg,
+		userRemoteConfigs: scm.userRemoteConfigs
+	]).GIT_COMMIT
+}
+
+def getLatestGitHubRelease(token, owner, repo) {
+
+	def latestUrl = "https://api.github.com/repos/$owner/$repo/releases/latest"
+	def output = sh(returnStdout: true, script: "curl --silent -H 'Accept: application/vnd.github.v3+json' -H 'Authorization: token $token' $latestUrl")
+	echo output
+
+	def tagNamePattern = /(?ms).*"tag_name":\s"(?<release>[^"]+)".*/
+	def tagNameMatch = output =~ tagNamePattern
+
+	def version = ''
+	if (tagNameMatch.matches()) {
+		version = tagNameMatch.group('release')
+	}
+	version
+}
+
+pipeline {
+
+	options {
+		skipDefaultCheckout true // checkout via getRepo()
+	}
+
+	agent none
+
+	stages {
+
+		stage('Release') {
+
+			agent {
+				label 'codedx-release-build-small'
+			}
+
+			stages {
+
+				stage('Checkout') {
+
+					steps {
+
+						script {
+							currentBuild.displayName = getRepo()
+						}
+					}
+				}
+
+				stage('Test') {
+
+					steps {
+
+						dir ('repo') {
+
+							// install newest guided-setup module, trusting PSGallery
+							sh 'pwsh -command "&{ [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Set-PSRepository -Name PSGallery -InstallationPolicy Trusted; Install-Module -Name guided-setup -Force }"'
+
+							// note: the -CI parameter sets Run.Exit, but it also creates two files in the working directory
+							sh 'pwsh -command "&{ . ./ps/external/powershell-algorithms/data-structures.ps1; Import-Module Pester; \\$cfg = [PesterConfiguration]::Default; \\$cfg.Run.Exit = \\$true; Invoke-Pester -Configuration \\$cfg }"'
+						}
+					}
+				}
+
+				stage('Get Versions') {
+
+					steps {
+
+						dir ('repo') {
+
+							withCredentials([
+								usernamePassword(credentialsId: 'codedx-build-github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN'),
+								string(credentialsId: 'codedxownername',            variable: 'GIT_OWNER'),
+								string(credentialsId: 'codedxreponame',             variable: 'GIT_CODEDX_REPO'),								
+								string(credentialsId: 'mariadbreponame',            variable: 'GIT_MARIADB_REPO'),
+								string(credentialsId: 'toolorchestrationreponame',  variable: 'GIT_TOOL_ORCHESTRATION_REPO'),
+								string(credentialsId: 'workflowreponame',           variable: 'GIT_WORKFLOW_REPO'),
+								string(credentialsId: 'restoredbreponame',          variable: 'GIT_RESTOREDB_REPO')]) {
+
+								script {
+
+									outputPreview = release.runSemanticRelease(GIT_TOKEN, true)
+
+									nextVersion = release.getNextVersion(outputPreview)
+									hasNextVersion = nextVersion != ''
+
+									currentVersions = []
+									[GIT_CODEDX_REPO,GIT_MARIADB_REPO,GIT_TOOL_ORCHESTRATION_REPO,GIT_WORKFLOW_REPO,GIT_RESTOREDB_REPO].each { x ->
+
+										currentVersion = getLatestGitHubRelease(GIT_TOKEN, GIT_OWNER, x)
+										if (currentVersion == '') {
+											error("unable to continue because the latest version from repo $x cannot be found")
+										}
+										currentVersions += currentVersion
+									}
+
+									webVersion                = currentVersions[0]
+									mariaDBVersion            = currentVersions[1]
+									toolOrchestrationVersion  = currentVersions[2]
+									workflowVersion           = currentVersions[3]
+									restoreDBVersion          = currentVersions[4]
+
+									def isCurrentVersion = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/test-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$workflowVersion' '$restoreDBVersion' }\"")
+
+									hasDockerChanges = !(isCurrentVersion.toBoolean())
+									println("Next version is '$nextVersion' (hasNextVersion='$hasNextVersion' hasDockerChanges='$hasDockerChanges')")
+
+									if (!hasNextVersion && !hasDockerChanges) {
+										error("unable to continue because the repository is up to date with the latest versions; webVersion=$webVersion; mariaDBVersion=$mariaDBVersion; toolOrchestrationVersion=$toolOrchestrationVersion; workflowVersion=$workflowVersion; restoreDBVersion=$restoreDBVersion")
+									}
+								}
+							}
+						}
+					}
+				}
+
+				stage('Confirm') {
+
+					steps {
+
+						milestone ordinal: 1, label: 'Confirm'
+
+						script {
+
+							try {
+
+								timeout(time: 15) {
+
+									// pipeline not triggered by SCM and input response should occur with minimal delay, so invoke input in this stage (leaving container running)
+									input message: "Continue with these versions? Web: $webVersion; MariaDB: $mariaDBVersion; Tool Orchestration: $toolOrchestrationVersion; Workflow: $workflowVersion; RestoreDB: $restoreDBVersion"
+								}
+							} catch (err) {
+
+								if (err instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+									error('Timeout occurred while awaiting release confirmation')
+								}
+								error(err.toString())
+							}
+						}
+					}
+				}
+
+				stage('Update Version') {
+
+					steps {
+
+						milestone ordinal: 2, label: 'Confirmed'
+
+						dir ('repo') {
+
+							sh 'git config user.name \'Code Dx Build\' && git config user.email support@codedx.com'
+							sh "git checkout ${scm.branches[0]}"
+							sh 'git clean -d -f'
+							sh 'git status'
+
+							script {
+								chartVersionBefore = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/get-chartversion.ps1 . }\"").trim()
+								if (hasDockerChanges) {
+
+									// note: this optionally applies minor version update to chart(s)
+									// chart version(s) should be adjusted manually when hasNextVersion=true and hasDockerChanges=false
+									sh "pwsh ./build/set-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$workflowVersion' '$restoreDBVersion'"
+									sh 'git add .'
+									sh 'git status'
+									sh "git commit -m 'feat: Update Docker image tags' -m 'Web: $webVersion' -m 'MariaDB: $mariaDBVersion' -m 'Tool Orchestration: $toolOrchestrationVersion' -m 'Workflow: $workflowVersion' -m 'RestoreDB: $restoreDBVersion'"
+								}
+								chartVersionAfter = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/get-chartversion.ps1 . }\"").trim()
+							}
+
+							withCredentials([usernamePassword(credentialsId: 'codedx-build-github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]){
+
+								sh('''
+									git config --local credential.helper "!helper() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_TOKEN; }; helper"
+								''')
+
+								script {
+									if (hasDockerChanges) {
+
+										// note: pipeline requires 'Suppress automatic SCM triggering' behavior
+										sh "git push --set-upstream origin ${scm.branches[0]}"
+
+										// Commit for Docker-related changes will alter next version number
+										outputPreview = release.runSemanticRelease(GIT_TOKEN, true)
+										nextVersion = release.getNextVersion(outputPreview)
+									}
+
+									if (chartVersionBefore != chartVersionAfter) {
+
+										repoBranch = 'gh-pages'
+										sh 'repoDir="$PWD" && curl -o helm.tar.gz https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz && tar -zxvf helm.tar.gz && mv ./linux-amd64/helm /usr/local/bin && cd "$repoDir"'
+										sh 'helm dependency update chart'
+										sh 'helm package chart'
+										sh 'git checkout -- .'
+										sh "git checkout $repoBranch"
+										sh 'pwsh ./run-index.ps1'
+										sh "git add srm-${chartVersionAfter}.tgz"
+										sh "git add index.yaml"
+										sh 'git status'
+										sh "git commit -m 'Add SRM v$chartVersionAfter chart'"
+
+										// note: pipeline requires 'Suppress automatic SCM triggering' behavior
+										sh "git push --set-upstream origin $repoBranch"
+									}
+								}
+							}
+						}
+					}
+				}
+
+				stage('Create Release') {
+
+					steps {
+
+						dir ('repo') {
+
+							withCredentials([usernamePassword(credentialsId: 'codedx-build-github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]) {
+
+								script {
+
+									sh "git checkout ${scm.branches[0]}"
+									sh 'git clean -d -f'
+									sh 'git status'
+
+									output = release.runSemanticRelease(GIT_TOKEN, false)
+									versionReleased = release.getNextVersion(output)
+									if (versionReleased != nextVersion) {
+										error("Build failed because released version ($versionReleased) does not match expected version ($nextVersion)")
+									}
+								}
+							}
+						}
+					}
+				}			
+			}
+		}
+	}
+}
+
