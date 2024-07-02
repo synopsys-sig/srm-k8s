@@ -10,6 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
+  'common.ps1',
 	'../../build/yaml.ps1',
 	'../../external/powershell-algorithms/data-structures.ps1',
   '../../keyvalue.ps1',
@@ -28,8 +29,11 @@ Describe 'Specifying ExtraLarge system size...' -Tag 'size' {
 
 	It 'Core feature should not include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with ExtraLarge system size
 		@'
@@ -243,8 +247,11 @@ Describe 'Specifying ExtraLarge system size...' -Tag 'size' {
 
 	It 'Tool Orchestration feature should not include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with ExtraLarge system size and Tool Orchestration
 		@'

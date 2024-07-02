@@ -10,6 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
+  'common.ps1',
 	'../../build/yaml.ps1',
 	'../../external/powershell-algorithms/data-structures.ps1',
   '../../keyvalue.ps1',
@@ -28,8 +29,11 @@ Describe 'Using a v1.2 config.json file...' {
 
 	It 'Core and Tool Orchestration features should use same default reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json (before system system was available) with Tool Orchestration
 		@'

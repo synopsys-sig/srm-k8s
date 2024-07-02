@@ -10,6 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
+  'common.ps1',
 	'../../build/yaml.ps1',
 	'../../external/powershell-algorithms/data-structures.ps1',
   '../../keyvalue.ps1',
@@ -28,8 +29,11 @@ Describe 'Specifying no system size...' -Tag 'size' {
 
 	It 'Core feature should include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
- 		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with Unspecified system size
 		@'
@@ -240,8 +244,11 @@ Describe 'Specifying no system size...' -Tag 'size' {
 
 	It 'Tool Orchestration feature should include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
- 		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+    $testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with Unspecified system size and Tool Orchestration
 		@'
