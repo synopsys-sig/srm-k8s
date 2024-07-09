@@ -54,6 +54,7 @@ Describe 'Specifying workflow storage' -Tag 'storage' {
 		0, # defaults (Storage Reservations)
 		0, # defaults (Volume Sizes)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
         (New-Password 'password'), # (Lock Config JSON)
@@ -122,6 +123,7 @@ Describe 'Specifying workflow storage' -Tag 'storage' {
 		0, # defaults (Storage Reservations)
 		0, # defaults (Volume Sizes)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
 		0 # save (Finish)
@@ -180,6 +182,7 @@ Describe 'Specifying workflow storage' -Tag 'storage' {
 		0, # defaults (Storage Reservations)
 		0, # defaults (Volume Sizes)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
 		0 # save (Finish)

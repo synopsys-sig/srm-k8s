@@ -31,6 +31,7 @@ data:
     swa.jobs.database-limit = {{ include "srm.sizing.webJobLimitDB" . }}
     swa.jobs.disk-limit = {{ include "srm.sizing.webJobLimitDisk" . }}
     analysis.concurrent-analysis-limit = {{ include "srm.sizing.webConcurrentAnalyses" . }}
+    auth.cookie.secure = {{ .Values.web.props.auth.cookie.secure }}
 
   {{ include "srm-web.connection-pool.filename" . }}: |-
     maximumPoolSize = {{ include "srm.sizing.webConnectionPoolSize" . }}

@@ -15,7 +15,7 @@ function Get-RegistryDocPath([string] $repoDir) {
 }
 
 function Get-RestoreDatabaseScriptPath([string] $repoDir) {
-	Join-Path $repoDir 'admin/db/.ps/.restore-db.ps1'
+	Join-Path $repoDir 'admin/db/restore-db.ps1'
 }
 
 function Get-ToolOrchestrationValuesPath([string] $repoDir) {

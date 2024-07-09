@@ -16,6 +16,9 @@ spec:
   template:
     metadata:
       labels:
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- include "srm-to.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}

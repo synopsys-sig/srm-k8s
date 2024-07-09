@@ -59,16 +59,18 @@ resource from which you can pattern a path-based route definition.
 		$this.config.skipIngressEnabled = $true
 		$this.config.webServiceType = 'ClusterIP'
 
+		$authCookieSecure = $false
 		switch (([MultipleChoiceQuestion]$question).choice) {
 			0 { $this.config.ingressType = [IngressType]::NginxIngressCommunity; $this.config.skipIngressEnabled = $false; }
 			1 { $this.config.ingressType = [IngressType]::OtherIngress; $this.config.skipIngressEnabled = $false; }
 			2 { $this.config.ingressType = [IngressType]::ClusterIP }
 			3 { $this.config.ingressType = [IngressType]::NodePort; $this.config.webServiceType = 'NodePort' }
 			4 { $this.config.ingressType = [IngressType]::LoadBalancer; $this.config.webServiceType = 'LoadBalancer' }
-			5 { $this.config.ingressType = [IngressType]::ClassicElb; $this.config.webServiceType = 'LoadBalancer' }
-			6 { $this.config.ingressType = [IngressType]::NetworkElb; $this.config.webServiceType = 'LoadBalancer' }
-			7 { $this.config.ingressType = [IngressType]::InternalClassicElb; $this.config.webServiceType = 'LoadBalancer' }
+			5 { $this.config.ingressType = [IngressType]::ClassicElb; $this.config.webServiceType = 'LoadBalancer'; $authCookieSecure = $true }
+			6 { $this.config.ingressType = [IngressType]::NetworkElb; $this.config.webServiceType = 'LoadBalancer'; $authCookieSecure = $true }
+			7 { $this.config.ingressType = [IngressType]::InternalClassicElb; $this.config.webServiceType = 'LoadBalancer'; $authCookieSecure = $true }
 		}
+		$this.config.authCookieSecure = $authCookieSecure
 
 		$this.config.ingressAnnotations = @()
 		if ($this.config.IsElbIngress()) {
@@ -110,6 +112,7 @@ resource from which you can pattern a path-based route definition.
 		$this.config.ingressAnnotations = @()
 		$this.config.webServiceType = ''
 		$this.config.ingressType = [IngressType]::ClusterIP
+		$this.config.authCookieSecure = $false
 
 		$this.config.webServicePortNumber = 9090
 		if (-not $this.config.skipTLS) {
@@ -192,20 +195,23 @@ be limited to dev/test-related deployments.
 
 	[bool]HandleResponse([IQuestion] $question) {
 
+		$authCookieSecure = $true
 		$choice = ([MultipleChoiceQuestion]$question).choice
 
 		switch ($choice) {
-			0 { $this.config.ingressTlsType = [IngressTlsType]::None }
+			0 { $this.config.ingressTlsType = [IngressTlsType]::None; $authCookieSecure = $false }
 			1 { $this.config.ingressTlsType = [IngressTlsType]::CertManagerIssuer }
 			2 { $this.config.ingressTlsType = [IngressTlsType]::CertManagerClusterIssuer }
 			3 { $this.config.ingressTlsType = [IngressTlsType]::ExternalSecret }
 		}
+		$this.config.authCookieSecure = $authCookieSecure
 
 		return $true
 	}
 
 	[void]Reset(){
 		$this.config.ingressTlsType = [IngressTlsType]::None
+		$this.config.authCookieSecure = $false
 	}
 
 	[bool]CanRun() {

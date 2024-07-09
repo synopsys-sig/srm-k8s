@@ -2,8 +2,6 @@
 nextVersion = ''
 hasNextVersion = false
 hasDockerChanges = false
-chartVersionBefore = ''
-chartVersionAfter = ''
 
 def getRepo() {
 
@@ -115,16 +113,16 @@ pipeline {
 									webVersion                = currentVersions[0]
 									mariaDBVersion            = currentVersions[1]
 									toolOrchestrationVersion  = currentVersions[2]
-									workflowVersion           = currentVersions[3]
 									restoreDBVersion          = currentVersions[4]
 
-									def isCurrentVersion = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/test-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$workflowVersion' '$restoreDBVersion' }\"")
+									def isCurrentVersion = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/test-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$restoreDBVersion' }\"")
 
 									hasDockerChanges = !(isCurrentVersion.toBoolean())
-									println("Next version is '$nextVersion' (hasNextVersion='$hasNextVersion' hasDockerChanges='$hasDockerChanges')")
+									chartVersionBefore = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/get-chartversion.ps1 . }\"").trim()
+									println("Next version is '$nextVersion' (hasNextVersion='$hasNextVersion' hasDockerChanges='$hasDockerChanges' chartVersionBefore='$chartVersionBefore')")
 
 									if (!hasNextVersion && !hasDockerChanges) {
-										error("unable to continue because the repository is up to date with the latest versions; webVersion=$webVersion; mariaDBVersion=$mariaDBVersion; toolOrchestrationVersion=$toolOrchestrationVersion; workflowVersion=$workflowVersion; restoreDBVersion=$restoreDBVersion")
+										error("unable to continue because the repository is up to date with the latest versions; webVersion=$webVersion; mariaDBVersion=$mariaDBVersion; toolOrchestrationVersion=$toolOrchestrationVersion; restoreDBVersion=$restoreDBVersion")
 									}
 								}
 							}
@@ -145,7 +143,7 @@ pipeline {
 								timeout(time: 15) {
 
 									// pipeline not triggered by SCM and input response should occur with minimal delay, so invoke input in this stage (leaving container running)
-									input message: "Continue with these versions? Web: $webVersion; MariaDB: $mariaDBVersion; Tool Orchestration: $toolOrchestrationVersion; Workflow: $workflowVersion; RestoreDB: $restoreDBVersion"
+									input message: "Continue with these versions for release $nextVersion? Web: $webVersion; MariaDB: $mariaDBVersion; Tool Orchestration: $toolOrchestrationVersion; RestoreDB: $restoreDBVersion"
 								}
 							} catch (err) {
 
@@ -158,67 +156,52 @@ pipeline {
 					}
 				}
 
-				stage('Update Version') {
+				stage('Confirmed') {
 
 					steps {
 
 						milestone ordinal: 2, label: 'Confirmed'
+					}
+				}
+
+				stage('Update Version') {
+
+					when {
+						beforeAgent true
+
+						expression { return hasDockerChanges }
+					}
+
+					steps {
 
 						dir ('repo') {
 
-							sh 'git config user.name \'Code Dx Build\' && git config user.email support@codedx.com'
-							sh "git checkout ${scm.branches[0]}"
-							sh 'git clean -d -f'
-							sh 'git status'
-
 							script {
-								chartVersionBefore = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/get-chartversion.ps1 . }\"").trim()
-								if (hasDockerChanges) {
 
-									// note: this optionally applies minor version update to chart(s)
-									// chart version(s) should be adjusted manually when hasNextVersion=true and hasDockerChanges=false
-									sh "pwsh ./build/set-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$workflowVersion' '$restoreDBVersion'"
-									sh 'git add .'
-									sh 'git status'
-									sh "git commit -m 'feat: Update Docker image tags' -m 'Web: $webVersion' -m 'MariaDB: $mariaDBVersion' -m 'Tool Orchestration: $toolOrchestrationVersion' -m 'Workflow: $workflowVersion' -m 'RestoreDB: $restoreDBVersion'"
-								}
-								chartVersionAfter = sh(returnStdout: true, script: "pwsh -command \"&{ ./build/get-chartversion.ps1 . }\"").trim()
-							}
+								sh 'git config user.name \'Code Dx Build\' && git config user.email support@codedx.com'
+								sh "git checkout ${scm.branches[0]}"
+								sh 'git clean -d -f'
+								sh 'git status'
 
-							withCredentials([usernamePassword(credentialsId: 'codedx-build-github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]){
+								// note: this optionally applies minor version update to chart(s)
+								// chart version(s) should be adjusted manually when hasNextVersion=true and hasDockerChanges=false
+								sh "pwsh ./build/set-version.ps1 '.' '$webVersion' '$mariaDBVersion' '$toolOrchestrationVersion' '$restoreDBVersion'"
+								sh 'git add .'
+								sh 'git status'
+								sh "git commit -m 'feat: Update Docker image tags' -m 'Web: $webVersion' -m 'MariaDB: $mariaDBVersion' -m 'Tool Orchestration: $toolOrchestrationVersion' -m 'RestoreDB: $restoreDBVersion'"
 
-								sh('''
-									git config --local credential.helper "!helper() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_TOKEN; }; helper"
-								''')
+								withCredentials([usernamePassword(credentialsId: 'codedx-build-github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_TOKEN')]){
 
-								script {
-									if (hasDockerChanges) {
+									sh('''
+										git config --local credential.helper "!helper() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_TOKEN; }; helper"
+									''')
 
-										// note: pipeline requires 'Suppress automatic SCM triggering' behavior
-										sh "git push --set-upstream origin ${scm.branches[0]}"
+									// note: pipeline requires 'Suppress automatic SCM triggering' behavior
+									sh "git push --set-upstream origin ${scm.branches[0]}"
 
-										// Commit for Docker-related changes will alter next version number
-										outputPreview = release.runSemanticRelease(GIT_TOKEN, true)
-										nextVersion = release.getNextVersion(outputPreview)
-									}
-
-									if (chartVersionBefore != chartVersionAfter) {
-
-										repoBranch = 'gh-pages'
-										sh 'repoDir="$PWD" && curl -o helm.tar.gz https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz && tar -zxvf helm.tar.gz && mv ./linux-amd64/helm /usr/local/bin && cd "$repoDir"'
-										sh 'helm dependency update chart'
-										sh 'helm package chart'
-										sh 'git checkout -- .'
-										sh "git checkout $repoBranch"
-										sh 'pwsh ./run-index.ps1'
-										sh "git add srm-${chartVersionAfter}.tgz"
-										sh "git add index.yaml"
-										sh 'git status'
-										sh "git commit -m 'Add SRM v$chartVersionAfter chart'"
-
-										// note: pipeline requires 'Suppress automatic SCM triggering' behavior
-										sh "git push --set-upstream origin $repoBranch"
-									}
+									// Commit for Docker-related changes will alter next version number
+									outputPreview = release.runSemanticRelease(GIT_TOKEN, true)
+									nextVersion = release.getNextVersion(outputPreview)
 								}
 							}
 						}
@@ -235,15 +218,55 @@ pipeline {
 
 								script {
 
+									sh 'git config user.name \'Code Dx Build\' && git config user.email support@codedx.com'
+									sh('''
+										git config --local credential.helper "!helper() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_TOKEN; }; helper"
+									''')
 									sh "git checkout ${scm.branches[0]}"
 									sh 'git clean -d -f'
+
+									// version chart according to next version, avoiding a commit that would update the version number again
+									sh "pwsh ./build/set-chart-version.ps1 '.' '$nextVersion' '$webVersion'"
 									sh 'git status'
+
+									commitChartVersionChange = sh(returnStdout: true, returnStatus: true, script: '''
+										test -z "$(git status --porcelain)"
+									''')
+									println("commitChartVersionChange is $commitChartVersionChange")
+
+									if (commitChartVersionChange) {
+
+										sh 'git add .'
+										sh 'git status'
+										sh "git commit -m 'chore: Set $nextVersion chart version'"
+
+										// note: pipeline requires 'Suppress automatic SCM triggering' behavior
+										sh "git push --set-upstream origin ${scm.branches[0]}"
+									}
 
 									output = release.runSemanticRelease(GIT_TOKEN, false)
 									versionReleased = release.getNextVersion(output)
 									if (versionReleased != nextVersion) {
 										error("Build failed because released version ($versionReleased) does not match expected version ($nextVersion)")
 									}
+
+									repoBranch = 'gh-pages'
+									sh 'git clean -d -f'
+									sh 'repoDir="$PWD" && curl -o helm.tar.gz https://get.helm.sh/helm-v3.2.4-linux-amd64.tar.gz && tar -zxvf helm.tar.gz && mv ./linux-amd64/helm /usr/local/bin && cd "$repoDir"'
+									sh 'helm dependency update chart'
+									sh 'helm package chart'
+									sh "mv srm-${versionReleased}.tgz /tmp/srm-${versionReleased}.tgz"
+									sh 'git checkout -- .'
+									sh "git checkout $repoBranch"
+									sh "mv /tmp/srm-${versionReleased}.tgz srm-${versionReleased}.tgz"
+									sh 'pwsh ./run-index.ps1'
+									sh "git add srm-${versionReleased}.tgz"
+									sh "git add index.yaml"
+									sh 'git status'
+									sh "git commit -m 'Add SRM v$versionReleased chart'"
+
+									// note: pipeline requires 'Suppress automatic SCM triggering' behavior
+									sh "git push --set-upstream origin $repoBranch"
 								}
 							}
 						}

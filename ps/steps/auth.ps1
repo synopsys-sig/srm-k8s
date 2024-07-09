@@ -352,3 +352,41 @@ class AbortAddSaml : Step {
 		return -not $this.config.useSaml
 	}
 }
+
+class AuthCookieSecure : Step {
+
+	static [string] hidden $description = @'
+Software Risk Manager uses an authentication cookie whose Secure attribute
+should be set when accessing the web application using HTTPS. The Secure
+attribute must not be used if you plan to access the application with 
+HTTP (not recommended) because it will block you from logging on.
+
+Note: Answer 'No' if you plan to access Software Risk Manager via HTTP.
+'@
+
+	AuthCookieSecure([Config] $config) : base(
+		[AuthCookieSecure].Name,
+		$config,
+		'Auth Cookie Secure',
+		[AuthCookieSecure]::description,
+		'Will you use HTTPS only to access Software Risk Manager?') {}
+
+	[IQuestion]MakeQuestion([string] $prompt) {
+		return new-object YesNoQuestion($prompt,
+			'Yes, set the Secure attribute because I plan to use HTTPS.',
+			'No, do not set the Secure attribute because I plan to use HTTP.', -1)
+	}
+
+	[bool]HandleResponse([IQuestion] $question) {
+		$this.config.authCookieSecure = ([YesNoQuestion]$question).choice -eq 0
+		return $true
+	}
+
+	[bool]CanRun(){
+		return -not $this.config.authCookieSecure
+	}
+
+	[void]Reset(){
+		$this.config.authCookieSecure = $false
+	}
+}

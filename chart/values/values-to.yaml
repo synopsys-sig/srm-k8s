@@ -171,6 +171,8 @@ minio:
   nodeSelector: {}
   # -- the pod annotations to use for the MinIO pod
   podAnnotations: {}
+  # -- labels added to the MinIO pod
+  podLabels: {}
   persistence:
     # -- the size of the MinIO persistent volume 
     size: 64Gi
@@ -198,11 +200,13 @@ minio:
 
 argo-workflows:
   # depends on https://github.com/codedx/codedx-kubernetes/tree/master/setup/core/crds/v1
+  # -- labels added to all Argo resources
+  commonLabels: {}
   controller:
     image:
       # -- the Argo workflow controller Docker image registry
       registry: docker.io
-      repository: codedx/codedx-workflow-controller
+      repository: argoproj/workflow-controller
     instanceID:
       # -- whether the Argo workflow controller uses an instance ID
       enabled: true
@@ -246,13 +250,13 @@ argo-workflows:
     image:
       # -- the Argo executor Docker image registry
       registry: docker.io
-      repository: codedx/codedx-argoexec
+      repository: argoproj/argoexec
   images:
     # -- the K8s image pull secret to use for Argo Docker images
     pullSecrets: []
     #  - name: private-registry
     # -- the Docker image version for the Argo workload
-    tag: v3.0.0
+    tag: v3.5.6
   # @ignore
   server:
     # @ignore

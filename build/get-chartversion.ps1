@@ -6,7 +6,8 @@ $ErrorActionPreference = 'Stop'
 $VerbosePreference     = 'Continue'
 Set-PSDebug -Strict
 
-'./ps/chart.ps1' | ForEach-Object {
+'./ps/chart.ps1',
+'./ps/yaml.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {

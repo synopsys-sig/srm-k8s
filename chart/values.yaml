@@ -20,6 +20,9 @@ sizing:
   # -- the version of the sizing guidance
   version: v1.0
 
+# -- labels added to SRM pods of the Core and TO features
+podLabels: {}
+
 ingress:
   # -- whether to enable an SRM ingress (required for the Scan Farm feature)
   enabled: false
@@ -152,6 +155,10 @@ web:
     runAsUser: 1000
 
   props:
+    auth:
+      cookie:
+        # -- whether to set the Secure attribute on the auth cookie, set to true when using HTTPS
+        secure: false
     limits:
       analysis:
         # -- the value of the SRM prop analysis.concurrent-analysis-limit, which determines the maximum number of analyses to run concurrently
@@ -337,6 +344,8 @@ mariadb:
     # -- the K8s image pull secret to use for MariaDB Docker images
     pullSecrets: []
     #  - private-registry
+  # -- labels added to database pod(s)
+  podLabels: {}
   serviceAccount:
     # -- whether to create a service account for the MariaDB service
     create: true
