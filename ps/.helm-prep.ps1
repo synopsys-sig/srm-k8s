@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.11.0
+.VERSION 1.12.0
 .GUID 11157c15-18d1-42c4-9d13-fa66ef61d5b2
 .AUTHOR Synopsys
 #>
@@ -41,6 +41,7 @@ Write-Host "`nLoading dependencies..."
 './build/memory.ps1',
 './build/netpol.ps1',
 './build/paths.ps1',
+'./build/props.ps1',
 './build/protect.ps1',
 './build/provider.ps1',
 './build/reg.ps1',
@@ -226,6 +227,7 @@ try {
 	New-EphemeralStorageConfig $config
 	New-VolumeSizeConfig $config
 	New-VolumeStorageClassConfig $config
+	New-WebPropsConfig $config
 
 	New-NodeSelectorConfig $config
 	New-TolerationConfig $config
@@ -261,10 +263,6 @@ try {
 	$chartPath = Join-Path $PSScriptRoot '../chart'
 	$chartFullPath = [IO.Path]::GetFullPath($chartPath)
 	Write-Host "`n----------------------`nRequired Helm Commands`n----------------------"
-	Write-Host "helm repo add codedx https://codedx.github.io/codedx-kubernetes --force-update"
-	Write-Host "helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative --force-update"
-	Write-Host "helm repo add argo-workflows https://argoproj.github.io/argo-helm --force-update"
-	Write-Host "helm repo update"
 	Write-Host "helm dependency update ""$chartFullPath"""
 	Write-Host "helm -n $($config.namespace) upgrade --reset-values --install $($config.releaseName)" -NoNewline
 

@@ -10,6 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
+  'common.ps1',
 	'../../build/yaml.ps1',
 	'../../external/powershell-algorithms/data-structures.ps1',
   '../../keyvalue.ps1',
@@ -28,8 +29,11 @@ Describe 'Specifying an ignored system size...' -Tag 'size' {
 
 	It 'Core feature should permit overrides' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with Medium system size that gets ignored for CPU, memory, and volume sizing
 		@'
@@ -241,8 +245,11 @@ Describe 'Specifying an ignored system size...' -Tag 'size' {
 
 	It 'Tool Orchestration feature should not include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+    $testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with Medium system size with Tool Orchestration that gets ignored for CPU, memory, and volume sizing
 		@'
@@ -452,8 +459,8 @@ Describe 'Specifying an ignored system size...' -Tag 'size' {
 		$yaml.GetKeyValue(('minio','resources','limits','cpu')) | Should -Be '36000m'
 		$yaml.GetKeyValue(('minio','resources','limits','memory')) | Should -Be '36000Mi'
 
-		$yaml.GetKeyValue(('argo','controller','resources','limits','cpu')) | Should -Be '37000m'
-		$yaml.GetKeyValue(('argo','controller','resources','limits','memory')) | Should -Be '37000Mi'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','cpu')) | Should -Be '37000m'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','memory')) | Should -Be '37000Mi'
 
 		$yaml.GetKeyValue(('web','persistence','size')) | Should -Be '1Gi'
 

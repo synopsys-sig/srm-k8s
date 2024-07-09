@@ -61,7 +61,7 @@ class Config {
 	static [int]   $volumeSizeGiBDefault = 0           # new default to support system size override when > 0
 	static [int]   $externalDatabasePortDefault = 3306
 
-	static [string]   $thisVersion = "1.4"
+	static [string]   $thisVersion = "1.5"
 
 	static [string[]] $protectedFields = @(
 		'sigRepoUsername',
@@ -310,6 +310,8 @@ class Config {
 	[KeyValue]     $workflowControllerNoScheduleExecuteToleration
 	[KeyValue]     $toolNoScheduleExecuteToleration
 
+	[bool]         $authCookieSecure
+
 	[KeyValue[]]  $notes = @()
 
 	[KeyValue[]]  $salts
@@ -345,6 +347,8 @@ class Config {
 		$this.workflowStorageType = [WorkflowStorageType]::OnCluster # < 1.4 skipMinIO ? [WorkflowStorageType]::AccessKey : [WorkflowStorageType]::OnCluster
 		$this.serviceAccountToolService = ''
 		$this.serviceAccountWorkflow = ''
+		# v1.5 fields
+		$this.authCookieSecure = $false
 	}
 
 	static [Config] FromJsonFile($configJsonFile) {

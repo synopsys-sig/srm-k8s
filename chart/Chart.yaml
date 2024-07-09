@@ -4,12 +4,12 @@ description: Software Risk Manager
 type: application
 icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
 version: 1.28.0
-appVersion: "2024.6.2"
+appVersion: "v2024.6.2"
 
 dependencies:
 - name: mariadb
-  version: 7.4.4
-  repository: https://codedx.github.io/codedx-kubernetes
+  version: 7.5.0
+  repository: https://synopsys-sig.github.io/srm-k8s
   condition: features.mariadb
 - name: cnc
   version: "2024.3.0"
@@ -20,6 +20,6 @@ dependencies:
   repository: https://argoproj.github.io/argo-helm
   condition: features.to
 - name: minio
-  version: 3.2.1
-  repository: https://codedx.github.io/codedx-kubernetes
+  version: 3.3.0
+  repository: https://synopsys-sig.github.io/srm-k8s
   condition: features.minio

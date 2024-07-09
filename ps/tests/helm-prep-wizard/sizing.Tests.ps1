@@ -46,6 +46,7 @@ Describe 'Specifying no system size' -Tag 'size' {
 		0, # use recommended (Ephemeral Storage Reservations)
 		0, # use recommended (Volume Sizes)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
 		0 # save (Finish)
@@ -112,6 +113,7 @@ Describe 'Specifying no system size' -Tag 'size' {
 		0, # defaults (Storage Reservations)
 		0, # defaults (Volume Sizes)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
 		0 # save (Finish)
@@ -178,6 +180,7 @@ Describe 'Specifying Medium system size' -Tag 'size' {
 		0, # yes (Auto-Generated Passwords)
 		1, # no (Docker Images)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
 		0 # save (Finish)
@@ -224,6 +227,7 @@ Describe 'Specifying Medium system size' -Tag 'size' {
 		0, # yes (Auto-Generated Passwords)
 		1, # no (Docker Images)
 		$null, # Storage Provider
+		1, # no (Auth Cookie Secure)
 		1, # no (Node Selectors)
 		1, # no (Pod Tolerations)
 		0 # save (Finish)

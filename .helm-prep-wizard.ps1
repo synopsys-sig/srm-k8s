@@ -63,6 +63,7 @@ $s = @{}
 [Abort],
 [AddExtraCertificates],
 [AdminPassword],
+[AuthCookieSecure],
 [AuthenticationType],
 [CACertsFile],
 [CACertsFilePassword],
@@ -287,7 +288,7 @@ Add-StepTransitions $graph $s[[Welcome]] $s[[About]], `
 	$s[[DefaultCPU]],$s[[WebCPU]],$s[[MasterDatabaseCPU]],$s[[SubordinateDatabaseCPU]],$s[[ToolServiceCPU]],$s[[MinIOCPU]],$s[[WorkflowCPU]],
 	$s[[DefaultMemory]],$s[[WebMemory]],$s[[MasterDatabaseMemory]],$s[[SubordinateDatabaseMemory]],$s[[ToolServiceMemory]],$s[[MinIOMemory]],$s[[WorkflowMemory]],
 	$s[[DefaultEphemeralStorage]],$s[[WebEphemeralStorage]],$s[[MasterDatabaseEphemeralStorage]],$s[[SubordinateDatabaseEphemeralStorage]],$s[[ToolServiceEphemeralStorage]],$s[[MinIOEphemeralStorage]],$s[[WorkflowEphemeralStorage]],
-	$s[[DefaultVolumeSize]],$s[[WebVolumeSize]],$s[[MasterDatabaseVolumeSize]],$s[[SubordinateDatabaseVolumeSize]],$s[[SubordinateDatabaseBackupVolumeSize]],$s[[MinIOVolumeSize]],$s[[StorageClassName]],
+	$s[[DefaultVolumeSize]],$s[[WebVolumeSize]],$s[[MasterDatabaseVolumeSize]],$s[[SubordinateDatabaseVolumeSize]],$s[[SubordinateDatabaseBackupVolumeSize]],$s[[MinIOVolumeSize]],$s[[StorageClassName]],$s[[AuthCookieSecure]],
 	$s[[UseNodeSelectors]],$s[[WebNodeSelector]],$s[[MasterDatabaseNodeSelector]],$s[[SubordinateDatabaseNodeSelector]],$s[[ToolServiceNodeSelector]],$s[[MinIONodeSelector]],$s[[WorkflowControllerNodeSelector]],$s[[ToolNodeSelector]],$s[[UseTolerations]],
 	$s[[WebTolerations]],$s[[MasterDatabaseTolerations]],$s[[SubordinateDatabaseTolerations]],$s[[ToolServiceTolerations]],$s[[MinIOTolerations]],$s[[WorkflowControllerTolerations]],$s[[ToolTolerations]],
 	$s[[Lock]],$s[[Finish]]
@@ -398,6 +399,9 @@ Add-StepTransitions $graph $s[[DefaultVolumeSize]] $s[[StorageClassName]]
 Add-StepTransitions $graph $s[[StorageClassName]] $s[[UseNodeSelectors]]
 Add-StepTransitions $graph $s[[StorageClassName]] $s[[Lock]],$s[[Finish]]
 Add-StepTransitions $graph $s[[StorageClassName]] $s[[Finish]]
+
+Add-StepTransitions $graph $s[[AuthCookieSecure]] $s[[Lock]],$s[[Finish]]
+Add-StepTransitions $graph $s[[AuthCookieSecure]] $s[[Finish]]
 
 Add-StepTransitions $graph $s[[WebNodeSelector]] $s[[ToolServiceNodeSelector]]
 Add-StepTransitions $graph $s[[WebNodeSelector]] $s[[UseTolerations]]

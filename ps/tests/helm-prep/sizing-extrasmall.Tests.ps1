@@ -10,6 +10,7 @@ if (-not $?) {
 }
 
 BeforeAll {
+  'common.ps1',
 	'../../build/yaml.ps1',
 	'../../external/powershell-algorithms/data-structures.ps1',
   '../../keyvalue.ps1',
@@ -28,8 +29,11 @@ Describe 'Specifying ExtraSmall system size...' -Tag 'size' {
 
 	It 'Core feature should not include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with ExtraSmall system size
 		@'
@@ -243,8 +247,11 @@ Describe 'Specifying ExtraSmall system size...' -Tag 'size' {
 
 	It 'Tool Orchestration feature should not include reservations' {
 
-		$workDirPath = $TestDrive.FullName.Replace('\','\\')
-		$configJsonPath = Join-Path $TestDrive 'config.json'
+		New-Mocks
+
+    $testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
 
 		# a default config.json with ExtraSmall system size and Tool Orchestration
 		@'
@@ -454,8 +461,8 @@ Describe 'Specifying ExtraSmall system size...' -Tag 'size' {
 		$yaml.GetKeyValue(('minio','resources','limits','cpu')) | Should -Be '1000m'
 		$yaml.GetKeyValue(('minio','resources','limits','memory')) | Should -Be '2560Mi'
 
-		$yaml.GetKeyValue(('argo','controller','resources','limits','cpu')) | Should -Be '250m'
-		$yaml.GetKeyValue(('argo','controller','resources','limits','memory')) | Should -Be '250Mi'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','cpu')) | Should -Be '250m'
+		$yaml.GetKeyValue(('argo-workflows','controller','resources','limits','memory')) | Should -Be '250Mi'
 
 		$yaml.GetKeyValue(('web','persistence','size')) | Should -BeNullOrEmpty
 
