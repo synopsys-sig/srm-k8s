@@ -133,7 +133,8 @@
   * [Removing Backup Configuration](#removing-backup-configuration)
   * [Reset Database Replication](#reset-database-replication)
 - [Upgrades](#upgrades)
-  * [TLS](#tls)
+  * [Applying an Update](#applying-an-update)
+    + [TLS](#tls)
   * [Adding the Scan Farm Feature](#adding-the-scan-farm-feature)
   * [Reconfigure the Scan Farm Feature](#reconfigure-the-scan-farm-feature)
   * [Trusting Additional Certificates](#trusting-additional-certificates)
@@ -179,6 +180,7 @@
   * [Helm Chart Notes](#helm-chart-notes)
     + [Upgrading to v1.22 - v1.25](#upgrading-to-v122---v125)
     + [Upgrading to v1.26](#upgrading-to-v126)
+    + [Upgrading to v1.28](#upgrading-to-v128)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
@@ -2936,6 +2938,8 @@ Terminal 4:
 
 Software Risk Manager has four major releases typically spaced evenly throughout the year. Minor releases are published on the second Tuesday of each month, with hotfixes released as needed. Updates to the Software Risk Manager Core feature get advertised with a notification in the Software Risk Manager web interface.
 
+## Applying an Update
+
 The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) is updated with each Software Risk Manager release. Additional Kubernetes-specific releases may occur between planned Software Risk Manager releases. Each release has a version number based on [Semantic Versioning](https://semver.org/) with release notes published on the [releases page](https://github.com/synopsys-sig/srm-k8s/releases). 
 
 >Note: It is essential to read release notes associated with releases introducing breaking changes.
@@ -2965,7 +2969,7 @@ An upgrade occurs with this four-step process:
 
 4. Follow the instructions printed by the Helm Prep script and rerun the printed helm/kubectl commands
 
-## TLS
+### TLS
 
 The TLS configuration for the Scan Farm Cache Service and the optional inter-component TLS will get regenerated during a helm install or upgrade. It may be necessary to restart pods configured for TLS if they do not restart during a helm upgrade.
 
