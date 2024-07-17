@@ -23,13 +23,13 @@ spec:
       securityContext:
         fsGroup: 1000
         runAsUser: 1000
-      {{- if .Values.web.nodeSelectors }}
+      {{- if .Values.web.nodeSelector }}
       nodeSelector:
-      {{- toYaml .Values.web.nodeSelectors | trim | nindent 8 }}
+      {{- toYaml .Values.web.nodeSelector | nindent 8 }}
       {{- end }}
       {{- if .Values.web.tolerations }}
       tolerations:
-      {{- toYaml .Values.web.tolerations | trim | nindent 8 }}
+      {{- toYaml .Values.web.tolerations | nindent 8 }}
       {{- end }}
       restartPolicy: Never
       containers:
