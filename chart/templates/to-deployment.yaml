@@ -29,13 +29,13 @@ spec:
       securityContext:
         fsGroup: 1000
         runAsUser: 1000
-      {{- if .Values.to.nodeSelectors }}
+      {{- if .Values.to.nodeSelector }}
       nodeSelector:
-      {{- toYaml .Values.to.nodeSelectors | trim | nindent 8 }}
+      {{- toYaml .Values.to.nodeSelector | nindent 8 }}
       {{- end }}
       {{- if .Values.to.tolerations }}
       tolerations:
-      {{- toYaml .Values.to.tolerations | trim | nindent 8 }}
+      {{- toYaml .Values.to.tolerations | nindent 8 }}
       {{- end }}
       containers:
       - name: tool-service
