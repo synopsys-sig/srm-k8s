@@ -3,7 +3,7 @@ name: srm
 description: Software Risk Manager
 type: application
 icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
-version: 1.29.1
+version: 1.29.1-9
 appVersion: "v2024.6.3"
 
 dependencies:
