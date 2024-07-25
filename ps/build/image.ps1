@@ -12,7 +12,7 @@ function New-DockerImageLocationConfig($config) {
 
 	if (-not $config.skipScanFarm) {
 		@"
-cnc:
+scan-services:
   imageRegistry: '$registryAndRepositoryPrefix'
 "@ | Out-File (Get-ScanFarmDockerImageLocationValuesPath $config)
 	}
