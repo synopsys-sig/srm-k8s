@@ -102,6 +102,7 @@
   * [Specify Web Properties (codedx.props)](#specify-web-properties-codedxprops)
     + [Public Web Properties Proxy Example](#public-web-properties-proxy-example)
     + [Private Web Properties Proxy Example](#private-web-properties-proxy-example)
+  * [Specify Database Connection Timeout](#specify-database-connection-timeout)
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
   * [Specify Custom Context Path](#specify-custom-context-path)
@@ -2100,6 +2101,18 @@ networkPolicy:
     egress:
       extraPorts:
         tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 8443, 3128]
+```
+
+## Specify Database Connection Timeout
+
+You can alter the database connection timeout using the web.props section of your `srm-extra-props.yaml` file. For example, you can switch from the 60-second default to a 120-second connection timeout with the following configuration:
+
+```
+web:
+  props:
+    limits:
+      database:
+        timeout: 120000
 ```
 
 ## Specify Extra SAML Configuration
