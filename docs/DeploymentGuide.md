@@ -3377,14 +3377,11 @@ Skip this section if you are using an on-cluster MariaDB database.
 Run a mysql command similiar to the following to import your logical backup, replacing the `admin` username, hostname, and `srmdb` database placeholders as necessary:
 
 ```
+$ sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump-codedx.sql
 $ mysql -h 127.0.0.1 -uadmin -p srmdb < dump-codedx.sql
 ```
 
-If you see the `Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation` error message, run the following command:
-
-```
-sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump-codedx.sql
-```
+>Note: If you see the `Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation` error message, confirm that you ran the `sed` command above.
 
 ## Copy Code Dx MinIO Files Locally (if installed)
 
