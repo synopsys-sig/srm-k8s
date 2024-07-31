@@ -12,7 +12,7 @@ spec:
       template:
         metadata:
           labels:
-            {{- include "srm-sf.svc-job-labels" . | nindent 8 }}
+            {{- include "srm-sf.svc-job-labels" . | nindent 12 }}
         spec:
           {{- with .Values.imagePullSecrets }}
           imagePullSecrets:
@@ -24,11 +24,11 @@ spec:
             runAsUser: 1000
           {{- if .Values.web.nodeSelectors }}
           nodeSelector:
-          {{- toYaml .Values.web.nodeSelectors | trim | nindent 8 }}
+          {{- toYaml .Values.web.nodeSelectors | trim | nindent 12 }}
           {{- end }}
           {{- if .Values.web.tolerations }}
           tolerations:
-          {{- toYaml .Values.web.tolerations | trim | nindent 8 }}
+          {{- toYaml .Values.web.tolerations | trim | nindent 12 }}
           {{- end }}
           restartPolicy: Never
           containers:
