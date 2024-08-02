@@ -143,6 +143,7 @@
 - [Code Dx Deployment Model Migration](#code-dx-deployment-model-migration)
   * [Before you Begin](#before-you-begin)
   * [Clone the srm-k8s GitHub Repository](#clone-the-srm-k8s-github-repository)
+  * [Upgrade your Code Dx Version](#upgrade-your-code-dx-version)
   * [Stop Code Dx Web](#stop-code-dx-web)
   * [Stop Code Dx Tool Orchestration (if installed)](#stop-code-dx-tool-orchestration-if-installed)
   * [Run the Software Risk Manager Migration Script](#run-the-software-risk-manager-migration-script)
@@ -3081,7 +3082,7 @@ Migrating from your legacy Code Dx deployment to Software Risk Manager requires 
 - Clone this GitHub Repository
 - Run the Software Risk Manager Migration Script
 - Run the Helm Prep Script
-- Invoke helm/kubectl Commands
+- Invoke helm/kubectl Commands (to install a brand-new, empty system)
 - Copy Code Dx Data to Software Risk Manager
 
 Note how the Software Risk Manager Migration Script replaces the Helm Prep Wizard and how the migration process has an extra step to copy data between your Code Dx and Software Risk Manager deployments.
@@ -3107,7 +3108,11 @@ $ git clone https://github.com/synopsys-sig/srm-k8s
 $ cd /path/to/git/srm-k8s
 ```
 
->Note: Make sure that the version of Software Risk Manager you are installing is equal to your Code Dx version. If you are running a Code Dx version that is less than 2023.8.0, you should upgrade your Code Dx version before continuing.
+## Upgrade your Code Dx Version
+
+If your legacy Code Dx version differs from the Software Risk Manager version you plan to install, upgrade your Code Dx system to match the Software Risk Manager version before you continue. For example, if you are running Code Dx 2023.4.0 and planning to install Software Risk Manager 2024.6.0, upgrade your Code Dx 2023.4.0 system to Code Dx 2024.6.0 before continuing. Since the 2024.6.0 upgrade may involve data migrations and other upgrades, avoid conflating those upgrade activities with your migration to the Software Risk Manager Helm chart.
+
+Verify that your upgraded Code Dx system works as expected, and then back up your Code Dx system so that you can restore its state should something go wrong with your migration.
 
 ## Stop Code Dx Web
 
@@ -3173,8 +3178,6 @@ $ pwsh /path/to/run-helm-prep.ps1
 ```
 
 Follow the instructions printed by run-helm-prep.ps1 and wait for Software Risk Manager to come online before continuing to the next section to import your Code Dx data into Software Risk Manager.
-
->Note: If you are using an external database, you will upgrade that database at deployment-time.
 
 ## Stop Software Risk Manager Web
 
