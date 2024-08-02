@@ -3147,16 +3147,16 @@ Make a copy of your run-setup.ps1 file:
 $ cp /path/to/run-setup.ps1 /path/to/run-migrate.ps1
 ```
 
-Edit run-migrate.ps1 by replacing /path/to/git/codedx-kubernetes/setup/steps/../core/setup.ps1 with the path to the migrate.ps1 script. For example, your edited file will look like this:
+Edit run-migrate.ps1 by prepending the path to the migrate.ps1 script (e.g., `/path/to/git/srm-k8s/admin/migrate/migrate.ps1`) followed by ` -codeDxSetupScriptPath`. For example, your edited file will look like this:
 
 ```
-/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' ...
+/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -codeDxSetupScriptPath /path/to/git/codedx-kubernetes/setup/steps/../core/setup.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' ...
 ```
 
 Before continuing, verify that the `-codeDxAdminPwd` parameter value matches the current admin password for your Code Dx instance. If the password matches the initial admin password, update the parameter by specifying the current password.
 
 ```
-/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' -codeDxAdminPwd 'current-admin-password-goes-here' ... 
+/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -codeDxSetupScriptPath /path/to/git/codedx-kubernetes/setup/steps/../core/setup.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' -codeDxAdminPwd 'current-admin-password-goes-here' ... 
 ```
 
 Invoke your run-migrate.ps1 script to generate a config.json file.

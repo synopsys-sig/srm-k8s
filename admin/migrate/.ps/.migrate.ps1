@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.4.0
+.VERSION 1.5.0
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
@@ -8,6 +8,7 @@
 using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
 
 param (
+	[string]                 $codeDxSetupScriptPath,
 	[string]                 $workDir = "$HOME/.k8s-codedx",
 	[string]                 $kubeContextName,
 
@@ -196,6 +197,7 @@ $global:PSNativeCommandArgumentPassing='Legacy'
 
 '../../../ps/keyvalue.ps1',
 '../../../ps/build/protect.ps1',
+'../../../ps/build/yaml.ps1',
 '../../../ps/config.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
@@ -242,6 +244,46 @@ function New-KeyValueFromTuple([Tuple`2[string,string]] $tuple) {
 	[KeyValue]::New($tuple.Item1, $tuple.Item2)
 }
 
+function Get-HelmChartAppVersionString([string] $chartYamlPath) {
+	$yaml = Get-Yaml $chartYamlPath
+	$yaml.GetKeyValue('appVersion')
+}
+
+function Get-CodeDxHelmChartVersionString([string] $chartYamlPath) {
+	# Code Dx version number format is "2024.9.0"
+	(Get-HelmChartAppVersionString $chartYamlPath) -replace '"'
+}
+
+function Get-SrmHelmChartVersionString([string] $chartYamlPath) {
+	# SRM version number format is "v2024.9.0"
+	(Get-HelmChartAppVersionString $chartYamlPath) -replace '"v?'
+}
+
+$srmChart = Join-Path $PSScriptRoot '../../../chart/Chart.yaml'
+if (-not (Test-Path $srmChart -PathType Leaf)) {
+	Write-Host "Unable to find Chart.yaml at $srmChart."
+	Exit 1
+}
+
+if ('' -eq $codeDxSetupScriptPath) {
+	$codeDxSetupScriptPath = Get-QuestionResponse "Enter the path to your setup.ps1 script in your codedx-kubernetes GitHub repo (e.g., /home/user/git/codedx-kubernetes/setup/steps/../core/setup.ps1)"
+	$codeDxSetupScriptPath = $codeDxSetupScriptPath.Trim('"').Trim("'")
+}
+
+$codeDxChart = Join-Path $codeDxSetupScriptPath '../charts/codedx/Chart.yaml'
+if (-not (Test-Path $codeDxChart -PathType Leaf)) {
+	Write-Host "Unable to find Chart.yaml at $codeDxChart."
+	Exit 1
+}
+
+$codeDxAppVersion = Get-CodeDxHelmChartVersionString $codeDxChart
+$srmAppVersion = Get-SrmHelmChartVersionString $srmChart
+
+if ($codeDxAppVersion -ne $srmAppVersion) {
+	Write-Host "You cannot continue because your Code Dx version ($codeDxAppVersion) does not equal the SRM version ($srmAppVersion) you plan to install. Upgrade your Code Dx system to $srmAppVersion (https://github.com/codedx/codedx-kubernetes?tab=readme-ov-file#upgrading), verify that the upgraded system behaves as expected, and then restart your migration."
+	Exit 1
+}
+
 Write-Host "Your Code Dx work directory is $workDir"
 do {
 	$newWorkDirectory = Get-DirectoryPath "Enter a new SRM work directory that differs from the old one"
@@ -268,8 +310,9 @@ guidance at this URL:
 https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#external-web-database-pre-work.
 
 Your SRM deployment will fail if your '$($config.externalDatabaseHost)' host 
-does not have an empty '$($config.externalDatabaseName)' database that the user '$($config.externalDatabaseUser)'
-can access.
+does not have an empty '$($config.externalDatabaseName)' database that the user '$($config.externalDatabaseUser)' can access.
+
+Note: Do *not* restore your Code Dx database now; you should instead create an empty database.
 ---
 Press Enter to continue...
 "@ | Out-Null
@@ -428,7 +471,7 @@ $config.minioNoScheduleExecuteToleration = New-KeyValueFromTuple $minioNoSchedul
 $config.workflowControllerNoScheduleExecuteToleration = New-KeyValueFromTuple $workflowControllerNoScheduleExecuteToleration
 $config.toolNoScheduleExecuteToleration = New-KeyValueFromTuple $toolNoScheduleExecuteToleration
 
-$configFilePwd = Read-HostSecureText -Prompt "`nEnter config file password"
+$configFilePwd = Read-HostSecureText -Prompt "`nSpecify a password to protect your config.json file"
 
 if ($config.ShouldLock()) {
 	$config.Lock($configFilePwd)
