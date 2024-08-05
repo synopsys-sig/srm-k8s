@@ -102,6 +102,7 @@
   * [Specify Web Properties (codedx.props)](#specify-web-properties-codedxprops)
     + [Public Web Properties Proxy Example](#public-web-properties-proxy-example)
     + [Private Web Properties Proxy Example](#private-web-properties-proxy-example)
+  * [Specify Database Connection Timeout](#specify-database-connection-timeout)
   * [Specify Extra SAML Configuration](#specify-extra-saml-configuration)
   * [Specify LDAP Configuration](#specify-ldap-configuration)
   * [Specify Custom Context Path](#specify-custom-context-path)
@@ -143,6 +144,7 @@
 - [Code Dx Deployment Model Migration](#code-dx-deployment-model-migration)
   * [Before you Begin](#before-you-begin)
   * [Clone the srm-k8s GitHub Repository](#clone-the-srm-k8s-github-repository)
+  * [Upgrade your Code Dx Version](#upgrade-your-code-dx-version)
   * [Stop Code Dx Web](#stop-code-dx-web)
   * [Stop Code Dx Tool Orchestration (if installed)](#stop-code-dx-tool-orchestration-if-installed)
   * [Run the Software Risk Manager Migration Script](#run-the-software-risk-manager-migration-script)
@@ -2101,6 +2103,18 @@ networkPolicy:
         tcp: [22, 53, 80, 389, 443, 636, 7990, 7999, 8443, 3128]
 ```
 
+## Specify Database Connection Timeout
+
+You can alter the database connection timeout using the web.props section of your `srm-extra-props.yaml` file. For example, you can switch from the 60-second default to a 120-second connection timeout with the following configuration:
+
+```
+web:
+  props:
+    limits:
+      database:
+        timeout: 120000
+```
+
 ## Specify Extra SAML Configuration
 
 Selecting SAML authentication in the Helm Prep Wizard will generate a config.json file with the following fields configured (field values are for illustrative purposes):
@@ -3080,7 +3094,7 @@ Migrating from your legacy Code Dx deployment to Software Risk Manager requires 
 - Clone this GitHub Repository
 - Run the Software Risk Manager Migration Script
 - Run the Helm Prep Script
-- Invoke helm/kubectl Commands
+- Invoke helm/kubectl Commands (to install a brand-new, empty system)
 - Copy Code Dx Data to Software Risk Manager
 
 Note how the Software Risk Manager Migration Script replaces the Helm Prep Wizard and how the migration process has an extra step to copy data between your Code Dx and Software Risk Manager deployments.
@@ -3106,7 +3120,11 @@ $ git clone https://github.com/synopsys-sig/srm-k8s
 $ cd /path/to/git/srm-k8s
 ```
 
->Note: Make sure that the version of Software Risk Manager you are installing is equal to your Code Dx version. If you are running a Code Dx version that is less than 2023.8.0, you should upgrade your Code Dx version before continuing.
+## Upgrade your Code Dx Version
+
+If your legacy Code Dx version differs from the Software Risk Manager version you plan to install, upgrade your Code Dx system to match the Software Risk Manager version before you continue. For example, if you are running Code Dx 2023.4.0 and planning to install Software Risk Manager 2024.6.0, upgrade your Code Dx 2023.4.0 system to Code Dx 2024.6.0 before continuing. Since the 2024.6.0 upgrade may involve data migrations and other upgrades, avoid conflating those upgrade activities with your migration to the Software Risk Manager Helm chart.
+
+Verify that your upgraded Code Dx system works as expected, and then back up your Code Dx system so that you can restore its state should something go wrong with your migration.
 
 ## Stop Code Dx Web
 
@@ -3141,16 +3159,16 @@ Make a copy of your run-setup.ps1 file:
 $ cp /path/to/run-setup.ps1 /path/to/run-migrate.ps1
 ```
 
-Edit run-migrate.ps1 by replacing /path/to/git/codedx-kubernetes/setup/steps/../core/setup.ps1 with the path to the migrate.ps1 script. For example, your edited file will look like this:
+Edit run-migrate.ps1 by prepending the path to the migrate.ps1 script (e.g., `/path/to/git/srm-k8s/admin/migrate/migrate.ps1`) followed by ` -codeDxSetupScriptPath`. For example, your edited file will look like this:
 
 ```
-/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' ...
+/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -codeDxSetupScriptPath /path/to/git/codedx-kubernetes/setup/steps/../core/setup.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' ...
 ```
 
 Before continuing, verify that the `-codeDxAdminPwd` parameter value matches the current admin password for your Code Dx instance. If the password matches the initial admin password, update the parameter by specifying the current password.
 
 ```
-/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' -codeDxAdminPwd 'current-admin-password-goes-here' ... 
+/path/to/git/srm-k8s/admin/migrate/migrate.ps1 -codeDxSetupScriptPath /path/to/git/codedx-kubernetes/setup/steps/../core/setup.ps1 -workDir '/home/user/.k8s-codedx' -kubeContextName 'cluster' -kubeApiTargetPort '443' -namespaceCodeDx 'cdx-app' -releaseNameCodeDx 'codedx' -codeDxAdminPwd 'current-admin-password-goes-here' ... 
 ```
 
 Invoke your run-migrate.ps1 script to generate a config.json file.
@@ -3172,8 +3190,6 @@ $ pwsh /path/to/run-helm-prep.ps1
 ```
 
 Follow the instructions printed by run-helm-prep.ps1 and wait for Software Risk Manager to come online before continuing to the next section to import your Code Dx data into Software Risk Manager.
-
->Note: If you are using an external database, you will upgrade that database at deployment-time.
 
 ## Stop Software Risk Manager Web
 
@@ -3389,14 +3405,11 @@ Skip this section if you are using an on-cluster MariaDB database.
 Run a mysql command similiar to the following to import your logical backup, replacing the `admin` username, hostname, and `srmdb` database placeholders as necessary:
 
 ```
+$ sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump-codedx.sql
 $ mysql -h 127.0.0.1 -uadmin -p srmdb < dump-codedx.sql
 ```
 
-If you see the `Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation` error message, run the following command:
-
-```
-sed 's/\sDEFINER=`[^`]*`@`[^`]*`//g' -i dump-codedx.sql
-```
+>Note: If you see the `Access denied; you need (at least one of) the SUPER, SET USER privilege(s) for this operation` error message, confirm that you ran the `sed` command above.
 
 ## Copy Code Dx MinIO Files Locally (if installed)
 
