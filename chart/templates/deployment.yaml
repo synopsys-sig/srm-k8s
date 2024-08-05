@@ -17,10 +17,11 @@ spec:
       {{- include "srm-web.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.web.podAnnotations }}
       annotations:
+      {{- with .Values.web.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+        configMapVersion: {{ include (clean (printf "%s/%s" $.Template.BasePath "configmap.yaml")) . | sha256sum | quote }}
       labels:
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
