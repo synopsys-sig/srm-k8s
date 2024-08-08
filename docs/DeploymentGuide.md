@@ -3582,14 +3582,18 @@ $ pwsh "/root/.k8s-srm/run-helm-prep.ps1"
 
 This section describes the Software Risk Manager Helm chart that the Helm Prep Wizard and Helm Prep Script help you configure.
 
+>Note: The chart is available in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s/tree/main/chart) and the [srm-k8s chart repository](https://synopsys-sig.github.io/srm-k8s/index.yaml).
+
 ## Chart Dependencies
 
-| Repository | Name | Purpose |
-|:-|:-|:-|
-| https://argoproj.github.io/argo-helm | argo-workflows | Tool Orchestration Workflow Controller |
-| https://codedx.github.io/codedx-kubernetes | mariadb | On-Cluster Software Risk Manager Web database |
-| https://codedx.github.io/codedx-kubernetes | minio | On-Cluster Software Risk Manager Workflow storage |
-| https://sig-repo.synopsys.com/artifactory/sig-cloudnative | cnc | Software Risk Manager Scan Farm |
+Depending on the Software Risk Manager features you install and how you configure them, your deployment will depend on zero or more of the following sub-charts.
+
+| Name | Feature | Repository | Purpose |
+|:-|:-|:-|:-|
+| argo-workflows | Tool Orchestration | https://argoproj.github.io/argo-helm | Required to manage orchestrated analyses |
+| cnc | Scan Farm | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
+| mariadb | Core | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
+| minio | Tool Orchestration | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
 
 ## Values
 
