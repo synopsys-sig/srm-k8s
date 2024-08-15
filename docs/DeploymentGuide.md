@@ -116,7 +116,7 @@
     + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
   * [Add Extra Pod Labels](#add-extra-pod-labels)
 - [Maintenance](#maintenance)
-  * [Admin Password Reset](#admin-password-reset)
+  * [System Component Password/Key Resets](#system-component-passwordkey-resets)
   * [Expand Volume Size](#expand-volume-size)
   * [Reset Replication](#reset-replication)
   * [Web Logging](#web-logging)
@@ -187,6 +187,7 @@
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
   * [Scan Farm Wizard](#scan-farm-wizard)
+  * [Set Passwords Wizard](#set-passwords-wizard)
 
 <!-- tocstop -->
 
@@ -2501,22 +2502,23 @@ argo-workflows:
 
 Refer to this section for details on operating your Software Risk Manager deployment.
 
-## Admin Password Reset
+## System Component Password/Key Resets
 
-Updating the administrator password for your Software Risk Manager deployment is a two-step process:
+Software Risk Manager workloads mount system passwords and API keys from Kubernetes Secrets established at deployment time. Some workloads can use a new password/key by restarting after updating a Kubernetes Secret resource on which they depend. Other workloads require a component-specific procedure followed by a corresponding update to related Kubernetes Secret resources.
 
-1. Change your admin password
-2. Update the admin password in the related Kubernetes Secret resource (mandatory when using the Scan Farm feature)
+If you previously deployed Software Risk Manager using the Quick Start method, you must switch to the Full Installation at this time. You can create a new config.json file by running the New Config script.
 
-You can change your admin password using the web application or the API. To update using the web application, log on using your admin credential, visit /srm/me, click Password, and update your password. Alternatively, set a new password using the API at /x/profile/password.
+```
+$ cd /path/to/srm-k8s
+$ pwsh ps/features/new-config.ps1
+```
 
-Failing to update your admin Kubernetes Secret resource when using the Scan Farm feature will block future Software Risk Manager upgrades. While you can temporarily update the resource by hand, the Helm Prep script will revert your update if you do not also update config.json, so consider updating config.json and regenerating your Kubernetes Secret resource(s) by rerunning the script:
+You can update passwords and keys for the Software Risk Manager Core and Tool Orchestration features by using the Set Passwords wizard.
 
-1. [Unlock config.json](#configuration-file-protection)
-2. Edit config.json by updating the `adminPwd` parameter
-3. [Lock config.json](#configuration-file-protection)
-4. Rerun your run-helm-prep.ps1 script
-5. Run the command(s) listed under Required K8s Resources
+```
+$ cd /path/to/srm-k8s
+$ pwsh ps/features/set-passwords.ps1 -configPath /path/to/work/directory/config.json
+```
 
 ## Expand Volume Size
 
@@ -4386,11 +4388,16 @@ This chart version replaces the `codedx/codedx-argoexec` and `codedx/codedx-work
 
 ## Helm Prep Wizard
 
+The Helm Prep Wizard helps you specify your desired Software Risk Manager deployment configuration by generating a config.json file that you can use with
+the Helm Prep script to stage your helm deployment. 
+
 Below is a graph showing every Helm Prep Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Helm Prep Wizard Steps](./images/helm-prep-wizard-graph.png)
 
 ## Add Certificates Wizard
+
+The Add Certificates Wizard allows your Software Risk Manager web instance to trust additional certificates that are not trusted by default.
 
 Below is a graph showing every Add Certificates Wizard step.
 
@@ -4398,12 +4405,24 @@ Below is a graph showing every Add Certificates Wizard step.
 
 ## Add SAML Authentication Wizard
 
+The Add SAML Authentication Wizard allows you to configure SAML authentication for Software Risk Manager users.
+
 Below is a graph showing every Add SAML Authentication Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Add SAML Authentication Steps](./images/add-saml-auth-wizard-graph.png)
 
 ## Scan Farm Wizard
 
+The Add Scan Farm Wizard allows you to include the Software Risk Manager Scan Farm feature in your deployment.
+
 Below is a graph showing every Add Scan Farm Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Add Scan Farm Steps](./images/add-scan-farm-wizard-graph.png)
+
+## Set Passwords Wizard
+
+The Set Passwords Wizard allows you to reset passwords and keys for Software Risk Manager Core and Tool Orchestration feature components.
+
+Below is a graph showing every Set Passwords Wizard step. You only have to visit the steps that apply to your SRM deployment.
+
+![Set Passwords Steps](./images/set-passwords-wizard-graph.png)
