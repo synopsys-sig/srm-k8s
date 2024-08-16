@@ -117,7 +117,7 @@
   * [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions)
   * [Add Extra Pod Labels](#add-extra-pod-labels)
 - [Maintenance](#maintenance)
-  * [Admin Password Reset](#admin-password-reset)
+  * [System Component Password/Key Resets](#system-component-passwordkey-resets)
   * [Expand Volume Size](#expand-volume-size)
   * [Reset Replication](#reset-replication)
   * [Web Logging](#web-logging)
@@ -189,6 +189,7 @@
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
   * [Scan Farm Wizard](#scan-farm-wizard)
+  * [Set Passwords Wizard](#set-passwords-wizard)
 
 <!-- tocstop -->
 
@@ -2513,22 +2514,23 @@ argo-workflows:
 
 Refer to this section for details on operating your Software Risk Manager deployment.
 
-## Admin Password Reset
+## System Component Password/Key Resets
 
-Updating the administrator password for your Software Risk Manager deployment is a two-step process:
+Software Risk Manager workloads mount system passwords and API keys from Kubernetes Secrets established at deployment time. Some workloads can use a new password/key by restarting after updating a Kubernetes Secret resource on which they depend. Other workloads require a component-specific procedure followed by a corresponding update to related Kubernetes Secret resources.
 
-1. Change your admin password
-2. Update the admin password in the related Kubernetes Secret resource (mandatory when using the Scan Farm feature)
+If you previously deployed Software Risk Manager using the Quick Start method, you must switch to the Full Installation at this time. You can create a new config.json file by running the New Config script.
 
-You can change your admin password using the web application or the API. To update using the web application, log on using your admin credential, visit /srm/me, click Password, and update your password. Alternatively, set a new password using the API at /x/profile/password.
+```
+$ cd /path/to/srm-k8s
+$ pwsh ps/features/new-config.ps1
+```
 
-Failing to update your admin Kubernetes Secret resource when using the Scan Farm feature will block future Software Risk Manager upgrades. While you can temporarily update the resource by hand, the Helm Prep script will revert your update if you do not also update config.json, so consider updating config.json and regenerating your Kubernetes Secret resource(s) by rerunning the script:
+You can update passwords and keys for the Software Risk Manager Core and Tool Orchestration features by using the Set Passwords wizard.
 
-1. [Unlock config.json](#configuration-file-protection)
-2. Edit config.json by updating the `adminPwd` parameter
-3. [Lock config.json](#configuration-file-protection)
-4. Rerun your run-helm-prep.ps1 script
-5. Run the command(s) listed under Required K8s Resources
+```
+$ cd /path/to/srm-k8s
+$ pwsh ps/features/set-passwords.ps1 -configPath /path/to/work/directory/config.json
+```
 
 ## Expand Volume Size
 
@@ -3594,14 +3596,18 @@ $ pwsh "/root/.k8s-srm/run-helm-prep.ps1"
 
 This section describes the Software Risk Manager Helm chart that the Helm Prep Wizard and Helm Prep Script help you configure.
 
+>Note: The chart is available in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s/tree/main/chart) and the [srm-k8s chart repository](https://synopsys-sig.github.io/srm-k8s/index.yaml).
+
 ## Chart Dependencies
 
-| Repository | Name | Purpose |
-|:-|:-|:-|
-| https://argoproj.github.io/argo-helm | argo-workflows | Tool Orchestration Workflow Controller |
-| https://codedx.github.io/codedx-kubernetes | mariadb | On-Cluster Software Risk Manager Web database |
-| https://codedx.github.io/codedx-kubernetes | minio | On-Cluster Software Risk Manager Workflow storage |
-| https://sig-repo.synopsys.com/artifactory/sig-cloudnative | scan-services | Software Risk Manager Scan Farm |
+Depending on the Software Risk Manager features you install and how you configure them, your deployment will depend on zero or more of the following sub-charts.
+
+| Name | Feature | Repository | Purpose |
+|:-|:-|:-|:-|
+| argo-workflows | Tool Orchestration | https://argoproj.github.io/argo-helm | Required to manage orchestrated analyses |
+| mariadb | Core | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
+| minio | Tool Orchestration | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
+| scan-services | Scan Farm | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
 
 ## Values
 
@@ -3651,7 +3657,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | mariadb.image.pullSecrets | list | `[]` | the K8s image pull secret to use for MariaDB Docker images |
 | mariadb.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the MariaDB Docker image |
 | mariadb.image.repository | string | `"codedx/codedx-mariadb"` | the Docker image repository name for the MariaDB workload |
-| mariadb.image.tag | string | `"v1.32.0"` | the Docker image version for the MariaDB workload |
+| mariadb.image.tag | string | `"v1.33.0"` | the Docker image version for the MariaDB workload |
 | mariadb.master.masterCaConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt Command: kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt |
 | mariadb.master.masterTlsSecret | string | `nil` | the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | mariadb.master.nodeSelector | object | `{}` | the node selector to use for the MariaDB primary database workload |
@@ -3719,7 +3725,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v2.1.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v2.2.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -3766,7 +3772,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2024.6.3"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2024.6.4"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=75.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
@@ -4402,11 +4408,16 @@ This chart also switches the Scan Farm SAST component from version 2024.3.0 to 2
 
 ## Helm Prep Wizard
 
+The Helm Prep Wizard helps you specify your desired Software Risk Manager deployment configuration by generating a config.json file that you can use with
+the Helm Prep script to stage your helm deployment. 
+
 Below is a graph showing every Helm Prep Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Helm Prep Wizard Steps](./images/helm-prep-wizard-graph.png)
 
 ## Add Certificates Wizard
+
+The Add Certificates Wizard allows your Software Risk Manager web instance to trust additional certificates that are not trusted by default.
 
 Below is a graph showing every Add Certificates Wizard step.
 
@@ -4414,12 +4425,24 @@ Below is a graph showing every Add Certificates Wizard step.
 
 ## Add SAML Authentication Wizard
 
+The Add SAML Authentication Wizard allows you to configure SAML authentication for Software Risk Manager users.
+
 Below is a graph showing every Add SAML Authentication Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Add SAML Authentication Steps](./images/add-saml-auth-wizard-graph.png)
 
 ## Scan Farm Wizard
 
+The Add Scan Farm Wizard allows you to include the Software Risk Manager Scan Farm feature in your deployment.
+
 Below is a graph showing every Add Scan Farm Wizard step. You only have to visit the steps that apply to your SRM deployment.
 
 ![Add Scan Farm Steps](./images/add-scan-farm-wizard-graph.png)
+
+## Set Passwords Wizard
+
+The Set Passwords Wizard allows you to reset passwords and keys for Software Risk Manager Core and Tool Orchestration feature components.
+
+Below is a graph showing every Set Passwords Wizard step. You only have to visit the steps that apply to your SRM deployment.
+
+![Set Passwords Steps](./images/set-passwords-wizard-graph.png)
