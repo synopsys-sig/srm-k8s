@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.2.0
+.VERSION 1.2.1
 .GUID b6b17e02-ecb1-4780-afbc-2128026b7464
 .AUTHOR Synopsys
 #>
@@ -153,7 +153,7 @@ if ($replicationPwd -eq '') {
 }
 
 Write-Verbose 'Restarting database...'
-& (join-path $PSScriptRoot 'restart-db.ps1') -namespace $namespace -releaseName $releaseName -waitSeconds $waitSeconds -skipWebRestart
+& (join-path $PSScriptRoot '.restart-db.ps1') -namespace $namespace -releaseName $releaseName -waitSeconds $waitSeconds -skipWebRestart
 
 Write-Verbose 'Searching for MariaDB slave pods...'
 $podFullNamesSlaves = kubectl -n $namespace get pod -l component=slave -o name
