@@ -167,8 +167,8 @@ Describe 'Specifying no system size...' -Tag 'size' {
   "caCertsFilePath": null,
   "caCertsFilePwd": null,
   "useCPUDefaults": true,
-  "webCPUReservation": "4000m",
-  "dbMasterCPUReservation": "4000m",
+  "webCPUReservation": "6000m",
+  "dbMasterCPUReservation": "5000m",
   "dbSlaveCPUReservation": "2000m",
   "toolServiceCPUReservation": null,
   "minioCPUReservation": null,
@@ -227,9 +227,17 @@ Describe 'Specifying no system size...' -Tag 'size' {
 
 		$yaml = Get-Yaml $valuesPath
 		$yaml.GetKeyValue(('sizing','size')) | Should -BeNullOrEmpty
-		$yaml.GetKeyValue(('web','resources','limits','cpu')) | Should -Be '4000m'
+		$yaml.GetKeyValue(('web','resources','limits','cpu')) | Should -Be '6000m'
 		$yaml.GetKeyValue(('web','resources','limits','memory')) | Should -Be '16384Mi'
-		$yaml.GetKeyValue(('mariadb','master','resources','limits','cpu')) | Should -Be '4000m'
+
+    $yaml.GetKeyValue(('web','props','limits','analysis','concurrent')) | Should -Be '12'
+    $yaml.GetKeyValue(('web','props','limits','database','poolSize')) | Should -Be '15'
+    $yaml.GetKeyValue(('web','props','limits','jobs','cpu')) | Should -Be '6000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','database')) | Should -Be '5000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','disk')) | Should -Be '6000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','memory')) | Should -Be '6000'
+
+		$yaml.GetKeyValue(('mariadb','master','resources','limits','cpu')) | Should -Be '5000m'
 		$yaml.GetKeyValue(('mariadb','master','resources','limits','memory')) | Should -Be '16384Mi'
 		$yaml.GetKeyValue(('mariadb','slave','resources','limits','cpu')) | Should -Be '2000m'
 		$yaml.GetKeyValue(('mariadb','slave','resources','limits','memory')) | Should -Be '8192Mi'
@@ -240,6 +248,219 @@ Describe 'Specifying no system size...' -Tag 'size' {
 		
 		$yaml.GetKeyValue(('mariadb','slave','persistence','size')) | Should -Be '64Gi'
 		$yaml.GetKeyValue(('mariadb','slave','persistence','backup','size')) | Should -Be '64Gi'
+	}
+
+	It 'Core feature with external database should include reservations' {
+
+		New-Mocks
+
+		$testDrivePath = Get-TestDriveDirectoryInfo
+		$workDirPath = $testDrivePath.FullName.Replace('\','\\')
+		$configJsonPath = Join-Path $testDrivePath 'config.json'
+
+		# a default config.json with Unspecified system size
+		@'
+{
+  "configVersion": "1.3",
+  "namespace": "srm",
+  "releaseName": "srm-release",
+  "workDir": "~/.k8s-srm",
+  "srmLicenseFile": "srm-web-license",
+  "scanFarmSastLicenseFile": null,
+  "scanFarmScaLicenseFile": null,
+  "sigRepoUsername": null,
+  "sigRepoPwd": null,
+  "scanFarmDatabaseHost": null,
+  "scanFarmDatabasePort": null,
+  "scanFarmDatabaseUser": null,
+  "scanFarmDatabasePwd": null,
+  "scanFarmDatabaseSslMode": null,
+  "scanFarmDatabaseServerCert": null,
+  "scanFarmScanDatabaseCatalog": null,
+  "scanFarmStorageDatabaseCatalog": null,
+  "scanFarmRedisHost": null,
+  "scanFarmRedisPort": null,
+  "scanFarmRedisDatabase": null,
+  "scanFarmRedisUseAuth": false,
+  "scanFarmRedisPwd": null,
+  "scanFarmRedisSecure": false,
+  "scanFarmRedisVerifyHostname": false,
+  "scanFarmRedisServerCert": null,
+  "scanFarmStorageType": null,
+  "scanFarmStorageBucketName": null,
+  "scanFarmCacheBucketName": null,
+  "scanFarmS3UseServiceAccountName": false,
+  "scanFarmS3AccessKey": null,
+  "scanFarmS3SecretKey": null,
+  "scanFarmS3ServiceAccountName": null,
+  "scanFarmS3Region": null,
+  "scanFarmGcsProjectName": null,
+  "scanFarmGcsSvcAccountKey": null,
+  "scanFarmAzureStorageAccount": null,
+  "scanFarmAzureStorageAccountKey": null,
+  "scanFarmAzureSubscriptionId": null,
+  "scanFarmAzureTenantId": null,
+  "scanFarmAzureResourceGroup": null,
+  "scanFarmAzureEndpoint": null,
+  "scanFarmAzureClientId": null,
+  "scanFarmAzureClientSecret": null,
+  "scanFarmMinIOHostname": null,
+  "scanFarmMinIOPort": null,
+  "scanFarmMinIORootUsername": null,
+  "scanFarmMinIORootPwd": null,
+  "scanFarmMinIOSecure": false,
+  "scanFarmMinIOVerifyHostname": false,
+  "scanFarmMinIOServerCert": null,
+  "scanFarmStorageHasInClusterUrl": false,
+  "scanFarmStorageInClusterUrl": null,
+  "scanFarmStorageIsProxied": true,
+  "scanFarmStorageContextPath": "upload",
+  "scanFarmStorageExternalUrl": "",
+  "useGeneratedPwds": true,
+  "mariadbRootPwd": null,
+  "mariadbReplicatorPwd": null,
+  "srmDatabaseUserPwd": null,
+  "adminPwd": null,
+  "toolServiceApiKey": null,
+  "minioAdminPwd": null,
+  "k8sProvider": "Other",
+  "kubeApiTargetPort": "443",
+  "clusterCertificateAuthorityCertPath": null,
+  "csrSignerName": null,
+  "createSCCs": false,
+  "scanFarmType": 0,
+  "skipDatabase": true,
+  "useTriageAssistant": true,
+  "skipScanFarm": true,
+  "skipToolOrchestration": true,
+  "skipMinIO": false,
+  "skipNetworkPolicies": true,
+  "skipTls": true,
+  "toolServiceReplicas": 0,
+  "dbSlaveReplicaCount": 0,
+  "externalDatabaseHost": "dbhost",
+  "externalDatabasePort": 3306,
+  "externalDatabaseName": "srmdb",
+  "externalDatabaseUser": "user",
+  "externalDatabasePwd": "password",
+  "externalDatabaseSkipTls": false,
+  "externalDatabaseTrustCert": false,
+  "externalDatabaseServerCert": null,
+  "externalWorkflowStorageEndpoint": null,
+  "externalWorkflowStorageEndpointSecure": false,
+  "externalWorkflowStorageUsername": null,
+  "externalWorkflowStoragePwd": null,
+  "externalWorkflowStorageBucketName": null,
+  "externalWorkflowStorageTrustCert": false,
+  "externalWorkflowStorageCertChainPath": null,
+  "addExtraCertificates": false,
+  "extraTrustedCaCertPaths": null,
+  "webServiceType": "ClusterIP",
+  "webServicePortNumber": "9090",
+  "webServiceAnnotations": [],
+  "skipIngressEnabled": true,
+  "ingressType": "ClusterIP",
+  "ingressClassName": null,
+  "ingressAnnotations": [],
+  "ingressHostname": null,
+  "ingressTlsSecretName": null,
+  "ingressTlsType": null,
+  "useSaml": false,
+  "useLdap": false,
+  "samlHostBasePath": null,
+  "samlIdentityProviderMetadataPath": null,
+  "samlAppName": null,
+  "samlKeystorePwd": null,
+  "samlPrivateKeyPwd": null,
+  "skipDockerRegistryCredential": true,
+  "dockerImagePullSecretName": null,
+  "dockerRegistry": null,
+  "dockerRegistryUser": null,
+  "dockerRegistryPwd": null,
+  "useDefaultDockerImages": true,
+  "imageVersionWeb": null,
+  "imageVersionMariaDB": null,
+  "imageVersionTo": null,
+  "imageVersionMinio": null,
+  "imageVersionWorkflow": null,
+  "useDockerRedirection": false,
+  "useDockerRepositoryPrefix": false,
+  "dockerRepositoryPrefix": null,
+  "useDefaultCACerts": true,
+  "caCertsFilePath": null,
+  "caCertsFilePwd": null,
+  "useCPUDefaults": true,
+  "webCPUReservation": "6000m",
+  "dbMasterCPUReservation": null,
+  "dbSlaveCPUReservation": null,
+  "toolServiceCPUReservation": null,
+  "minioCPUReservation": null,
+  "workflowCPUReservation": null,
+  "useMemoryDefaults": true,
+  "webMemoryReservation": "16384Mi",
+  "dbMasterMemoryReservation": null,
+  "dbSlaveMemoryReservation": null,
+  "toolServiceMemoryReservation": null,
+  "minioMemoryReservation": null,
+  "workflowMemoryReservation": null,
+  "useEphemeralStorageDefaults": true,
+  "webEphemeralStorageReservation": "2868Mi",
+  "dbMasterEphemeralStorageReservation": null,
+  "dbSlaveEphemeralStorageReservation": null,
+  "toolServiceEphemeralStorageReservation": null,
+  "minioEphemeralStorageReservation": null,
+  "workflowEphemeralStorageReservation": null,
+  "useVolumeSizeDefaults": true,
+  "webVolumeSizeGiB": 64,
+  "dbVolumeSizeGiB": 0,
+  "dbSlaveVolumeSizeGiB": 0,
+  "dbSlaveBackupVolumeSizeGiB": 0,
+  "minioVolumeSizeGiB": 0,
+  "storageClassName": "",
+  "systemSize": "Unspecified",
+  "useNodeSelectors": false,
+  "webNodeSelector": null,
+  "masterDatabaseNodeSelector": null,
+  "subordinateDatabaseNodeSelector": null,
+  "toolServiceNodeSelector": null,
+  "minioNodeSelector": null,
+  "workflowControllerNodeSelector": null,
+  "toolNodeSelector": null,
+  "useTolerations": false,
+  "webNoScheduleExecuteToleration": null,
+  "masterDatabaseNoScheduleExecuteToleration": null,
+  "subordinateDatabaseNoScheduleExecuteToleration": null,
+  "toolServiceNoScheduleExecuteToleration": null,
+  "minioNoScheduleExecuteToleration": null,
+  "workflowControllerNoScheduleExecuteToleration": null,
+  "toolNoScheduleExecuteToleration": null,
+  "notes": [],
+  "salts": [],
+  "isLocked": false,
+  "scanFarmScaApiUrlOverride": null
+}
+'@.Replace('~/.k8s-srm', $workDirPath) | Out-File $configJsonPath
+
+		$licenseFilePath = Join-Path $TestDrive 'srm-web-license'
+		Write-Output $null > $licenseFilePath
+
+		. (Join-Path $PSScriptRoot ../../helm-prep.ps1) -configPath $configJsonPath
+
+		$valuesPath = Join-Path $TestDrive 'chart-values-combined/values-combined.yaml'
+
+		$yaml = Get-Yaml $valuesPath
+		$yaml.GetKeyValue(('sizing','size')) | Should -BeNullOrEmpty
+		$yaml.GetKeyValue(('web','resources','limits','cpu')) | Should -Be '6000m'
+		$yaml.GetKeyValue(('web','resources','limits','memory')) | Should -Be '16384Mi'
+
+    $yaml.GetKeyValue(('web','props','limits','analysis','concurrent')) | Should -Be '12'
+    $yaml.GetKeyValue(('web','props','limits','database','poolSize')) | Should -Be '18'
+    $yaml.GetKeyValue(('web','props','limits','jobs','cpu')) | Should -Be '6000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','database')) | Should -Be '6000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','disk')) | Should -Be '6000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','memory')) | Should -Be '6000'
+
+		$yaml.GetKeyValue(('web','persistence','size')) | Should -Be '64Gi'
 	}
 
 	It 'Tool Orchestration feature should include reservations' {
@@ -382,8 +603,8 @@ Describe 'Specifying no system size...' -Tag 'size' {
   "caCertsFilePath": null,
   "caCertsFilePwd": null,
   "useCPUDefaults": true,
-  "webCPUReservation": "4000m",
-  "dbMasterCPUReservation": "4000m",
+  "webCPUReservation": "8000m",
+  "dbMasterCPUReservation": "12000m",
   "dbSlaveCPUReservation": "2000m",
   "toolServiceCPUReservation": "1000m",
   "minioCPUReservation": "2000m",
@@ -443,10 +664,17 @@ Describe 'Specifying no system size...' -Tag 'size' {
 		$yaml = Get-Yaml $valuesPath
 		$yaml.GetKeyValue(('sizing','size')) | Should -BeNullOrEmpty
 
-		$yaml.GetKeyValue(('web','resources','limits','cpu')) | Should -Be '4000m'
+		$yaml.GetKeyValue(('web','resources','limits','cpu')) | Should -Be '8000m'
 		$yaml.GetKeyValue(('web','resources','limits','memory')) | Should -Be '16384Mi'
 
-		$yaml.GetKeyValue(('mariadb','master','resources','limits','cpu')) | Should -Be '4000m'
+    $yaml.GetKeyValue(('web','props','limits','analysis','concurrent')) | Should -Be '16'
+    $yaml.GetKeyValue(('web','props','limits','database','poolSize')) | Should -Be '36'
+    $yaml.GetKeyValue(('web','props','limits','jobs','cpu')) | Should -Be '8000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','database')) | Should -Be '12000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','disk')) | Should -Be '8000'
+    $yaml.GetKeyValue(('web','props','limits','jobs','memory')) | Should -Be '8000'
+
+		$yaml.GetKeyValue(('mariadb','master','resources','limits','cpu')) | Should -Be '12000m'
 		$yaml.GetKeyValue(('mariadb','master','resources','limits','memory')) | Should -Be '16384Mi'
 		$yaml.GetKeyValue(('mariadb','slave','resources','limits','cpu')) | Should -Be '2000m'
 		$yaml.GetKeyValue(('mariadb','slave','resources','limits','memory')) | Should -Be '8192Mi'
