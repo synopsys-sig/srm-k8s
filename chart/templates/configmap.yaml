@@ -38,7 +38,10 @@ data:
     connectionTimeout={{ .Values.web.props.limits.database.timeout }}
 
   tomcat.env: |-
-    CATALINA_OPTS='-Dsrm.mounted-license-filename=license.lic {{ include "srm-web.props.system-properties" . }}'
+    CATALINA_OPTS='{{ include "srm-web.props.system-properties" . }}'
+    {{- if .Values.web.licenseSecret }}
+    CATALINA_OPTS="$CATALINA_OPTS -Dsrm.mounted-license-filename={{ include "srm-web.license.filename" . }}"
+    {{- end }}
     CATALINA_OPTS="$CATALINA_OPTS {{ default "" .Values.web.javaOpts }}"
     CATALINA_OPTS="$CATALINA_OPTS -Dcodedx.autoupdate=true"
     CATALINA_OPTS="$CATALINA_OPTS -Dsrm.webapp-name={{ include "srm-web.appName" . }}"
