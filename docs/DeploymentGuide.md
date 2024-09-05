@@ -3397,7 +3397,7 @@ Restore the database backup from your local system by running the restore-db.ps1
 
 ```
 $ cd /path/to/local/work/directory
-$ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.tgz' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -waitSeconds 600 -skipWebRestart
+$ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.tgz' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -waitSeconds 600 -skipSRMWebRestart
 ```
 
 ### Restore External Database
