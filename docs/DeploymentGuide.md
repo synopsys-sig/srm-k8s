@@ -373,6 +373,8 @@ Using the equation: (M \* N \* T) GB + 10GB + T/2 GB
 
 The total Scan Service storage bucket size is 750 GB (scan objects) + 10 GB (CLI tools) + 15 GB (logs) = 775 GB
 
+>Note: Do not set an object expiration/deletion policy on the storage bucket.
+
 The Cache Service bucket should not be geographically distributed and should not enable versioning, retention, or other special features. 
 
 You must configure your Cache Service bucket with an object expiration greater than (not equal to) 7 days. When creating a life cycle policy on Azure, define the policy using the last modified date, not the creation date. The Cache Service checks that this lifecycle rule is present and will not start if a lifecycle policy retention period is not set.
