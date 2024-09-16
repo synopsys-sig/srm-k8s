@@ -385,6 +385,15 @@ Both buckets must support read/write access from the Cache Service and Storage S
 
 The Scan Farm requires a separate node pool that supports nodes with 6.5 vCPUs and 26 GB of RAM. Meeting this requirement in your infrastructure might require a node pool of 8 vCPU and 32 GB RAM nodes. The nodes must include a Kubernetes taint for NodeType​=​​ScannerNode and a label of pool-type​=​small. A SAST analysis will consume a single node, so you should configure your node pool to scale horizontally as your scanning workload requires.
 
+### Scan Farm Network Ports
+
+The Software Risk Manager web pod communicates with Scan Farm pods using port 9998, and the Scan Farm pods communicate with the web pod using port 8080. For a complete list of network ports, refer to the Software Risk Manager chart and script resources:
+
+- [Core NetworkPolicy](../chart/templates/networkpolicy.yaml)
+- [Scan Farm Egress Ports](../ps/build/netpol.ps1)
+
+>Note: If you also use the Tool Orchestration feature, refer to the [Tool Orchestration NetworkPolicy](../chart/templates/to-networkpolicy.yaml).
+
 ### Scan Farm Private Registry
 
 When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Synopsys SIG (Software Integrity Group) private Docker registry (SIG repo) and push them to your private registry. This includes the Docker images for all the features you plan to install, not just Scan Farm-related ones. 
