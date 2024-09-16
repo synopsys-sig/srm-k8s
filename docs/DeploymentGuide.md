@@ -22,6 +22,7 @@
     + [Scan Farm Cache Requirements](#scan-farm-cache-requirements)
     + [Scan Farm Object Storage Requirements](#scan-farm-object-storage-requirements)
     + [Scan Farm Node Pool Requirements](#scan-farm-node-pool-requirements)
+    + [Scan Farm Network Ports](#scan-farm-network-ports)
     + [Scan Farm Private Registry](#scan-farm-private-registry)
     + [Scan Farm Ingress Requirements](#scan-farm-ingress-requirements)
     + [Scan Farm Internet Access Requirements](#scan-farm-internet-access-requirements)
