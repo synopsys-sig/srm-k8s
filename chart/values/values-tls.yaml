@@ -4,6 +4,7 @@
 #
 # (the commands below are also available at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#helm-tls-values-values-tlsyaml)
 #
+# $ export CACERTS_PATH='/path/to/cacerts'
 # $ export CERT_MANAGER_NAMESPACE='cert-manager'
 # $ export SRM_NAMESPACE='srm'
 # $ export SRM_RELEASE_NAME='srm'
@@ -28,13 +29,13 @@
 # $ kubectl -n $SRM_NAMESPACE create secret generic $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
 # 
 # $ # Remove any previous srm-ca entry
-# $ keytool -delete -keystore /path/to/cacerts -alias 'srm-ca' -noprompt -storepass 'changeit'
+# $ keytool -delete -keystore $CACERTS_PATH -alias 'srm-ca' -noprompt -storepass 'changeit'
 #
 # $ # Add ca.crt to cacerts file (your config.json caCertsFilePath parameter value)
-# $ keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
+# $ keytool -import -trustcacerts -keystore $CACERTS_PATH -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
 #
 # $ # Create cacerts Secret
-# $ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=/path/to/cacerts --from-literal cacerts-password=changeit
+# $ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=$CACERTS_PATH --from-literal cacerts-password=changeit
 #
 # $ # Start pwsh session
 # $ pwsh

@@ -8,6 +8,9 @@
   * [Tool Orchestration Feature](#tool-orchestration-feature)
 - [Requirements](#requirements)
   * [Kubernetes Requirements](#kubernetes-requirements)
+    + [Kubernetes Privileges for Core Feature Deployment](#kubernetes-privileges-for-core-feature-deployment)
+    + [Kubernetes Privileges for Scan Farm Feature Deployment](#kubernetes-privileges-for-scan-farm-feature-deployment)
+    + [Kubernetes Privileges for Tool Orchestration Feature Deployment](#kubernetes-privileges-for-tool-orchestration-feature-deployment)
   * [Helm Requirements](#helm-requirements)
   * [System Size](#system-size)
   * [Core Feature Requirements](#core-feature-requirements)
@@ -238,7 +241,51 @@ Refer to what follows for the supported or tested versions of software that comp
 
 ## Kubernetes Requirements
 
-The Software Risk Manager deployment supports Kubernetes versions 1.22 through 1.29 and was tested with OpenShift 4.13.
+The Software Risk Manager deployment supports Kubernetes versions 1.22 through 1.30 and was tested with OpenShift 4.13. If you are not a cluster administrator, your cluster access must include the permissions defined in the sections below before installing Software Risk Manager on your cluster.
+
+### Kubernetes Privileges for Core Feature Deployment
+
+The required Kubernetes privileges for the Core feature deployment will depend on whether or not you use an external database. For external database deployments, refer to the [admin-core-external-db-deployment-role](./roles/admin-core-external-db-deployment-role.yaml) ClusterRole definition. Otherwise, refer to the [admin-core-deployment-role](./roles/admin-core-deployment-role.yaml) ClusterRole definition.
+
+You can use a role YAML file to assign privileges required at deployment time. For example, if you plan to deploy the Core feature using an external database by logging on to your cluster as `user1`, you can do the following:
+
+As a cluster admin, create a ClusterRole resource using the `admin-core-external-db-deployment-role.yaml` file:
+
+```
+$ kubectl apply -f /path/to/git/srm-k8s/docs/roles/admin-core-external-db-deployment-role.yaml
+```
+
+As a cluster admin, create a ClusterRoleBinding resource:
+
+```
+$ kubectl create clusterrolebinding admin-core-external-db-deployment-role-binding --clusterrole=admin-core-external-db-deployment-role --user=user1
+```
+
+You can now log on to the cluster as `user1` and deploy the Core feature with an external database.
+
+### Kubernetes Privileges for Scan Farm Feature Deployment
+
+The [required Kubernetes privileges for the Scan Farm feature deployment](https://sig-product-docs.synopsys.com/bundle/coverity-docs/page/cnc/topics/infrastructure_prerequisites.html) are documented externally under the `Access privileges` section.
+
+### Kubernetes Privileges for Tool Orchestration Feature Deployment
+
+The required Kubernetes privileges for the Tool Orchestration feature deployment will depend on whether or not you use an external database. For external database deployments, refer to the [admin-tool-orchestration-external-db-deployment-role](./roles/admin-tool-orchestration-external-db-deployment-role.yaml) ClusterRole definition. Otherwise, refer to the [admin-tool-orchestration-deployment-role](./roles/admin-tool-orchestration-deployment-role) ClusterRole definition.
+
+You can use a role YAML file to assign privileges required at deployment time. For example, if you plan to deploy the Tool Orchestration feature using an external database by logging on to your cluster as `user1`, you can do the following:
+
+As a cluster admin, create a ClusterRole resource using the `admin-tool-orchestration-external-db-deployment-role.yaml` file:
+
+```
+$ kubectl apply -f /path/to/git/srm-k8s/docs/roles/admin-tool-orchestration-external-db-deployment-role.yaml
+```
+
+As a cluster admin, create a ClusterRoleBinding resource:
+
+```
+$ kubectl create clusterrolebinding admin-tool-orchestration-external-db-deployment-role-binding --clusterrole=admin-tool-orchestration-external-db-deployment-role --user=user1
+```
+
+You can now log on to the cluster as `user1` and deploy the Tool Orchestration feature with an external database.
 
 ## Helm Requirements
 
@@ -4183,6 +4230,7 @@ Here are the Bash and PowerShell commands you should run after adjusting variabl
 >Note: You do not need to run these commands if you plan to use the commands in the next section.
 
 ```
+$ export CACERTS_PATH='/path/to/cacerts'
 $ export CERT_MANAGER_NAMESPACE='cert-manager'
 $ export SRM_NAMESPACE='srm'
 $ export SRM_RELEASE_NAME='srm'
@@ -4207,13 +4255,13 @@ $ # Create CA Secret by the same name, which is required for workflows to access
 $ kubectl -n $SRM_NAMESPACE create secret generic $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
 
 $ # Remove any previous srm-ca entry
-$ keytool -delete -keystore /path/to/cacerts -alias 'srm-ca' -noprompt -storepass 'changeit'
+$ keytool -delete -keystore $CACERTS_PATH -alias 'srm-ca' -noprompt -storepass 'changeit'
 
 $ # Add ca.crt to cacerts file (your config.json caCertsFilePath parameter value)
-$ keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
+$ keytool -import -trustcacerts -keystore $CACERTS_PATH -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
 
 $ # Create cacerts Secret
-$ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=/path/to/cacerts --from-literal cacerts-password=changeit
+$ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=$CACERTS_PATH --from-literal cacerts-password=changeit
 
 $ # Start pwsh session
 $ pwsh
@@ -4259,6 +4307,7 @@ Here are the PowerShell commands you should run after adjusting variable values 
 >Note: You do not need to run these commands if you plan to use the commands in the previous section.
 
 ```
+PS> $CACERTS_PATH='/path/to/cacerts'
 PS> $CERT_MANAGER_NAMESPACE='cert-manager'
 PS> $SRM_NAMESPACE='srm'
 PS> $SRM_RELEASE_NAME='srm'
@@ -4283,13 +4332,13 @@ PS> # Create CA Secret by the same name, which is required for workflows to acce
 PS> kubectl -n $SRM_NAMESPACE create secret generic $CA_CONFIGMAP_NAME --from-file ca.crt=ca.crt
 
 PS> # Remove any previous srm-ca entry
-PS> keytool -delete -keystore /path/to/cacerts -alias 'srm-ca' -noprompt -storepass 'changeit'
+PS> keytool -delete -keystore $CACERTS_PATH -alias 'srm-ca' -noprompt -storepass 'changeit'
 
 PS> # Add ca.crt to cacerts file (your config.json caCertsFilePath parameter value)
-PS> keytool -import -trustcacerts -keystore /path/to/cacerts -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
+PS> keytool -import -trustcacerts -keystore $CACERTS_PATH -file ca.crt -alias 'srm-ca' -noprompt -storepass 'changeit'
 
 PS> # Create cacerts Secret
-PS> kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=/path/to/cacerts --from-literal cacerts-password=changeit
+PS> kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=$CACERTS_PATH --from-literal cacerts-password=changeit
 
 PS> $global:PSNativeCommandArgumentPassing='Legacy'
 PS> Install-Module guided-setup

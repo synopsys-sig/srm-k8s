@@ -412,7 +412,7 @@ class Config {
 
 	[string]GetFullName() {
 		$fullName = Get-HelmChartFullname $this.releaseName 'srm'
-		$fullName.substring(0, [math]::min($fullName.length, 63)).TrimEnd('-')
+		$fullName = $fullName.substring(0, [math]::min($fullName.length, 63)).TrimEnd('-')
 		return $fullName
 	}
 

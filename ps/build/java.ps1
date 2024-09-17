@@ -1,5 +1,5 @@
 function Get-CacertsSecretName($config) {
-	"$($config.releaseName)-cacerts-secret"
+	"$($config.GetFullName())-web-cacerts-secret"
 }
 
 function New-CacertsSecret($config) {
