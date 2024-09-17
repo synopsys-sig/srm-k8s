@@ -269,7 +269,7 @@ The [required Kubernetes privileges for the Scan Farm feature deployment](https:
 
 ### Kubernetes Privileges for Tool Orchestration Feature Deployment
 
-The required Kubernetes privileges for the Tool Orchestration feature deployment will depend on whether or not you use an external database. For external database deployments, refer to the [admin-tool-orchestration-external-db-deployment-role](./roles/admin-tool-orchestration-external-db-deployment-role.yaml) ClusterRole definition. Otherwise, refer to the [admin-tool-orchestration-deployment-role](./roles/admin-tool-orchestration-deployment-role) ClusterRole definition.
+The required Kubernetes privileges for the Tool Orchestration feature deployment will depend on whether or not you use an external database. For external database deployments, refer to the [admin-tool-orchestration-external-db-deployment-role](./roles/admin-tool-orchestration-external-db-deployment-role.yaml) ClusterRole definition. Otherwise, refer to the [admin-tool-orchestration-deployment-role](./roles/admin-tool-orchestration-deployment-role.yaml) ClusterRole definition.
 
 You can use a role YAML file to assign privileges required at deployment time. For example, if you plan to deploy the Tool Orchestration feature using an external database by logging on to your cluster as `user1`, you can do the following:
 
