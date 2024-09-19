@@ -21,7 +21,12 @@ data:
   {{- end -}}
 
   {{- $sessionVariables := "sessionVariables=sql_mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'" -}}
-  {{- $dbUrl = (printf "%s%s" $dbUrl $sessionVariables) }}
+  {{- $dbUrl = (printf "%s%s" $dbUrl $sessionVariables) -}}
+
+  {{- $useDatabasePublicKey := and (not .Values.features.mariadb) (not (empty (.Values.web.database.publicKeyConfigMap))) -}}
+  {{- if $useDatabasePublicKey -}}
+  {{-   $dbUrl = (printf "%s&serverRsaPublicKeyFile=%s" $dbUrl (include "srm-web.database.pubkey.path" .)) -}}
+  {{- end }}
 
   {{ include "srm-web.main.props.filename" . }}: |-
     swa.db.url = {{ $dbUrl }}

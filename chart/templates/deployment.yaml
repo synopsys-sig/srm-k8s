@@ -27,6 +27,7 @@ spec:
         {{- end }}
         {{- include "srm-web.selectorLabels" . | nindent 8 }}
     spec:
+      {{- $useDatabasePublicKey := and (not .Values.features.mariadb) (not (empty (.Values.web.database.publicKeyConfigMap))) -}}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -172,6 +173,11 @@ spec:
               mountPath: {{ include "srm-web.saml-keystore.props.path" . }}
               subPath: {{ include "srm-web.saml-keystore.props.filename" . }}
             {{- end }}
+            {{ if $useDatabasePublicKey -}}
+            - name: db-public-key
+              mountPath: {{ include "srm-web.database.pubkey.path" . }}
+              subPath: {{ include "srm-web.database.pubkey.filename" . }}
+            {{- end }}
       initContainers:
         - name: srm-dbinit
           securityContext:
@@ -315,4 +321,12 @@ spec:
             items:
             - key: {{ include "srm-web.to.props.filename" . }}
               path: {{ include "srm-web.to.props.filename" . }}
+        {{- end }}
+        {{ if $useDatabasePublicKey -}}
+        - name: db-public-key
+          configMap:
+            name: {{ .Values.web.database.publicKeyConfigMap | quote }}
+            items:
+            - key: {{ include "srm-web.database.pubkey.filename" . }}
+              path: {{ include "srm-web.database.pubkey.filename" . }}
         {{- end }}

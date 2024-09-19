@@ -112,6 +112,11 @@ web:
     credentialSecret: ""
     # -- the URL for the external SRM web database (jdbc:mysql://my-srm-web-db-host:3306/my-srm-web-db-name?useSSL=true&requireSSL=true)
     externalDbUrl:
+    # -- the K8s configmap name containing the RSA public key when using MySQL's caching_sha2_password plugin
+    # Note: see the caching_sha2_password_public_key_path MySQL variable for the public key file location
+    # Command:
+    # kubectl -n srm create configmap srm-web-db-public-key-configmap --from-file db-public-key=/path/to/public_key.pem
+    publicKeyConfigMap: ""
 
   image:
     # -- the registry name and optional registry suffix for the SRM web Docker image

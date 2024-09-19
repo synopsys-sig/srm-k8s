@@ -207,3 +207,17 @@ Returns the Scan Farm properties path.
 {{- define "srm-web.sf.props.path" -}}
 {{- printf "%s/%s" (include "srm-web.appdata.path" . ) (include "srm-web.sf.props.filename" .) -}}
 {{- end -}}
+
+{{/*
+Returns the optional database public key filename.
+*/}}
+{{- define "srm-web.database.pubkey.filename" -}}
+db-public-key
+{{- end -}}
+
+{{/*
+Returns the optional database public key path.
+*/}}
+{{- define "srm-web.database.pubkey.path" -}}
+{{- printf "%s/%s" (include "srm-web.appdata.path" . ) (include "srm-web.database.pubkey.filename" .) -}}
+{{- end -}}
