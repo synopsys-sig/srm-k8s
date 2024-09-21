@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.5.0
+.VERSION 1.6.0
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
@@ -39,9 +39,9 @@ param (
 	[string]                 $codeDxCPUReservation,
 	[string]                 $dbMasterCPUReservation,
 	[string]                 $dbSlaveCPUReservation,
-	[string]                 $toolServiceCPUReservation,
+	[string]                 $toolServiceCPUReservation = '1000m',
 	[string]                 $minioCPUReservation,
-	[string]                 $workflowCPUReservation,
+	[string]                 $workflowCPUReservation = '500m',
 
 	[string]                 $codeDxEphemeralStorageReservation = '2868Mi',
 	[string]                 $dbMasterEphemeralStorageReservation,
@@ -198,7 +198,8 @@ $global:PSNativeCommandArgumentPassing='Legacy'
 '../../../ps/keyvalue.ps1',
 '../../../ps/build/protect.ps1',
 '../../../ps/build/yaml.ps1',
-'../../../ps/config.ps1' | ForEach-Object {
+'../../../ps/config.ps1',
+'./.common.ps1' | ForEach-Object {
 	Write-Debug "'$PSCommandPath' is including file '$_'"
 	$path = Join-Path $PSScriptRoot $_
 	if (-not (Test-Path $path)) {
@@ -207,57 +208,6 @@ $global:PSNativeCommandArgumentPassing='Legacy'
 	. $path | out-null
 }
 
-function Get-FilePath([string] $prompt) {
-	$q = new-object PathQuestion($prompt, $false, $false)
-	$q.Prompt()
-	$q.Response
-}
-
-function Get-DirectoryPath([string] $prompt) {
-	$q = new-object PathQuestion($prompt, $true, $false)
-	$q.Prompt()
-	$q.Response
-}
-
-function Get-QuestionResponse([string] $prompt, [string[]] $blockedList, [switch] $isSecure) {
-	$q = new-object Question($prompt)
-	$q.blacklist = $blockedList
-	$q.isSecure = $isSecure
-	$q.Prompt()
-	$q.Response
-}
-
-function Get-KeyValuesFromTable([hashtable] $table) {
-
-	$table.Keys | ForEach-Object {
-		$key = $_
-		$val = $table[$key]
-		[KeyValue]::New($key, $val)
-	}
-}
-
-function New-KeyValueFromTuple([Tuple`2[string,string]] $tuple) {
-
-	if ($null -eq $tuple) {
-		return $null
-	}
-	[KeyValue]::New($tuple.Item1, $tuple.Item2)
-}
-
-function Get-HelmChartAppVersionString([string] $chartYamlPath) {
-	$yaml = Get-Yaml $chartYamlPath
-	$yaml.GetKeyValue('appVersion')
-}
-
-function Get-CodeDxHelmChartVersionString([string] $chartYamlPath) {
-	# Code Dx version number format is "2024.9.0"
-	(Get-HelmChartAppVersionString $chartYamlPath) -replace '"'
-}
-
-function Get-SrmHelmChartVersionString([string] $chartYamlPath) {
-	# SRM version number format is "v2024.9.0"
-	(Get-HelmChartAppVersionString $chartYamlPath) -replace '"v?'
-}
 
 $srmChart = Join-Path $PSScriptRoot '../../../chart/Chart.yaml'
 if (-not (Test-Path $srmChart -PathType Leaf)) {
@@ -427,19 +377,63 @@ $config.useDefaultCACerts = -not [string]::IsNullOrEmpty($caCertsFilePath)
 $config.caCertsFilePath = $caCertsFilePath
 $config.caCertsFilePwd = $caCertsFilePwd
 
-$config.webCPUReservation = $codeDxCPUReservation
-$config.dbMasterCPUReservation = $dbMasterCPUReservation
-$config.dbSlaveCPUReservation = $dbSlaveCPUReservation
-$config.toolServiceCPUReservation = $toolServiceCPUReservation
-$config.minioCPUReservation = $minioCPUReservation
-$config.workflowCPUReservation = $workflowCPUReservation
+Write-Host 'For a description of SRM System Size, see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size'
 
-$config.webMemoryReservation = $codeDxMemoryReservation
-$config.dbMasterMemoryReservation = $dbMasterMemoryReservation
-$config.dbSlaveMemoryReservation = $dbSlaveMemoryReservation
-$config.toolServiceMemoryReservation = $toolServiceMemoryReservation
-$config.minioMemoryReservation = $minioMemoryReservation
-$config.workflowMemoryReservation = $workflowMemoryReservation
+$cpuCountWeb = Get-VirtualCpuCountFromReservation $codeDxCPUReservation
+if ($cpuCountWeb -lt 4) {
+	Write-Host "WARNING: Your CPU reservation ($codeDxCPUReservation) is roughly $cpuCountWeb virtual CPU(s), which is less than the Small System Size."
+}
+
+$systemSizeQuestionChoice = Get-MultipleChoiceQuestionResponse `
+	'Select a System Size (recommended) or choose Unspecified to keep individual resource reservations (e.g., CPU, memory, etc.)' @(
+			[tuple]::create('&Unspecified', 'Do not use system size; continue using individual resource reservations'),
+			[tuple]::create('&Small', 'Total projects between 1 and 100 with 1,000 daily analyses (8 concurrent)'),
+			[tuple]::create('&Medium', 'Total projects between 100 and 2000 with 2,000 daily analyses (16 concurrent)'),
+			[tuple]::create('&Large', 'Total projects between 2,000 and 10,000 with 10,000 daily analyses (32 concurrent)'),
+			[tuple]::create('&Extra Large', 'Total projects in excess of 10,000 with more than 10,000 daily analyses (64 concurrent)')
+	) -1
+
+switch ($systemSizeQuestionChoice) {
+	0 { $config.systemSize = [SystemSize]::Unspecified }
+	1 { $config.systemSize = [SystemSize]::Small }
+	2 { $config.systemSize = [SystemSize]::Medium }
+	3 { $config.systemSize = [SystemSize]::Large }
+	4 { $config.systemSize = [SystemSize]::ExtraLarge }
+}
+
+if ($config.systemSize -eq [SystemSize]::Unspecified) {
+
+	$config.webCPUReservation = $codeDxCPUReservation
+	$config.dbMasterCPUReservation = $dbMasterCPUReservation
+	$config.dbSlaveCPUReservation = $dbSlaveCPUReservation
+	$config.toolServiceCPUReservation = $toolServiceCPUReservation
+	$config.minioCPUReservation = $minioCPUReservation
+	$config.workflowCPUReservation = $workflowCPUReservation
+
+	$config.webMemoryReservation = $codeDxMemoryReservation
+	$config.dbMasterMemoryReservation = $dbMasterMemoryReservation
+	$config.dbSlaveMemoryReservation = $dbSlaveMemoryReservation
+	$config.toolServiceMemoryReservation = $toolServiceMemoryReservation
+	$config.minioMemoryReservation = $minioMemoryReservation
+	$config.workflowMemoryReservation = $workflowMemoryReservation
+
+	$config.webVolumeSizeGiB = $codeDxVolumeSizeGiB
+	$config.dbVolumeSizeGiB = $dbVolumeSizeGiB
+	$config.dbSlaveVolumeSizeGiB = $dbSlaveVolumeSizeGiB
+	$config.dbSlaveBackupVolumeSizeGiB = $dbSlaveVolumeSizeGiB
+	$config.minioVolumeSizeGiB = $minioVolumeSizeGiB
+
+	# use the web CPU count to infer system size
+	if ($cpuCountWeb -ge 32) {
+		$config.toolServiceReplicas = 4
+	} elseif ($cpuCountWeb -ge 16) {
+		$config.toolServiceReplicas = 3
+	} elseif ($cpuCountWeb -ge 8) {
+		$config.toolServiceReplicas = 2
+	} else {
+		$config.toolServiceReplicas = 1
+	}
+}
 
 $config.webEphemeralStorageReservation = $codeDxEphemeralStorageReservation
 $config.dbMasterEphemeralStorageReservation = $dbMasterEphemeralStorageReservation
@@ -448,11 +442,6 @@ $config.toolServiceEphemeralStorageReservation = $toolServiceEphemeralStorageRes
 $config.minioEphemeralStorageReservation = $minioEphemeralStorageReservation
 $config.workflowEphemeralStorageReservation = $workflowEphemeralStorageReservation
 
-$config.webVolumeSizeGiB = $codeDxVolumeSizeGiB
-$config.dbVolumeSizeGiB = $dbVolumeSizeGiB
-$config.dbSlaveVolumeSizeGiB = $dbSlaveVolumeSizeGiB
-$config.dbSlaveBackupVolumeSizeGiB = $dbSlaveVolumeSizeGiB
-$config.minioVolumeSizeGiB = $minioVolumeSizeGiB
 $config.storageClassName = $storageClassName
 
 $config.webNodeSelector = New-KeyValueFromTuple $codeDxNodeSelector

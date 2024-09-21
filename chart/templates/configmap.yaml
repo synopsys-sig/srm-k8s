@@ -9,7 +9,7 @@ data:
   {{- if .Values.mariadb.master.masterTlsSecret -}}
   {{-   $tlsOpts = "?useSSL=true&requireSSL=true" -}}
   {{- end -}}
-  {{- $dbUrl := (printf "jdbc:mysql://%s-mariadb/codedx%s" .Release.Name $tlsOpts) -}}
+  {{- $dbUrl := (printf "jdbc:mysql://%s/codedx%s" (include "srm-web.db.fullname" .) $tlsOpts) -}}
   {{- if not .Values.features.mariadb -}}
   {{-   $dbUrl = (required ".Values.web.database.externalDbUrl must be specified when using an external MariaDB instance" .Values.web.database.externalDbUrl) -}}
   {{- end -}}
@@ -44,6 +44,9 @@ data:
 
   tomcat.env: |-
     CATALINA_OPTS='{{ include "srm-web.props.system-properties" . }}'
+    {{- if .Values.web.licenseSecret }}
+    CATALINA_OPTS="$CATALINA_OPTS -Dsrm.mounted-license-filename={{ include "srm-web.license.filename" . }}"
+    {{- end }}
     CATALINA_OPTS="$CATALINA_OPTS {{ default "" .Values.web.javaOpts }}"
     CATALINA_OPTS="$CATALINA_OPTS -Dcodedx.autoupdate=true"
     CATALINA_OPTS="$CATALINA_OPTS -Dsrm.webapp-name={{ include "srm-web.appName" . }}"

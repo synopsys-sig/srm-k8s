@@ -1,26 +1,39 @@
 function New-WebCPUConfig($config) {
 
-	$cpuCount = Get-VirtualCpuCountFromReservation $config.webCPUReservation
-	if ($cpuCount -lt 2) {
+	$cpuCountWeb = Get-VirtualCpuCountFromReservation $config.webCPUReservation
+	if ($cpuCountWeb -lt 2) {
 		throw "Unable to continue with the CPU reservation $($config.webCPUReservation) because the web component's CPU reservation must be >= 2 vCPUs"
+	}
+
+	$cpuCountDB = $cpuCountWeb
+	if (-not $config.skipDatabase -and $config.dbMasterCPUReservation) {
+		# for an external database, use the web CPU count to infer system size where CPU and DB 
+		# counts are equal for the Small, Medium, Large, and Extra Large sizes
+		$cpuCountDB = Get-VirtualCpuCountFromReservation $config.dbMasterCPUReservation
 	}
 	
 	# https://community.synopsys.com/s/article/Code-Dx-Hikari-connection-pooling-settings-and-connection-timeout
-	$poolSize = $cpuCount * 3
+	$poolSize = $cpuCountDB * 3
 
 	# https://community.synopsys.com/s/article/SRM-Notes-on-Performance
-	$limit = $cpuCount * 1000
+	$limit = $cpuCountWeb * 1000
+	$dbLimit = $cpuCountDB * 1000
+
+	# https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size
+	$concurrentAnalyses = $cpuCountWeb * 2
 
 	@"
 web:
   props:
     limits:
+      analysis:
+        concurrent: $concurrentAnalyses
       database:
         poolSize: $poolSize
       jobs:
         cpu: $limit
         memory: $limit
-        database: $limit
+        database: $dbLimit
         disk: $limit
   resources:
     limits:

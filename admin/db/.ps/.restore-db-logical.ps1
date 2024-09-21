@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.2.0
+.VERSION 1.2.2
 .GUID b6b17e02-ecb1-4780-afbc-2128026b7464
 .AUTHOR Synopsys
 #>
@@ -77,6 +77,15 @@ function New-DatabaseFromLogicalBackup([string] $namespace,
 	}
 }
 
+function Get-HelmValuesAll([string] $namespace, [string] $releaseName) {
+
+	$values = helm -n $namespace get values $releaseName -a -o json
+	if ($LASTEXITCODE -ne 0) {
+		throw "Unable to get release values, helm exited with code $LASTEXITCODE."
+	}
+	ConvertFrom-Json $values
+}
+
 if (-not (Test-HelmRelease $namespace $releaseName)) {
 	Write-Error "Unable to find Helm release named $releaseName in namespace $namespace."
 }
@@ -85,13 +94,14 @@ $deployment = "$(Get-HelmChartFullname $releaseName 'srm')-web"
 $statefulSetMariaDBMaster = "$releaseName-mariadb-master"
 $statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
 
-$statefulSetMariaDBSlaveCount = (Get-HelmValues $namespace $releaseName).mariadb.slave.replicas
-if ($statefulSetMariaDBSlaveCount -eq 0) {
+$values = Get-HelmValuesAll $namespace $releaseName
+$statefulSetMariaDBSlaveCount = $values.mariadb.slave.replicas
+if (-not $values.mariadb.replication.enabled) {
+	$statefulSetMariaDBSlaveCount = 0
 	$statefulSetMariaDBMaster = "$releaseName-mariadb"
 	$statefulSetMariaDBSlave = ''
 }
 
-$mariaDbSecretName = "$releaseName-db-cred-secret"
 $mariaDbMasterServiceName = "$releaseName-mariadb"
 
 if (-not (Test-Deployment $namespace $deployment)) {
@@ -104,6 +114,12 @@ if (-not (Test-StatefulSet $namespace $statefulSetMariaDBMaster)) {
 
 if ($statefulSetMariaDBSlaveCount -ne 0 -and (-not (Test-StatefulSet $namespace $statefulSetMariaDBSlave))) {
 	Write-Error "Unable to find StatefulSet named $statefulSetMariaDBSlave in namespace $namespace."
+}
+
+# identify the MariaDB password K8s secret resource name
+$mariaDbSecretName = "$releaseName-mariadb-default-secret"
+if ($null -ne $values.mariadb.existingSecret) {
+	$mariaDbSecretName = $values.mariadb.existingSecret
 }
 
 if (-not (Test-Secret $namespace $mariaDbSecretName)) {
@@ -153,7 +169,7 @@ if ($replicationPwd -eq '') {
 }
 
 Write-Verbose 'Restarting database...'
-& (join-path $PSScriptRoot 'restart-db.ps1') -namespace $namespace -releaseName $releaseName -waitSeconds $waitSeconds -skipWebRestart
+& (join-path $PSScriptRoot '.restart-db.ps1') -namespace $namespace -releaseName $releaseName -waitSeconds $waitSeconds -skipWebRestart
 
 Write-Verbose 'Searching for MariaDB slave pods...'
 $podFullNamesSlaves = kubectl -n $namespace get pod -l component=slave -o name

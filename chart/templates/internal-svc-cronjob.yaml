@@ -1,0 +1,50 @@
+{{- if .Values.features.scanfarm -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "srm-sf.svc-cronjob" . | quote }}
+  labels:
+    {{- include "srm-sf.svc-job-labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.web.scanfarm.key.regenSchedule }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "srm-sf.svc-job-labels" . | nindent 12 }}
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          serviceAccountName: {{ include "srm-web.serviceAccountName" . | quote }}
+          securityContext:
+            fsGroup: 1000
+            runAsUser: 1000
+          {{- if .Values.web.nodeSelectors }}
+          nodeSelector:
+          {{- toYaml .Values.web.nodeSelectors | trim | nindent 12 }}
+          {{- end }}
+          {{- if .Values.web.tolerations }}
+          tolerations:
+          {{- toYaml .Values.web.tolerations | trim | nindent 12 }}
+          {{- end }}
+          restartPolicy: Never
+          containers:
+          - name: configuration-job
+            image: "{{ .Values.web.image.registry }}/{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+            command:
+              - /bin/bash
+              - -c
+              - |
+{{ include "srm-web.key-job" . | indent 16 }}
+            volumeMounts:
+            - name: web-secret
+              mountPath: {{ include "srm-web.admin.password.path" . }}
+              subPath: {{ include "srm-web.admin.password.filename" . }}
+          volumes:
+          - name: web-secret
+            secret:
+              secretName: {{ include "srm-web.web.secret" . | quote }}
+{{- end -}}

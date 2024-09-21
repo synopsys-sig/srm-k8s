@@ -22,6 +22,10 @@
 {{- printf "%s-internal-svc-job" ((include "srm.fullname" .) | trunc 45 | trimSuffix "-") }}
 {{- end -}}
 
+{{- define "srm-sf.svc-cronjob" -}}
+{{- printf "%s-internal-svc-cronjob" ((include "srm.fullname" .) | trunc 41 | trimSuffix "-") }}
+{{- end -}}
+
 {{- define "srm-sf.svc-job-labels" -}}
 helm.sh/chart: {{ include "srm.chart" . }}
 {{- if .Chart.AppVersion }}

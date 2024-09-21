@@ -1846,9 +1846,6 @@ kubectl apply -f "/path/to/.k8s-srm/chart-resources"
 ----------------------
 Required Helm Commands
 ----------------------
-helm repo add codedx https://codedx.github.io/codedx-kubernetes
-helm repo add cnc https://sig-repo.synopsys.com/artifactory/sig-cloudnative
-helm repo update
 helm dependency update /path/to/git/srm-k8s/chart
 helm -n srm upgrade --reset-values --install srm -f "/path/to/.k8s-srm/chart-values-combined/values-combined.yaml" --timeout 30m0s /path/to/git/srm-k8s/chart
 
@@ -3470,7 +3467,7 @@ Restore the database backup from your local system by running the restore-db.ps1
 
 ```
 $ cd /path/to/local/work/directory
-$ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.tgz' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -skipWebRestart
+$ pwsh /path/to/git/srm-k8s/admin/db/restore-db-logical.ps1 -backupToRestore './dump-codedx.tgz' -rootPwd '<srm-db-root-pwd>' -replicationPwd '<srm-db-repl-pwd>' -namespace '<srm-namespace>' -releaseName '<srm-release-name>' -waitSeconds 600 -skipSRMWebRestart
 ```
 
 ### Restore External Database
@@ -3876,6 +3873,8 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
 | web.scanfarm.sast.version | string | `"2024.3.0"` | the SAST component version to use |
 | web.scanfarm.sca.version | string | `"9.2.0"` | the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable) |
+| web.scanfarm.key.validForDays | int | 45 | the duration of the Scan Farm API key |
+| web.scanfarm.key.regenSchedule | string | `"0 0 1 * *"` | the Scan Farm API key regeneration period (minute hour day-of-month month day-of-week) |
 | web.securityContext.readOnlyRootFilesystem | bool | `true` | whether the SRM web workload uses a read-only filesystem |
 | web.service.annotations | object | `{}` | the annotations to apply to the SRM web service |
 | web.service.port | int | `9090` | the port number of the SRM web service |

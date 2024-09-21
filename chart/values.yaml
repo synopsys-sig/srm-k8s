@@ -217,6 +217,11 @@ web:
     sca:
       # -- the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable)
       version: 9.2.0
+    key:
+      # -- the duration of the Scan Farm API key
+      validForDays: 45
+      # -- the Scan Farm API key regeneration period (minute hour day-of-month month day-of-week)
+      regenSchedule: '0 0 1 * *' # monthly
 
   securityContext:
     # -- whether the SRM web workload uses a read-only filesystem

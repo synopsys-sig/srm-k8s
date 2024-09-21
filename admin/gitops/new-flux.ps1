@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.21.0
+.VERSION 1.22.0
 .GUID 31739033-88f1-425d-be17-ed5ad608d005
 .AUTHOR Synopsys
 #>
@@ -286,6 +286,9 @@ spec:
   interval: 1m0s
   install:
     skipCRDs: true
+  upgrade:
+    remediation:
+      retries: -1
 # values:
 #   web:
 #     image:
@@ -344,6 +347,9 @@ spec:
   interval: 1m0s
   install:
     skipCRDs: true
+  upgrade:
+    remediation:
+      retries: -1
 # values:
 #   web:
 #     image:
