@@ -313,7 +313,7 @@ spec:
 	'Git' {
 
 @"
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
   name: srm
