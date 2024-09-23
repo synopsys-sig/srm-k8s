@@ -12,7 +12,7 @@ dependencies:
   repository: https://synopsys-sig.github.io/srm-k8s
   condition: features.mariadb
 - name: scan-services
-  version: "2024.9.0"
+  version: "2024.6.1"
   repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
   condition: features.scanfarm
 - name: argo-workflows
