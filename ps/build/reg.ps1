@@ -27,7 +27,7 @@ minio:
     pullSecrets:
     - $registrySecretName
 
-cnc:
+scan-services:
   imagePullSecret: $registrySecretName
 "@ | Out-File (Get-RegistryValuesPath $config)
 }

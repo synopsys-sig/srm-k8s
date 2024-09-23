@@ -13,8 +13,8 @@ function New-SigRepoSecret($config) {
 function New-ScanFarmInternalStorageConfig($config) {
 
 	@"
-cnc:
-  cnc-storage-service:
+scan-services:
+  storage-service:
     endpoint:
       internal:
         url: $($config.scanFarmStorageInClusterUrl)
@@ -30,8 +30,8 @@ function New-ScanFarmExternalProxiedStorageConfig($config) {
   $externalWebSvcUrl = "$externalWebSvcProtocol`://$($config.ingressHostname)"
 
 	@"
-cnc:
-  cnc-storage-service:
+scan-services:
+  storage-service:
     endpoint:
       external:
         proxyPath: '$($config.scanFarmStorageContextPath)'
@@ -42,8 +42,8 @@ cnc:
 function New-ScanFarmExternalStorageConfig($config) {
 
 	@"
-cnc:
-  cnc-storage-service:
+scan-services:
+  storage-service:
     endpoint:
       external:
         url: $($config.scanFarmStorageExternalUrl)
@@ -64,21 +64,16 @@ function New-ScanFarmConfig($config) {
 	@"
 features:
   scanfarm: true
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     javaOpts: "-Dserver.ssl.enabled-protocols=TLSv1.2,TLSv1.3 -Dcom.synopsys.coverity.cache.srm.secure=false"
-  scanfarm:
-    enabled: true
-    http:
-      enabled: true
-    mode: "SRM"
-    srm:
-      url: $webSvcUrl
+  scan-service:
     tools:
       sync:
         enabled: true
         existingSecret: $(Get-SigRepoSecretName $config)
-
+  srm:
+    url: $webSvcUrl
 "@ | Out-File (Get-ScanFarmValuesPath $config)
 
 	if ($config.scanFarmStorageHasInClusterUrl) {

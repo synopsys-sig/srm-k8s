@@ -118,6 +118,7 @@
     + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
     + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
+  * [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions)
   * [Add Extra Pod Labels](#add-extra-pod-labels)
   * [Specify MySQL Server Public Key Path](#specify-mysql-server-public-key-path)
 - [Maintenance](#maintenance)
@@ -2281,15 +2282,14 @@ web:
       hostBasePath: https://<hostname>/mysrm
 ```
 
-If you use the Scan Farm feature, you must also update the `cnc.scanfarm.srm.url` helm chart parameter. Here is an example for the `/mysrm` context path where you would replace `srm-web` as necessary:
+If you use the Scan Farm feature, you must also update the `scan-services.srm.url` helm chart parameter. Here is an example for the `/mysrm` context path where you would replace `srm-web` as necessary:
 
 ```
 web:
   appName: mysrm
-cnc:
-  scanfarm:
-    srm:
-      url: http://srm-web:9090/mysrm
+scan-services:
+  srm:
+    url: http://srm-web:9090/mysrm
 ```
 
 >Note: Synopsys Bridge requires an /srm context path, so do not use a custom context path if you plan to use Synopsys Bridge.
@@ -2328,8 +2328,8 @@ You can change the CPU and memory required for SAST and SCA scan jobs. Custom si
 To control the amount of CPU and memory used for SCA buildless scans, add the following content to your srm-extra-props.yaml file:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKSCAN_CPU: cpu-in-millicores
       BLACKDUCKSCAN_MEM: memory-in-mebibytes
@@ -2338,8 +2338,8 @@ cnc:
 For example, to configure three vCPUs (3000m) and 3500Mi of memory, specify the following values:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKSCAN_CPU: 3000
       BLACKDUCKSCAN_MEM: 3500
@@ -2348,8 +2348,8 @@ cnc:
 The above configuration will run on the default node pool (see [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)), so your CPU and memory configuration must not exceed the capacity of nodes in that pool. If you want to use a custom node pool with higher capacity nodes, use the below configuration after creating a node pool with the label pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKSCAN_LABEL: "custom"
       BLACKDUCKSCAN_CPU: cpu-in-millicores
@@ -2361,8 +2361,8 @@ cnc:
 To control the amount of CPU and memory used for SCA scans started with Bridge, add the following content to your srm-extra-props.yaml file:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKBDIO_CPU: cpu-in-millicores
       BLACKDUCKBDIO_MEM: memory-in-mebibytes
@@ -2371,8 +2371,8 @@ cnc:
 For example, to configure two vCPUs (2000m) and 2500Mi of memory, specify the following values:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKBDIO_CPU: 2000
       BLACKDUCKBDIO_MEM: 2500
@@ -2381,8 +2381,8 @@ cnc:
 The above configuration will run on the default node pool (see [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)), so your CPU and memory configuration must not exceed the capacity of nodes in that pool. If you want to use a custom node pool with higher capacity nodes, use the below configuration after creating a node pool with the label pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKBDIO_LABEL: "custom"
       BLACKDUCKBDIO_CPU: cpu-in-millicores
@@ -2394,8 +2394,8 @@ cnc:
 To control the amount of CPU and memory used for SAST scans, add the following content to your srm-extra-props.yaml file:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       COVCAPTURE_DEFAULTPOOLTYPE: "custom"
       COVANALYSIS_DEFAULTPOOLTYPE: "custom"
@@ -2409,8 +2409,8 @@ cnc:
 For example, to configure four vCPUs (4000m) and 8000Mi of memory, specify the following values after creating a custom node pool that can support workloads of that size.
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       COVCAPTURE_DEFAULTPOOLTYPE: "custom"
       COVANALYSIS_DEFAULTPOOLTYPE: "custom"
@@ -2533,6 +2533,20 @@ Run the following command to create the configmap resource, replacing the namesp
 ```
 kubectl -n cdx-svc create -f ./cdx-toolsvc-mytool-resource-requirements.yaml
 ```
+
+## Specify Scan Farm Engine Versions
+
+Each Software Risk Manager version depends on a specific SAST and SCA engine version. If you upgrade to a new Software Risk Manager version with a different SAST and SCA engine version, you can retain the previous versions by specifying helm values.
+
+Specify the SAST version by entering the version number in the following properties:
+
+- web.scanfarm.sast
+- scan-services.scan-service.environment.TOOL_COVERITY_VERSION
+
+Specify the SCA version by entering the version number in the following properties:
+
+- web.scanfarm.sca
+- scan-services.scan-service.environment.TOOL_DETECT_VERSION
 
 ## Add Extra Pod Labels
 
@@ -3670,14 +3684,12 @@ This section describes the Software Risk Manager Helm chart that the Helm Prep W
 
 ## Chart Dependencies
 
-Depending on the Software Risk Manager features you install and how you configure them, your deployment will depend on zero or more of the following sub-charts.
-
-| Name | Feature | Repository | Purpose |
-|:-|:-|:-|:-|
-| argo-workflows | Tool Orchestration | https://argoproj.github.io/argo-helm | Required to manage orchestrated analyses |
-| cnc | Scan Farm | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
-| mariadb | Core | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
-| minio | Tool Orchestration | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
+| Repository | Name | Purpose |
+|:-|:-|:-|
+| https://argoproj.github.io/argo-helm | argo-workflows | Tool Orchestration Workflow Controller |
+| https://codedx.github.io/codedx-kubernetes | mariadb | On-Cluster Software Risk Manager Web database |
+| https://codedx.github.io/codedx-kubernetes | minio | On-Cluster Software Risk Manager Workflow storage |
+| https://sig-repo.synopsys.com/artifactory/sig-cloudnative | scan-services | Software Risk Manager Scan Farm |
 
 ## Values
 
@@ -3702,9 +3714,9 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | argo-workflows.executor.image.registry | string | `docker.io` | the Argo executor Docker image registry |
 | argo-workflows.images.pullSecrets | list | `[]` | the K8s image pull secret to use for Argo Docker images |
 | argo-workflows.images.tag | string | `"v3.5.6"` | the Docker image version for the Argo workload |
-| cnc.cnc-common-infra.cleanupSchedule | string | `"*/55 * * * *"` | the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob |
-| cnc.imagePullPolicy | string | `"Always"` | the image pull policy for scan farm components |
-| cnc.scanfarm.srm.port | string | `"9090"` | the port number of the SRM web service |
+| scan-services.common-infra.cleanupSchedule | string | `"*/55 * * * *"` | the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob |
+| scan-services.imagePullPolicy | string | `"Always"` | the image pull policy for scan farm components |
+| scan-services.srm.port | string | `"9090"` | the port number of the SRM web service |
 | features.mariadb | bool | `true` | whether to enable the on-cluster MariaDB; an external database must be used otherwise |
 | features.minio | bool | `false` | whether to enable the on-cluster MinIO for the SRM Tool Orchestration feature; an external object storage system must be used otherwise |
 | features.scanfarm | bool | `false` | whether to enable the Scan Farm feature, which requires an SRM Scan Farm license |
@@ -4005,14 +4017,14 @@ The Scan Farm chart does not include a helm value setting for the job's restart 
 
 ```
 $ cd /path/to/git/srm-k8s/chart/charts
-$ tar xvf cnc-2024.3.0.tgz
-$ vim cnc/templates/cnc-scan-service.yaml # set job's restartPolicy to Never
-$ mv cnc-2024.3.0.tgz ~ # move original chart elsewhere
-$ helm package cnc # recreate cnc-2024.3.0.tgz
-$ rm -r cnc # delete working chart
+$ tar xvf scan-services-2024.6.1.tgz
+$ vim scan-services/templates/scan-service.yaml # set job's restartPolicy to Never
+$ mv scan-services-2024.6.1.tgz ~ # move original chart elsewhere
+$ helm package scan-services # recreate scan-services-2024.6.1.tgz
+$ rm -r scan-services # delete working chart
 ```
 
->Note: The above procedure uses the "cnc" dependency chart version 2024.3.0.
+>Note: The above procedure uses the "scan-services" dependency chart version 2024.6.1.
 
 Avoid rerunning the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
 

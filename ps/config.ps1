@@ -428,15 +428,15 @@ class Config {
 	}
 
 	[string]GetScanServiceName() {
-		return "$($this.releaseName)-cnc-scan-service"
+		return "$($this.releaseName)-scan-service"
 	}
 
 	[string]GetStorageServiceName() {
-		return "$($this.releaseName)-cnc-storage-service"
+		return "$($this.releaseName)-storage-service"
 	}
 
 	[string]GetCacheServiceName() {
-		return "$($this.releaseName)-cnc-cache-service"
+		return "$($this.releaseName)-cache-service"
 	}
 
 	SetNote([string] $key, [string] $value) {

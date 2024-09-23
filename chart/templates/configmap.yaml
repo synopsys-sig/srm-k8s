@@ -118,6 +118,6 @@ data:
   {{ include "srm-web.sf.props.filename" . }}: |-
     scan-service.url = {{ include "srm-sf.scanSvcUrl" . }}
     storage-service.url = {{ include "srm-sf.storageSvcUrl" . }}
-    coverity.version-to-run = {{ .Values.web.scanfarm.sast.version }}
-    blackduck.version-to-run = {{ .Values.web.scanfarm.sca.version }}
+    coverity.version-to-run = {{ include "srm-sf.assert-sast-version" . }}
+    blackduck.version-to-run = {{ include "srm-sf.assert-sca-version" . }}
   {{- end }}
