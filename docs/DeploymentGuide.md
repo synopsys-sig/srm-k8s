@@ -3604,10 +3604,21 @@ $ kubectl delete -f /path/to/local/work/directory/host-srm-minio-volume.yaml
 
 ## Copy Tool Orchestration Resources from Code Dx to Software Risk Manager (if installed)
 
-1) Run the following command to copy Tool Orchestration resources from the `cdx-svc` namespace to the `srm` namespace, replacing namespace names as necessary:
+1) Set your kube context to the cluster hosting your Code Dx deployment, replacing the context name placeholder:
 
 ```
-$ pwsh /path/to/git/srm-k8s/admin/migrate/copy-tool-orch-resources.ps1 'cdx-svc' 'srm'
+$ kubectl config use-context <context-name>
+```
+
+2) Run the following command to copy Tool Orchestration resources from the `cdx-svc` namespace to the `srm` namespace, replacing namespace names as necessary and removing the `-srmKubeConfigPath` and `-srmKubeContextName` parameters if the Software Risk Manager namespace is in the same cluster as the Code Dx namespace:
+
+```
+$ pwsh
+PS> /path/to/git/srm-k8s/admin/migrate/copy-tool-orch-resources.ps1 `
+  -codeDxNamespace 'cdx-svc' `
+  -srmNamespace 'srm' `
+  -srmKubeConfigPath '/path/to/SoftwareRiskManager/.kube/config' `
+  -srmKubeContextName '<name>'
 ```
 
 ## Start Software Risk Manager Tool Orchestration (if installed)
