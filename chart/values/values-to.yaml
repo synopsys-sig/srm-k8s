@@ -256,7 +256,7 @@ argo-workflows:
     pullSecrets: []
     #  - name: private-registry
     # -- the Docker image version for the Argo workload
-    tag: v3.5.6
+    tag: v3.5.11
   # @ignore
   server:
     # @ignore
