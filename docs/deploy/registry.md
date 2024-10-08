@@ -177,8 +177,8 @@ The SRM Tool Orchestration feature requires these Docker images:
 - sig-repo.synopsys.com/synopsys/codedx/codedx-results:v2.3.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v2.3.0
 - sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v2.3.0
-- sig-repo.synopsys.com/synopsys/argoproj/workflow-controller:v3.5.6
-- sig-repo.synopsys.com/synopsys/argoproj/argoexec:v3.5.6
+- sig-repo.synopsys.com/synopsys/argoproj/workflow-controller:v3.5.11
+- sig-repo.synopsys.com/synopsys/argoproj/argoexec:v3.5.11
 - sig-repo.synopsys.com/synopsys/bitnami/minio:2021.4.6-debian-10-r11 (when not using external workflow storage)
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
@@ -195,8 +195,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 'codedx/codedx-tool-service:v2.3.0',
 'codedx/codedx-cleanup:v2.3.0',
 'bitnami/minio:2021.4.6-debian-10-r11',
-'argoproj/workflow-controller:v3.5.6',
-'argoproj/argoexec:v3.5.6' | ForEach-Object {
+'argoproj/workflow-controller:v3.5.11',
+'argoproj/argoexec:v3.5.11' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -229,8 +229,8 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 'codedx/codedx-cleanup:v2.3.0',
 'codedx/codedx-mariadb:v1.34.0',
 'bitnami/minio:2021.4.6-debian-10-r11',
-'argoproj/workflow-controller:v3.5.6',
-'argoproj/argoexec:v3.5.6',
+'argoproj/workflow-controller:v3.5.11',
+'argoproj/argoexec:v3.5.11',
 'cnc-cache-service:2024.3.0',
 'cnc-common-infra:2024.3.0',
 'cnc-scan-service:2024.3.0',

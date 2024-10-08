@@ -203,6 +203,10 @@ argo-workflows:
   # -- labels added to all Argo resources
   commonLabels: {}
   controller:
+    # @ignore
+    clusterWorkflowTemplates:
+      # @ignore
+      enabled: false
     image:
       # -- the Argo workflow controller Docker image registry
       registry: docker.io
@@ -246,6 +250,8 @@ argo-workflows:
       create: true
   crds:
     install: false
+  # @ignore
+  createAggregateRoles: false
   executor:
     image:
       # -- the Argo executor Docker image registry
@@ -256,8 +262,10 @@ argo-workflows:
     pullSecrets: []
     #  - name: private-registry
     # -- the Docker image version for the Argo workload
-    tag: v3.5.6
+    tag: v3.5.11
   # @ignore
   server:
     # @ignore
     enabled: false
+  # @ignore
+  singleNamespace: true
