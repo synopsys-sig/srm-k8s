@@ -4,7 +4,7 @@
 {{-         $size := .Values.sizing.size -}}
 {{-         if (eq $size "ExtraSmall") -}}
 {{-             $ref = dict 
-                    "webCPU" "2000m"
+                    "webCPU" "3000m"
                     "webMemory" "8192Mi"
                     "webStorage" "32Gi"
                     "webConcurrentAnalyses" "4"
