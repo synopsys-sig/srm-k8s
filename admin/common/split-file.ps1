@@ -33,7 +33,7 @@ function New-FileSplit([string] $file, [int] $maxPartSizeBytes, [int] $readBuffe
 		throw "Unable to split empty file '$inputFile'"
 	}
 
-	$currentReadIndex = 0
+	$currentReadIndex = 0l
 	$currentSplitIndex = 0
 
 	$part = New-FilePart $inputFile $currentSplitIndex; $fileParts += $part[0]
@@ -74,4 +74,31 @@ function New-FileSplit([string] $file, [int] $maxPartSizeBytes, [int] $readBuffe
 	$fileReader.Close()
 
 	$fileParts
+}
+
+function New-FileJoin([string[]] $fileParts, [string] $filePath, [int] $readBufferSizeBytes=1024) {
+
+	if ($readBufferSizeBytes -le 0) {
+		throw "Read buffer size ($readBufferSizeBytes) must be > 0 (1024 recommended)."
+	}
+
+	$stream = [IO.File]::Open($filePath, [IO.FileMode]::OpenOrCreate)
+	$stream.SetLength(0)
+	$fileWriter = new-object IO.BinaryWriter($stream)
+
+	$fileParts | ForEach-Object {
+
+		$filePart = Resolve-Path $_ | Select-Object -ExpandProperty Path
+		$fileReader = new-object IO.BinaryReader(([IO.File]::Open($filePart, [IO.FileMode]::Open)))
+		$buffer = new-object byte[] $readBufferSizeBytes
+
+		$bytesRead = $fileReader.Read($buffer, 0, $buffer.Length)
+		while ($bytesRead -gt 0) {
+
+			$fileWriter.Write($buffer, 0, $bytesRead)
+			$bytesRead = $fileReader.Read($buffer, 0, $buffer.Length)
+		}
+		$fileReader.Close()
+	}
+	$fileWriter.Close()
 }
