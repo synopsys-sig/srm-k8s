@@ -206,6 +206,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.web.priorityClass.create }}
+      priorityClassName: {{ include "srm-web.priorityClassName" . | quote }}
+      {{- end }}
       volumes:
         {{ $propsConfigMapName := include "srm-web.props.configMapName" . | quote }}
         {{ if .Values.web.licenseSecret -}}

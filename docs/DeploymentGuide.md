@@ -3619,10 +3619,21 @@ $ kubectl delete -f /path/to/local/work/directory/host-srm-minio-volume.yaml
 
 ## Copy Tool Orchestration Resources from Code Dx to Software Risk Manager (if installed)
 
-1) Run the following command to copy Tool Orchestration resources from the `cdx-svc` namespace to the `srm` namespace, replacing namespace names as necessary:
+1) Set your kube context to the cluster hosting your Code Dx deployment, replacing the context name placeholder:
 
 ```
-$ pwsh /path/to/git/srm-k8s/admin/migrate/copy-tool-orch-resources.ps1 'cdx-svc' 'srm'
+$ kubectl config use-context <context-name>
+```
+
+2) Run the following command to copy Tool Orchestration resources from the `cdx-svc` namespace to the `srm` namespace, replacing namespace names as necessary and removing the `-srmKubeConfigPath` and `-srmKubeContextName` parameters if the Software Risk Manager namespace is in the same cluster as the Code Dx namespace:
+
+```
+$ pwsh
+PS> /path/to/git/srm-k8s/admin/migrate/copy-tool-orch-resources.ps1 `
+  -codeDxNamespace 'cdx-svc' `
+  -srmNamespace 'srm' `
+  -srmKubeConfigPath '/path/to/SoftwareRiskManager/.kube/config' `
+  -srmKubeContextName '<name>'
 ```
 
 ## Start Software Risk Manager Tool Orchestration (if installed)
@@ -3716,7 +3727,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | argo-workflows.controller.workflowNamespaces | list | `[]` | the namespace for the Argo workflow service account |
 | argo-workflows.executor.image.registry | string | `docker.io` | the Argo executor Docker image registry |
 | argo-workflows.images.pullSecrets | list | `[]` | the K8s image pull secret to use for Argo Docker images |
-| argo-workflows.images.tag | string | `"v3.5.6"` | the Docker image version for the Argo workload |
+| argo-workflows.images.tag | string | `"v3.5.11"` | the Docker image version for the Argo workload |
 | scan-services.common-infra.cleanupSchedule | string | `"*/55 * * * *"` | the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob |
 | scan-services.imagePullPolicy | string | `"Always"` | the image pull policy for scan farm components |
 | scan-services.srm.port | string | `"9090"` | the port number of the SRM web service |
@@ -3742,7 +3753,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | mariadb.image.pullSecrets | list | `[]` | the K8s image pull secret to use for MariaDB Docker images |
 | mariadb.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the MariaDB Docker image |
 | mariadb.image.repository | string | `"codedx/codedx-mariadb"` | the Docker image repository name for the MariaDB workload |
-| mariadb.image.tag | string | `"v1.34.0"` | the Docker image version for the MariaDB workload |
+| mariadb.image.tag | string | `"v1.35.0"` | the Docker image version for the MariaDB workload |
 | mariadb.master.masterCaConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt Command: kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt |
 | mariadb.master.masterTlsSecret | string | `nil` | the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | mariadb.master.nodeSelector | object | `{}` | the node selector to use for the MariaDB primary database workload |
@@ -3810,7 +3821,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
 | to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v2.3.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v2.4.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -3858,7 +3869,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2024.9.2"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2024.9.4"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=75.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
