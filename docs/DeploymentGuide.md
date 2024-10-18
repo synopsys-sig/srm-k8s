@@ -3897,7 +3897,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.resources.limits.cpu | string | `"4000m"` | the required CPU for the web workload (must be >= 2 vCPUs) |
 | web.resources.limits.ephemeral-storage | string | `"2868Mi"` | the ephemeral storage for the web workload |
 | web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
-| web.scanfarm.sast.version | string | `"2024.3.0"` | the SAST component version to use |
+| web.scanfarm.sast.version | string | `"2024.9.1"` | the SAST component version to use |
 | web.scanfarm.sca.version | string | `"9.2.0"` | the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable) |
 | web.scanfarm.key.validForDays | int | 45 | the duration of the Scan Farm API key |
 | web.scanfarm.key.regenSchedule | string | `"0 0 1 * *"` | the Scan Farm API key regeneration period (minute hour day-of-month month day-of-week) |
@@ -4031,14 +4031,14 @@ The Scan Farm chart does not include a helm value setting for the job's restart 
 
 ```
 $ cd /path/to/git/srm-k8s/chart/charts
-$ tar xvf scan-services-2024.6.1.tgz
+$ tar xvf scan-services-2024.9.1.tgz
 $ vim scan-services/templates/scan-service.yaml # set job's restartPolicy to Never
-$ mv scan-services-2024.6.1.tgz ~ # move original chart elsewhere
-$ helm package scan-services # recreate scan-services-2024.6.1.tgz
+$ mv scan-services-2024.9.1.tgz ~ # move original chart elsewhere
+$ helm package scan-services # recreate scan-services-2024.9.1.tgz
 $ rm -r scan-services # delete working chart
 ```
 
->Note: The above procedure uses the "scan-services" dependency chart version 2024.6.1.
+>Note: The above procedure uses the "scan-services" dependency chart version 2024.9.1.
 
 Avoid rerunning the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
 
@@ -4509,11 +4509,11 @@ fsGroup = 1000
 
 This chart version replaces the `codedx/codedx-argoexec` and `codedx/codedx-workflow-controller` Docker images with `argoproj/argoexec` and `argoproj/workflow-controller`.
 
-### Upgrading to v1.36
+### Upgrading to v1.39
 
-This chart version uses a different subchart for the Scan Farm feature, switching from chart `cnc` (version 2024.3.0) to the `scan-services` chart (version 2024.6.1). The Helm Prep Script for this version will switch your helm config from one chart to the other, but if you previously customized your Scan Farm configuration via your `srm-extra-props.yaml` file, refer to the [Scan Farm Job Resources](#scan-farm-job-resources) and [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) sections to update your customizations.
+This chart version uses a different subchart for the Scan Farm feature, switching from chart `cnc` (version 2024.3.0) to the `scan-services` chart (version 2024.9.1). The Helm Prep Script for this version will switch your helm config from one chart to the other, but if you previously customized your Scan Farm configuration via your `srm-extra-props.yaml` file, refer to the [Scan Farm Job Resources](#scan-farm-job-resources) and [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) sections to update your customizations.
 
-This chart also switches the Scan Farm SAST component from version 2024.3.0 to 2024.6.1. Refer to [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) if you'd prefer to use a previous SAST version that SRM supports.
+This chart also switches the Scan Farm SAST component from version 2024.3.0 to 2024.9.1. Refer to [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) if you'd prefer to use a previous SAST version that SRM supports.
 
 ## Helm Prep Wizard
 

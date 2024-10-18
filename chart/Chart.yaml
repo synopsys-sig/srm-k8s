@@ -3,7 +3,7 @@ name: srm
 description: Software Risk Manager
 type: application
 icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
-version: 1.38.0
+version: 1.38.0-0
 appVersion: "v2024.9.4"
 
 dependencies:
@@ -12,8 +12,8 @@ dependencies:
   repository: https://synopsys-sig.github.io/srm-k8s
   condition: features.mariadb
 - name: scan-services
-  version: "2024.6.1"
-  repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
+  version: "2024.9.0-3804668+2024.9.maint"
+  repository: http://localhost:8080
   condition: features.scanfarm
 - name: argo-workflows
   version: 0.42.4

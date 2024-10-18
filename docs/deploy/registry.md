@@ -129,13 +129,13 @@ If you are not using the SRM Scan Farm feature, skip this section.
 
 The SRM Scan Farm feature requires these Docker images:
 
-- sig-repo.synopsys.com/synopsys/cache-service:2024.6.1
-- sig-repo.synopsys.com/synopsys/common-infra:2024.6.1
-- sig-repo.synopsys.com/synopsys/scan-service:2024.6.1
-- sig-repo.synopsys.com/synopsys/scan-service-migration:2024.6.1
-- sig-repo.synopsys.com/synopsys/storage-service:2024.6.1
-- sig-repo.synopsys.com/synopsys/storage-service-migration:2024.6.1
-- sig-repo.synopsys.com/synopsys/job-runner:2024.6.1
+- sig-repo.synopsys.com/synopsys/cache-service:2024.9.1
+- sig-repo.synopsys.com/synopsys/common-infra:2024.9.1
+- sig-repo.synopsys.com/synopsys/scan-service:2024.9.1
+- sig-repo.synopsys.com/synopsys/scan-service-migration:2024.9.1
+- sig-repo.synopsys.com/synopsys/storage-service:2024.9.1
+- sig-repo.synopsys.com/synopsys/storage-service-migration:2024.9.1
+- sig-repo.synopsys.com/synopsys/job-runner:2024.9.1
 
 You can use this PowerShell script below to pull, tag, and push the above Synopsys Docker image to your private registry; you must set the $myPrivateRegistryPrefix variable by replacing `id.dkr.ecr.us-east-2.amazonaws.com` with your Docker registry name and any prefix (e.g., my-srm) you require ($myPrivateRegistryPrefix must end with a forward slash):
 
@@ -143,13 +143,13 @@ You can use this PowerShell script below to pull, tag, and push the above Synops
 $myPrivateRegistryPrefix = 'id.dkr.ecr.us-east-2.amazonaws.com/'
 if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$myPrivateRegistryPrefix/" }
 
-'cache-service:2024.6.1',
-'common-infra:2024.6.1',
-'scan-service:2024.6.1',
-'scan-service-migration:2024.6.1',
-'storage-service:2024.6.1',
-'storage-service-migration:2024.6.1',
-'job-runner:2024.6.1' | ForEach-Object {
+'cache-service:2024.9.1',
+'common-infra:2024.9.1',
+'scan-service:2024.9.1',
+'scan-service-migration:2024.9.1',
+'storage-service:2024.9.1',
+'storage-service-migration:2024.9.1',
+'job-runner:2024.9.1' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 
@@ -231,13 +231,13 @@ if (-not $myPrivateRegistryPrefix.EndsWith('/')) { $myPrivateRegistryPrefix="$my
 'bitnami/minio:2021.4.6-debian-10-r11',
 'argoproj/workflow-controller:v3.5.11',
 'argoproj/argoexec:v3.5.11',
-'cache-service:2024.6.1',
-'common-infra:2024.6.1',
-'scan-service:2024.6.1',
-'scan-service-migration:2024.6.1',
-'storage-service:2024.6.1',
-'storage-service-migration:2024.6.1',
-'job-runner:2024.6.1' | ForEach-Object {
+'cache-service:2024.9.1',
+'common-infra:2024.9.1',
+'scan-service:2024.9.1',
+'scan-service-migration:2024.9.1',
+'storage-service:2024.9.1',
+'storage-service-migration:2024.9.1',
+'job-runner:2024.9.1' | ForEach-Object {
 
    docker pull "sig-repo.synopsys.com/synopsys/$_"
    if($LASTEXITCODE -ne 0){throw "$_ pull failed"} 

@@ -213,7 +213,7 @@ web:
   scanfarm:
     sast:
       # -- the SAST component version to use for build-less scans (must match scan service's TOOL_COVERITY_VERSION environment variable)
-      version: 2024.6.1
+      version: 2024.9.1
     sca:
       # -- the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable)
       version: 9.2.0
@@ -287,7 +287,7 @@ scan-services:
       # -- must match web.scanfarm.sca.version
       TOOL_DETECT_VERSION: "9.2.0"
       # -- must match web.scanfarm.sast.version
-      TOOL_COVERITY_VERSION: "2024.6.1"
+      TOOL_COVERITY_VERSION: "2024.9.1"
       # @ignore
       SCANFARM_CONSUMER_TYPE: "Srm"
       # -- SRM version reported to scan service
