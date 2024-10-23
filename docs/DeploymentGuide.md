@@ -190,7 +190,7 @@
     + [Upgrading to v1.22 - v1.25](#upgrading-to-v122---v125)
     + [Upgrading to v1.26](#upgrading-to-v126)
     + [Upgrading to v1.28](#upgrading-to-v128)
-    + [Upgrading to v1.36](#upgrading-to-v136)
+    + [Upgrading to v1.40](#upgrading-to-v140)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
@@ -2549,6 +2549,21 @@ Specify the SCA version by entering the version number in the following properti
 - web.scanfarm.sca
 - scan-services.scan-service.environment.TOOL_DETECT_VERSION
 
+For example, if you want to continue using SAST 2024.3.0 after upgrading Software Risk Manager, add the following to your srm-extra-props.yaml file:
+
+```
+web:
+  scanfarm:
+    sast:
+      version: 2024.3.0
+scan-services:
+  scan-service:
+    environment:
+      TOOL_COVERITY_VERSION: "2024.3.0"
+```
+
+>Note: You must specify SAST/SCA versions that are compatible with Software Risk Manager.
+
 ## Add Extra Pod Labels
 
 You can add extra labels to pods associated with the Core and Tool Orchestration features.
@@ -4509,7 +4524,7 @@ fsGroup = 1000
 
 This chart version replaces the `codedx/codedx-argoexec` and `codedx/codedx-workflow-controller` Docker images with `argoproj/argoexec` and `argoproj/workflow-controller`.
 
-### Upgrading to v1.39
+### Upgrading to v1.40
 
 This chart version uses a different subchart for the Scan Farm feature, switching from chart `cnc` (version 2024.3.0) to the `scan-services` chart (version 2024.9.1). The Helm Prep Script for this version will switch your helm config from one chart to the other, but if you previously customized your Scan Farm configuration via your `srm-extra-props.yaml` file, refer to the [Scan Farm Job Resources](#scan-farm-job-resources) and [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) sections to update your customizations.
 
