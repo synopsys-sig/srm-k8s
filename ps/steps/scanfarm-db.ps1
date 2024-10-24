@@ -2,8 +2,8 @@ class ScanFarmDatabaseHost : Step {
 
 	static [string] hidden $description = @'
 SRM saves and manages scan farm data in a PostgreSQL database you must
-provide. Synopsys recommends using a cloud-provider DBaaS (e.g., AWS RDS, Azure
-Database for PostgreSQL, Google Cloud SQL).
+provide. Black Duck recommends using a cloud-provider DBaaS (e.g., AWS RDS,
+Azure Database for PostgreSQL, Google Cloud SQL).
 
 Your PostgreSQL database instance must permit network traffic from both
 the storage and scan service.

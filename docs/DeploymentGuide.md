@@ -219,15 +219,15 @@ Every Software Risk Manager includes the web application that serves the web UI.
 
 Deployments that include the Scan Farm feature have built-in SAST and SCA scanning provided by Coverity and Black Duck, respectively. They include additional pods that support scanning, caching, and storage with external dependencies on PostgreSQL (versions 10.16 - 14.x), Redis (version 5.0 or greater), and object storage provided by either GCP, AWS, Azure, or MinIO. You are responsible for configuring external dependencies according to our guidance.
 
-Your Software Risk Manager licensing will determine whether you have SAST, SCA, or both SAST and SCA scanning capability. SCA scanning depends on an external Black Duck server instance hosted by Synopsys. You are not responsible for the configuration of this instance or for specifying its endpoint during the Software Risk Manager deployment process.
+Your Software Risk Manager licensing will determine whether you have SAST, SCA, or both SAST and SCA scanning capability. SCA scanning depends on an external Black Duck server instance hosted by Black Duck Software. You are not responsible for the configuration of this instance or for specifying its endpoint during the Software Risk Manager deployment process.
 
-Scan Farm-related Docker images are unavailable in Docker Hub. You must pull them along with all other Software Risk Manager Docker images from the Synopsys Software Integrity Group repository (sig-repo.synopsys.com).
+Scan Farm-related Docker images are unavailable in Docker Hub. You must pull them along with all other Software Risk Manager Docker images from the Black Duck repository (repo.blackduck.com).
 
 ![Scan Farm](images/diagram-scan-farm.png "Scan Farm")
 
 The Scan Farm includes an ingress resource for the following services: Storage Service, Cache Service, and Scan Service. The Storage Service provides access to externally provided object storage, the Cache Service provides an interface to an external cache, and the Scan Service provides the Tool API that lets clients download SAST and SCA tools.
 
-The external, Synopsys-provided Black Duck SCA scanning endpoint will receive a Black Duck BDIO file used for Black Duck Rapid Scans. The file gets sent to a Synopsys Code Sight endpoint and is then handled by Black Duck server and Black Duck KnowledgeBase instances. For general [communication with Black Duck services](https://sig-product-docs.synopsys.com/bundle/bd-hub/page/Network_Communications/CommunicationWithBDServers.html) information, refer to the Black Duck documentation.
+The external, Black Duck Software-provided Black Duck SCA scanning endpoint will receive a Black Duck BDIO file used for Black Duck Rapid Scans. The file gets sent to a Code Sight endpoint and is then handled by Black Duck server and Black Duck KnowledgeBase instances. For general [communication with Black Duck services](https://documentation.blackduck.com/bundle/bd-hub/page/Network_Communications/CommunicationWithBDServers.html) information, refer to the Black Duck documentation.
 
 ## Tool Orchestration Feature
 
@@ -269,7 +269,7 @@ You can now log on to the cluster as `user1` and deploy the Core feature with an
 
 ### Kubernetes Privileges for Scan Farm Feature Deployment
 
-The [required Kubernetes privileges for the Scan Farm feature deployment](https://sig-product-docs.synopsys.com/bundle/coverity-docs/page/cnc/topics/infrastructure_prerequisites.html) are documented externally under the `Access privileges` section.
+The [required Kubernetes privileges for the Scan Farm feature deployment](https://documentation.blackduck.com/bundle/coverity-docs/page/cnc/topics/infrastructure_prerequisites.html) are documented externally under the `Access privileges` section.
 
 ### Kubernetes Privileges for Tool Orchestration Feature Deployment
 
@@ -385,7 +385,7 @@ This section covers the requirements you must satisfy with the external dependen
 
 ### Scan Farm Database Requirements
 
-The Scan Farm feature depends on a PostgreSQL database supporting versions 12 to 15, including all minor versions. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
+The Scan Farm feature depends on a PostgreSQL database supporting versions 12 to 15, including all minor versions. Black Duck recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
 
 ### Scan Farm Cache Requirements
 
@@ -401,7 +401,7 @@ Here are the requirements and recommendations for your Redis instance:
 
 - Allocate 1 vCPU for on-cluster Redis workloads.
 
-Synopsys recommends configuring your Redis instance with both authentication and TLS.
+Black Duck recommends configuring your Redis instance with both authentication and TLS.
 
 ### Scan Farm Object Storage Requirements
 
@@ -448,19 +448,19 @@ The Software Risk Manager web pod communicates with Scan Farm pods using port 99
 
 ### Scan Farm Private Registry
 
-When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Synopsys SIG (Software Integrity Group) private Docker registry (SIG repo) and push them to your private registry. This includes the Docker images for all the features you plan to install, not just Scan Farm-related ones. 
+When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Black Duck private Docker registry (Black Duck Repo) and push them to your private registry. This includes the Docker images for all the features you plan to install, not just Scan Farm-related ones. 
 
 You can use a private registry hosted by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own (see [registry.md](deploy/registry.md) for details).
 
 ### Scan Farm Ingress Requirements
 
-The Scan Farm feature requires you to use an ingress controller, and your ingress controller must support multiple ingress resources referencing the same hostname. Synopsys recommends the [NGINX Community](https://kubernetes.github.io/ingress-nginx/) ingress controller. You can find the Installation Guide [here](https://kubernetes.github.io/ingress-nginx/deploy/).
+The Scan Farm feature requires you to use an ingress controller, and your ingress controller must support multiple ingress resources referencing the same hostname. Black Duck recommends the [NGINX Community](https://kubernetes.github.io/ingress-nginx/) ingress controller. You can find the Installation Guide [here](https://kubernetes.github.io/ingress-nginx/deploy/).
 
 ### Scan Farm Internet Access Requirements
 
-SCA scanning depends on an external Black Duck system hosted by Synopsys at `https://codesight.synopsys.com`. SCA scans will fail if this endpoint is inaccessible from your cluster.
+SCA scanning depends on an external Black Duck system hosted by Black Duck at `https://codesight.blackduck.com`. SCA scans will fail if this endpoint is inaccessible from your cluster.
 
-The Scan Service also depends on the Synopsys SIG Repo hosted at sig-repo.synopsys.com. The service downloads Scan Farm components at boot time and will not work correctly without a SIG Repo connection.
+The Scan Service also depends on the Black Duck Repo hosted at repo.blackduck.com. The service downloads Scan Farm components at boot time and will not work correctly without a Black Duck Repo connection.
 
 ### Scan Farm Default Pod Resources
 
@@ -778,7 +778,7 @@ Software Risk Manager does not include the dependencies required for the Scan Fa
 
 When using the Scan Farm feature, you must have access to a private registry where you will store Software Risk Manager Docker images. Determine whether your private registry requires a Kubernetes Image Pull Secret. Your private registry may not require an explicit username and password if your cluster's configuration already includes access. If you need a registry credential, identify the username and password, but do not pre-create the Kubernetes Image Pull Secret.
 
-Determine whether you will use a prefix for repositories added to your private registry. Your registry may require one, or you may create one to simplify pushing Docker images by pre-creating a single repository. For example, if you use Google Cloud Platform Artifact Registry in the us-central1 region, your registry host will be us-central1-docker.pkg.dev, but your repository prefix could be my-gcp-project-name/srm (assuming a GCP project named "my-gcp-project-name"). In that case, you should pre-create the srm repository before pushing Docker images from SIG repo to us-central1-docker.pkg.dev/my-gcp-project-name/srm.
+Determine whether you will use a prefix for repositories added to your private registry. Your registry may require one, or you may create one to simplify pushing Docker images by pre-creating a single repository. For example, if you use Google Cloud Platform Artifact Registry in the us-central1 region, your registry host will be us-central1-docker.pkg.dev, but your repository prefix could be my-gcp-project-name/srm (assuming a GCP project named "my-gcp-project-name"). In that case, you should pre-create the srm repository before pushing Docker images from Black Duck Repo to us-central1-docker.pkg.dev/my-gcp-project-name/srm.
 
 You can find instructions for pulling the latest Software Risk Manager Docker images for Scan Farm deployments [here](deploy/registry.md).
 
@@ -1521,7 +1521,7 @@ How many passwords you must set will depend on how you deploy Software Risk Mana
 | SAML Java Keystore Password | Core (SAML Authentication) | Y |
 | SAML Java Private Key Password | Core (SAML Authentication) | Y |
 | | | |
-| SIG Repo Password | Scan Farm | N |
+| Black Duck Password | Scan Farm | N |
 | | | |
 | Scan Farm PostgreSQL Password | Scan Farm | N |
 | | | |
@@ -1758,7 +1758,7 @@ Ensure you can run PowerShell Core scripts on Windows by switching your PowerShe
 
 ### PowerShell Module
 
-The Helm Prep Wizard has a dependency on a Synopsys PowerShell module published to the [PowerShell Gallery](https://www.powershellgallery.com/packages/guided-setup) and [NuGet Repository](https://www.nuget.org/packages/guided-setup). The wizard will automatically download and install the module when it starts. If you would prefer to download and install the module by hand, refer to the [manual installation note](../.install-guided-setup-module.ps1#L12) in the module installation script.
+The Helm Prep Wizard has a dependency on a Black Duck PowerShell module published to the [PowerShell Gallery](https://www.powershellgallery.com/packages/guided-setup) and [NuGet Repository](https://www.nuget.org/packages/guided-setup). The wizard will automatically download and install the module when it starts. If you would prefer to download and install the module by hand, refer to the [manual installation note](../.install-guided-setup-module.ps1#L12) in the module installation script.
 
 ## Clone GitHub Repository
 
@@ -1832,7 +1832,7 @@ K8s Installation Notes
   *   Assign a pool-type label (pool-type=small) to analysis node(s).
   *   Assign a scanner node taint (NodeType=ScannerNode:NoSchedule) to analysis node(s).
   *   NOTE: A "small" pool-type requires one or more nodes with 6.5 vCPUs and 26 GB of memory
-- Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Synopsys Docker images to your private registry.
+- Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Black Duck Docker images to your private registry.
 
 
 ----------------------
@@ -2054,7 +2054,7 @@ Below is an example showing config.json and srm-extra-props, renamed from srm-ex
 
 # Customizing Software Risk Manager
 
-You can use a Helm values file to customize your Software Risk Manager deployment. Add custom helm property values to a file named `srm-extra-props.yaml`, and store this file alongside your config.json file when using the Helm Prep Script. You should include any custom chart settings and any web component property values you would specify in a [Software Risk Manager "props" file like codedx.props](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/config-files.html).
+You can use a Helm values file to customize your Software Risk Manager deployment. Add custom helm property values to a file named `srm-extra-props.yaml`, and store this file alongside your config.json file when using the Helm Prep Script. You should include any custom chart settings and any web component property values you would specify in a [Software Risk Manager "props" file like codedx.props](https://documentation.blackduck.com/bundle/srm/page/install_guide/SRMConfiguration/config-files.html).
 
 If you store your `srm-extra-props.yaml` file alongside your config.json file generated by the Helm Prep Wizard, when you run your `run-helm-prep.ps1` script, the Helm Prep Script will automatically include `-f /path/to/srm-extra-props.yaml` in the `helm upgrade` command it generates.
 
@@ -2079,7 +2079,7 @@ You can change the behavior of Software Risk Manager's web component by adding c
 
 There are two types of `codedx.props` property values you may want to configure. Private property values are those that should be protected, such as passwords, and they get stored in a Kubernetes Secret. Public property values are stored and loaded from a Kubernetes ConfigMap.
 
-To explain the configuration of public and private properties, the following example shows how to configure a [proxy server](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/proxy.html) for Software Risk Manager. When you are finished configuring the public and private proxy configuration, rerun `helm upgrade` as described in the previous section.
+To explain the configuration of public and private properties, the following example shows how to configure a [proxy server](https://documentation.blackduck.com/bundle/srm/page/install_guide/SRMConfiguration/proxy.html) for Software Risk Manager. When you are finished configuring the public and private proxy configuration, rerun `helm upgrade` as described in the previous section.
 
 ### Public Web Properties Proxy Example
 
@@ -2293,7 +2293,7 @@ scan-services:
     url: http://srm-web:9090/mysrm
 ```
 
->Note: Synopsys Bridge requires an /srm context path, so do not use a custom context path if you plan to use Synopsys Bridge.
+>Note: Bridge CLI requires an /srm context path, so do not use a custom context path if you plan to use Bridge CLI.
 
 If you are using the Ingress-NGINX controller, refer to this ingress resource example that uses path-based/fanout routing to make Software Risk Manager available at `/mysrm`:
 
@@ -3087,7 +3087,7 @@ An upgrade occurs with this four-step process:
    ```
    >Note: The above command assumes you are upgrading to the latest version. You can update to a specific version by running `git checkout version-number` instead.
 
-2. If you previously pulled Software Risk Manager Docker images from the Synopsys Docker registry or you copied Docker images from Docker Hub to your private Docker registry, refer to the [registry deployment script](deploy/registry.md) to re-pull/push required Docker images.
+2. If you previously pulled Software Risk Manager Docker images from the Black Duck Docker registry or you copied Docker images from Docker Hub to your private Docker registry, refer to the [registry deployment script](deploy/registry.md) to re-pull/push required Docker images.
 
 3. Rerun the Helm Prep Script
    ```
@@ -3211,7 +3211,7 @@ Before you get started, make sure that you have satisified the Software Risk Man
 
 Back up your Code Dx system now so that you can restore its state should something go wrong with your data migration.
 
->Note: Data migration for external workflow storage is unsupported because it will be reused with your Software Risk Manager deployment. Contact Synopsys if you would like guidance on how to avoid reuse for external workflow storage.
+>Note: Data migration for external workflow storage is unsupported because it will be reused with your Software Risk Manager deployment. Contact Black Duck if you would like guidance on how to avoid reuse for external workflow storage.
 
 ## Clone the srm-k8s GitHub Repository
 
@@ -3718,7 +3718,7 @@ Depending on the Software Risk Manager features you install and how you configur
 | argo-workflows | Tool Orchestration | https://argoproj.github.io/argo-helm | Required to manage orchestrated analyses |
 | mariadb | Core | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
 | minio | Tool Orchestration | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
-| scan-services | Scan Farm | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
+| scan-services | Scan Farm | https://repo.blackduck.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
 
 ## Values
 
@@ -4082,8 +4082,8 @@ Refer to the [lock/unlock scripts](../admin/config) to edit [protected config.js
 |scanFarmSastLicenseFile|Scan Farm|file path to the SRM SAST license file||1.0|
 |scanFarmScaLicenseFile|Scan Farm|file path to the SRM SCA license file||1.0|
 ||||||
-|sigRepoUsername|Scan Farm|username for the Synopsys SIG repo||1.0|
-|sigRepoPwd|Scan Farm|password for the Synopsys SIG repo||1.0|
+|sigRepoUsername|Scan Farm|username for the Black Duck Repo||1.0|
+|sigRepoPwd|Scan Farm|password for the Black Duck Repo||1.0|
 ||||||
 |scanFarmDatabaseHost|Scan Farm|hostname of the scan farm PostgreSQL database||1.0|
 |scanFarmDatabasePort|Scan Farm|port number of the scan farm PostgreSQL database||1.0|

@@ -1,7 +1,8 @@
 <#PSScriptInfo
 .VERSION 1.1.0
 .GUID b6b17e02-ecb1-4780-afbc-2128026b7464
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 #>
 
 <# 

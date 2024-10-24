@@ -1,7 +1,8 @@
 <#PSScriptInfo
 .VERSION 1.0.0
 .GUID cfd2621d-ea87-4cc3-b059-d065efeec238
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 .DESCRIPTION Starts the specified script after testing pwsh requirements
 and conditionally helping with module installation. Note that the 
 $startScriptPath script must not include a startScriptPath parameter.

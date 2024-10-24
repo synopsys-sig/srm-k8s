@@ -102,7 +102,7 @@ class ScanFarmScaLicense : Step {
 	static [string] hidden $description = @'
 The SCA Scan Farm feature is enabled using a separate license file.
 
-Note: Your SCA license file is associated with a Synopsys-provided
+Note: Your SCA license file is associated with a Black Duck-provided
 SCA API endpoint upon which SCA scans depend.
 '@
 

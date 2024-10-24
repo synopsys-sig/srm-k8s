@@ -37,7 +37,7 @@ if ($tool -ne 'coverity') {
 
 # download kit using the repo credential
 $downloadFile = "coverity-all-platforms-$toolVersion.tar.gz"
-$downloadUri  = "https://sig-repo.synopsys.com/coverity-releases/$toolVersion/$downloadFile"
+$downloadUri  = "https://repo.blackduck.com/coverity-releases/$toolVersion/$downloadFile"
 
 Write-Host "Downloading $downloadUri..."
 Invoke-WebRequest `

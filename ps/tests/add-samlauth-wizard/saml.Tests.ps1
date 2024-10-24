@@ -413,7 +413,7 @@ Describe 'Running the add SAML authentication wizard' -Tag 'size' {
 		$global:inputs = new-object collections.queue
 		$null, # welcome
 		0, # yes (Use SAML Authentication)
-		'https://my-srm.synopsys.com/srm', # (SRM SAML hostBasePath)
+		'https://my-srm.blackduck.com/srm', # (SRM SAML hostBasePath)
 		'idp-metadata-path', # (SAML Identity Provider Metadata)
 		'saml-client', # (SAML Application Name)
 		(New-Password 'password'), # (SAML Keystore Password)
@@ -444,7 +444,7 @@ Describe 'Running the add SAML authentication wizard' -Tag 'size' {
 
 		$config.isLocked | Should -BeTrue
 		$config.useSaml | Should -BeTrue
-		$config.samlHostBasePath | Should -BeExactly 'https://my-srm.synopsys.com/srm'
+		$config.samlHostBasePath | Should -BeExactly 'https://my-srm.blackduck.com/srm'
 		$config.samlIdentityProviderMetadataPath | Should -BeExactly 'idp-metadata-path'
 		$config.samlAppName | Should -BeExactly 'saml-client'
 

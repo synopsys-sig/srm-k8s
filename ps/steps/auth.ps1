@@ -73,11 +73,11 @@ class SamlAuthenticationHostBasePath : Step {
 Your SAML IdP will connect to your SRM instance using the SRM Assertion Consumer Service (ACS) 
 endpoint, a URL that combines your host base path with 'login/callback/saml'.
 
-For example, if you will access SRM over HTTPS at my-srm.synopsys.com with an /srm context
-path, enter this as your SAML SRM host base path: https://my-srm.synopsys.com/srm
+For example, if you will access SRM over HTTPS at my-srm.blackduck.com with an /srm context
+path, enter this as your SAML SRM host base path: https://my-srm.blackduck.com/srm
 
 In the above example, your SAML IdP should permit login redirects to this URL:
-https://my-srm.synopsys.com/srm/login/callback/saml
+https://my-srm.blackduck.com/srm/login/callback/saml
 
 Note: Do not enter the /login/callback/saml portion here; enter the host base path only.
 '@
@@ -248,7 +248,7 @@ the information you have provided thus far:
 - auth.hostBasePath
 
 You can find the entire list of SRM SAML properties at 
-https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/saml-props.html
+https://documentation.blackduck.com/bundle/srm/page/install_guide/SRMConfiguration/saml-props.html
 
 To configure additional SAML properties, follow these instructions:
 https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#specify-extra-saml-configuration

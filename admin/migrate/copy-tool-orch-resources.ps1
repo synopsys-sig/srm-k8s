@@ -1,7 +1,8 @@
 <#PSScriptInfo
 .VERSION 1.2.0
 .GUID 46b422ab-4460-430e-912e-10133a0cf1be
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 .DESCRIPTION Move any project secrets and resource requirements from one namespace/cluster to another.
 #>
 
