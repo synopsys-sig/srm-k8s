@@ -5,8 +5,8 @@ function Get-SigRepoSecretName($config) {
 function New-SigRepoSecret($config) {
 
 	New-GenericSecret $config.namespace (Get-SigRepoSecretName $config) -keyValues @{
-		"username"=$config.sigRepoUsername
-		"password"=$config.sigRepoPwd
+		"username"=$config.repoUsername
+		"password"=$config.repoPwd
 	} -dryRun | Out-File (Get-SigRepoSecretK8sPath $config)
 }
 

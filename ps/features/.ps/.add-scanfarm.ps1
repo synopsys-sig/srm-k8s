@@ -134,8 +134,8 @@ $s = @{}
 [ScanFarmStorageBucketName],
 [ScanFarmTlsRemoval],
 [ScanFarmType],
-[SigRepoUsername],
-[SigRepoPassword],
+[RepoUsername],
+[RepoPassword],
 [UseDockerRegistry],
 [UseDockerRegistryCredential],
 [UseDockerRepositoryPrefix],
@@ -148,7 +148,7 @@ $s = @{}
 
 Add-StepTransitions $graph $s[[WelcomeScanFarm]] $s[[UseScanFarm]],$s[[AbortScanFarm]]
 
-Add-StepTransitions $graph $s[[WelcomeScanFarm]] $s[[UseScanFarm]],$s[[SigRepoUsername]],$s[[SigRepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
+Add-StepTransitions $graph $s[[WelcomeScanFarm]] $s[[UseScanFarm]],$s[[RepoUsername]],$s[[RepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
 	$s[[ScanFarmDatabaseHost]],$s[[ScanFarmDatabasePort]],$s[[ScanFarmDatabaseUsername]],$s[[ScanFarmDatabasePwd]],
 	$s[[ScanFarmDatabaseTls]],$s[[ScanFarmDatabaseCert]],$s[[ScanFarmScanServiceDatabaseName]],$s[[ScanFarmStorageServiceDatabaseName]],
 	$s[[ScanFarmRedisRequirements]],$s[[ScanFarmRedisHost]],$s[[ScanFarmRedisPort]],$s[[ScanFarmRedisDatabase]],

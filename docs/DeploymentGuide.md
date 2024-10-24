@@ -4082,8 +4082,8 @@ Refer to the [lock/unlock scripts](../admin/config) to edit [protected config.js
 |scanFarmSastLicenseFile|Scan Farm|file path to the SRM SAST license file||1.0|
 |scanFarmScaLicenseFile|Scan Farm|file path to the SRM SCA license file||1.0|
 ||||||
-|sigRepoUsername|Scan Farm|username for the Black Duck Repo||1.0|
-|sigRepoPwd|Scan Farm|password for the Black Duck Repo||1.0|
+|repoUsername|Scan Farm|username for the Black Duck Repo||1.0|
+|repoPwd|Scan Farm|password for the Black Duck Repo||1.0|
 ||||||
 |scanFarmDatabaseHost|Scan Farm|hostname of the scan farm PostgreSQL database||1.0|
 |scanFarmDatabasePort|Scan Farm|port number of the scan farm PostgreSQL database||1.0|

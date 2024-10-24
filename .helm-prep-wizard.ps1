@@ -188,8 +188,8 @@ $s = @{}
 [ServiceAccountNameToolService],
 [ServiceAccountNameWorkflow],
 [SignerName],
-[SigRepoUsername],
-[SigRepoPassword],
+[RepoUsername],
+[RepoPassword],
 [Size],
 [SrmWebLicense],
 [StorageClassName],
@@ -240,7 +240,7 @@ $s = @{}
 	Add-Step $graph $s[$_]
 }
 
-Add-StepTransitions $graph $s[[UseScanFarm]] $s[[SigRepoUsername]],$s[[SigRepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
+Add-StepTransitions $graph $s[[UseScanFarm]] $s[[RepoUsername]],$s[[RepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
 	$s[[ScanFarmDatabaseHost]],$s[[ScanFarmDatabasePort]],$s[[ScanFarmDatabaseUsername]],$s[[ScanFarmDatabasePwd]],
 	$s[[ScanFarmDatabaseTls]],$s[[ScanFarmDatabaseCert]],$s[[ScanFarmScanServiceDatabaseName]],$s[[ScanFarmStorageServiceDatabaseName]],
 	$s[[ScanFarmRedisRequirements]],$s[[ScanFarmRedisHost]],$s[[ScanFarmRedisPort]],$s[[ScanFarmRedisDatabase]],

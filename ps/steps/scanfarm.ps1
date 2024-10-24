@@ -101,7 +101,7 @@ feature. Your component TLS configuration must be removed.
 	}
 }
 
-class SigRepoUsername : Step {
+class RepoUsername : Step {
 
 	static [string] hidden $description = @'
 To use the Scan Farm feature, you must provide a username and password
@@ -117,20 +117,20 @@ Your credential is the same one you will use to copy Docker images from
 the Black Duck Docker registry to your private Docker registry.
 '@
 
-	SigRepoUsername([Config] $config) : base(
-		[SigRepoUsername].Name, 
+	RepoUsername([Config] $config) : base(
+		[RepoUsername].Name, 
 		$config,
 		'Black Duck Docker Repo Username',
-		[SigRepoUsername]::description,
+		[RepoUsername]::description,
 		'Enter your Black Duck Docker Repo username') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.sigRepoUsername = ([Question]$question).response
+		$this.config.repoUsername = ([Question]$question).response
 		return $true
 	}
 
 	[void]Reset(){
-		$this.config.sigRepoUsername = ''
+		$this.config.repoUsername = ''
 	}
 	
 	[bool]CanRun() {
@@ -138,7 +138,7 @@ the Black Duck Docker registry to your private Docker registry.
 	}
 }
 
-class SigRepoPassword : Step {
+class RepoPassword : Step {
 
 	static [string] hidden $description = @'
 To use the Scan Farm feature, you must provide a username and password
@@ -154,11 +154,11 @@ Your credential is the same one you will use to copy Docker images from
 the Black Duck Docker registry to your private Docker registry.
 '@
 
-	SigRepoPassword([Config] $config) : base(
-		[SigRepoPassword].Name, 
+	RepoPassword([Config] $config) : base(
+		[RepoPassword].Name, 
 		$config,
 		'Black Duck Docker Repo Password',
-		[SigRepoPassword]::description,
+		[RepoPassword]::description,
 		'Enter your Black Duck Docker Repo password') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
@@ -168,12 +168,12 @@ the Black Duck Docker registry to your private Docker registry.
 	}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.sigRepoPwd = ([ConfirmationQuestion]$question).response
+		$this.config.repoPwd = ([ConfirmationQuestion]$question).response
 		return $true
 	}
 
 	[void]Reset(){
-		$this.config.sigRepoPwd = ''
+		$this.config.repoPwd = ''
 	}
 
 	[bool]CanRun() {

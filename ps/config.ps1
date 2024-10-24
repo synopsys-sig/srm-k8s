@@ -61,11 +61,11 @@ class Config {
 	static [int]   $volumeSizeGiBDefault = 0           # new default to support system size override when > 0
 	static [int]   $externalDatabasePortDefault = 3306
 
-	static [string]   $thisVersion = "1.5"
+	static [string]   $thisVersion = "1.6"
 
 	static [string[]] $protectedFields = @(
-		'sigRepoUsername',
-		'sigRepoPwd',
+		'repoUsername',
+		'repoPwd',
 		'scanFarmDatabaseUser',
 		'scanFarmDatabasePwd',
 		'scanFarmRedisPwd',
@@ -106,8 +106,8 @@ class Config {
 	[string]       $scanFarmSastLicenseFile
 	[string]       $scanFarmScaLicenseFile
 
-	[string]       $sigRepoUsername
-	[string]       $sigRepoPwd
+	[string]       $repoUsername
+	[string]       $repoPwd
 
 	[string]       $scanFarmDatabaseHost
 	[string]       $scanFarmDatabasePort
@@ -351,6 +351,17 @@ class Config {
 		$this.authCookieSecure = $false
 	}
 
+	static [PSObject] RenameJsonField($json, $oldField, $newField) {
+
+		$hasOldField = $null -ne ($json.PSObject.Properties | Where-Object { $_.Name -eq $oldField })
+
+		if ($hasOldField) {
+			$json | add-member -name $newField -value $json.$oldField -MemberType NoteProperty
+			$json.PSObject.Properties.Remove($oldField)
+		}
+		return $json
+	}
+
 	static [Config] FromJsonFile($configJsonFile) {
 
 		$configJson = Get-Content $configJsonFile | ConvertFrom-Json
@@ -365,6 +376,13 @@ class Config {
 
 		if ($version -gt $currentVersion) {
 			throw "Unable to handle config version: $($configJson.configVersion)"
+		}
+
+		# file version 1.6 replaces sigRepoUsername with repoUsername and sigRepoPwd with repoPwd
+		$oneDotSixVersion = new-object Management.Automation.SemanticVersion('1.6')
+		if ($version -lt $currentVersion -and $version -lt $oneDotSixVersion) {
+			$configJson = [Config]::RenameJsonField($configJson, 'sigRepoUsername', 'repoUsername')
+			$configJson = [Config]::RenameJsonField($configJson, 'sigRepoPwd', 'repoPwd')
 		}
 
 		$config = [Config]$configJson
