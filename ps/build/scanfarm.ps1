@@ -74,6 +74,8 @@ scan-services:
         existingSecret: $(Get-SigRepoSecretName $config)
   srm:
     url: $webSvcUrl
+    codesight:
+      url: https://codesight.synopsys.com
 "@ | Out-File (Get-ScanFarmValuesPath $config)
 
 	if ($config.scanFarmStorageHasInClusterUrl) {
