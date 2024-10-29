@@ -2,7 +2,7 @@ apiVersion: v2
 name: srm
 description: Software Risk Manager
 type: application
-icon: https://synopsys.com/content/dam/synopsys/sig-assets/images/icons/synopsys-codedx.svg
+icon: https://github.com/synopsys-sig/srm-k8s/raw/refs/heads/main/docs/images/icon.svg
 version: 1.39.0
 appVersion: "v2024.9.4.1"
 
