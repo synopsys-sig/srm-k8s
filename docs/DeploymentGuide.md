@@ -1631,7 +1631,7 @@ kubectl apply -f ./clusterissuer.yaml
 kubectl get clusterissuer ca-issuer -o wide
 ```
 
-When you run the Helm Prep Wizard (see [Full Installation](#installation---full)) and enable TLS on the Configure TLS screen, specify `clusterissuers.cert-manager.io/ca-issuer` for your CSR signer name and enter the path to your ca.crt for your Kubernetes CA cert.
+When you run the Helm Prep Wizard (see [Full Installation](#installation---full)) and enable TLS on the Configure TLS screen, specify `clusterissuers.cert-manager.io/ca-issuer` for your CSR signer name, on the SRM CSR Signer screen, and enter the path to your ca.crt for your Kubernetes CA cert.
 
 >Note: The wizard will include an installation note referencing additional pre-work documented in the values-tls.yaml file.
 
