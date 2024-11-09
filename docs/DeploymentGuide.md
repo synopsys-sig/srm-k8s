@@ -2935,9 +2935,9 @@ PS /> cd ~/git/srm-k8s/admin
 Start the restore-db.ps1 script by running the following command after replacing parameter placeholders:
 
 ```
-PS /git/srm-k8s/admin> ./restore-db.ps1 `
-        -namespaceCodeDx 'srm-namespace-placeholder' `
-        -releaseNameCodeDx 'srm-helm-release-name-placeholder'
+PS /git/srm-k8s/admin/db> ./restore-db.ps1 `
+        -namespace 'srm-namespace-placeholder' `
+        -releaseName 'srm-helm-release-name-placeholder'
 ```
 
 > Note: You can pull the Software Risk Manager Restore Database Docker image from an alternate Docker registry using the -imageDatabaseRestore parameter and from a private Docker registry by adding the -dockerImagePullSecretName parameter.
