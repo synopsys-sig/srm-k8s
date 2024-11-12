@@ -12,7 +12,7 @@ function New-DockerImageLocationConfig($config) {
 
 	if (-not $config.skipScanFarm) {
 		@"
-cnc:
+scan-services:
   imageRegistry: '$registryAndRepositoryPrefix'
 "@ | Out-File (Get-ScanFarmDockerImageLocationValuesPath $config)
 	}
@@ -40,7 +40,6 @@ to:
     registry: '$($config.dockerRegistry)'
     repository:
       tools: '$("$($repositoryPrefix)codedx/codedx-tools")'
-      toolsMono: '$("$($repositoryPrefix)codedx/codedx-toolsmono")'
       helmPreDelete: '$("$($repositoryPrefix)codedx/codedx-cleanup")'
       prepare: '$("$($repositoryPrefix)codedx/codedx-prepare")'
       newAnalysis: '$("$($repositoryPrefix)codedx/codedx-newanalysis")'

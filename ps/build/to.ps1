@@ -160,7 +160,7 @@ to:
 	}
 
 	# incorporate chart name into argo-workflows controller priority class name
-	$chartFullName = Get-HelmChartFullname $config.releaseName 'srm'
+	$chartFullName = Get-HelmChartFullnameEquals $config.releaseName 'srm'
 	$controllerPriorityClassNamePrefix = $chartFullName.substring(0, ([Math]::Min($chartFullName.length, 45))).TrimEnd('-')
 	$controllerPriorityClassName = "$controllerPriorityClassNamePrefix-wf-controller-pc"
 	@"

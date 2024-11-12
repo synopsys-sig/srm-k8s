@@ -13,8 +13,7 @@ function Set-WebRegistryDocTag([string] $repoDir, [string] $tag) {
 	$semVersionPattern = Get-SemVerPattern
 	(Get-Content $docPath) `
 		-replace "codedx/codedx-tomcat:v$semVersionPattern","codedx/codedx-tomcat:$tag" `
-		-replace "codedx/codedx-tools:v$semVersionPattern","codedx/codedx-tools:$tag" `
-		-replace "codedx/codedx-toolsmono:v$semVersionPattern","codedx/codedx-toolsmono:$tag" | Set-Content $docPath
+		-replace "codedx/codedx-tools:v$semVersionPattern","codedx/codedx-tools:$tag" | Set-Content $docPath
 }
 
 function Set-WebDeploymentGuideTag([string] $repoDir, [string] $tag) {

@@ -12,10 +12,10 @@ function New-WebCPUConfig($config) {
 		$cpuCountDB = Get-VirtualCpuCountFromReservation $config.dbMasterCPUReservation
 	}
 	
-	# https://community.synopsys.com/s/article/Code-Dx-Hikari-connection-pooling-settings-and-connection-timeout
+	# https://community.blackduck.com/s/article/Code-Dx-Hikari-connection-pooling-settings-and-connection-timeout
 	$poolSize = $cpuCountDB * 3
 
-	# https://community.synopsys.com/s/article/SRM-Notes-on-Performance
+	# https://community.blackduck.com/s/article/SRM-Notes-on-Performance
 	$limit = $cpuCountWeb * 1000
 	$dbLimit = $cpuCountDB * 1000
 

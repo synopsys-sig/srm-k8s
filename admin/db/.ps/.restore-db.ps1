@@ -18,7 +18,7 @@ param (
 	[string] $namespace = 'srm',
 	[string] $releaseName = 'srm',
 	[int]    $waitSeconds = 600,
-	[string] $imageDatabaseRestore = 'codedx/codedx-dbrestore:v1.12.0',
+	[string] $imageDatabaseRestore = 'codedx/codedx-dbrestore:v1.13.0',
 	[string] $dockerImagePullSecretName,
 	[switch] $skipSRMWebRestart
 )
@@ -108,10 +108,12 @@ if (-not (Test-HelmRelease $namespace $releaseName)) {
 	Write-Error "Unable to find Helm release named $releaseName in namespace $namespace."
 }
 
-$deploymentWeb = "$(Get-HelmChartFullname $releaseName 'srm')-web"
-$statefulSetMariaDBMaster = "$releaseName-mariadb-master"
-$statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
-$mariaDbMasterServiceName = "$releaseName-mariadb"
+$deploymentWeb = "$(Get-HelmChartFullnameEquals $releaseName 'srm')-web"
+
+$dbFullChartName = Get-HelmChartFullnameContains $releaseName 'mariadb'
+$statefulSetMariaDBMaster = "$dbFullChartName-master"
+$statefulSetMariaDBSlave = "$dbFullChartName-slave"
+$mariaDbMasterServiceName = $dbFullChartName
 
 if (-not (Test-Deployment $namespace $deploymentWeb)) {
 	Write-Error "Unable to find Deployment named $deploymentWeb in namespace $namespace."

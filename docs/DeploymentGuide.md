@@ -118,6 +118,7 @@
     + [Add-in Example 1 - Project Resource Requirement](#add-in-example-1---project-resource-requirement)
     + [Add-in Example 2 - Global Tool Resource Requirement](#add-in-example-2---global-tool-resource-requirement)
     + [Add-in Example 3 - Node Selector](#add-in-example-3---node-selector)
+  * [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions)
   * [Add Extra Pod Labels](#add-extra-pod-labels)
   * [Specify MySQL Server Public Key Path](#specify-mysql-server-public-key-path)
 - [Maintenance](#maintenance)
@@ -180,6 +181,7 @@
     + [RSA Public Key Unavailable](#rsa-public-key-unavailable)
   * [Scan Farm Feature Troubleshooting](#scan-farm-feature-troubleshooting)
     + [Scan Farm Migration Job Fails](#scan-farm-migration-job-fails)
+    + [Scan Service GetAccessToken Fails](#scan-service-getaccesstoken-fails)
 - [Appendix](#appendix)
   * [Config.json](#configjson)
   * [Helm TLS Values (values-tls.yaml)](#helm-tls-values-values-tlsyaml)
@@ -189,6 +191,7 @@
     + [Upgrading to v1.22 - v1.25](#upgrading-to-v122---v125)
     + [Upgrading to v1.26](#upgrading-to-v126)
     + [Upgrading to v1.28](#upgrading-to-v128)
+    + [Upgrading to v1.40](#upgrading-to-v140)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
@@ -217,15 +220,15 @@ Every Software Risk Manager includes the web application that serves the web UI.
 
 Deployments that include the Scan Farm feature have built-in SAST and SCA scanning provided by Coverity and Black Duck, respectively. They include additional pods that support scanning, caching, and storage with external dependencies on PostgreSQL (versions 10.16 - 14.x), Redis (version 5.0 or greater), and object storage provided by either GCP, AWS, Azure, or MinIO. You are responsible for configuring external dependencies according to our guidance.
 
-Your Software Risk Manager licensing will determine whether you have SAST, SCA, or both SAST and SCA scanning capability. SCA scanning depends on an external Black Duck server instance hosted by Synopsys. You are not responsible for the configuration of this instance or for specifying its endpoint during the Software Risk Manager deployment process.
+Your Software Risk Manager licensing will determine whether you have SAST, SCA, or both SAST and SCA scanning capability. SCA scanning depends on an external Black Duck server instance hosted by Black Duck Software. You are not responsible for the configuration of this instance or for specifying its endpoint during the Software Risk Manager deployment process.
 
-Scan Farm-related Docker images are unavailable in Docker Hub. You must pull them along with all other Software Risk Manager Docker images from the Synopsys Software Integrity Group repository (sig-repo.synopsys.com).
+Scan Farm-related Docker images are unavailable in Docker Hub. You must pull them along with all other Software Risk Manager Docker images from the Black Duck repository (repo.blackduck.com).
 
 ![Scan Farm](images/diagram-scan-farm.png "Scan Farm")
 
 The Scan Farm includes an ingress resource for the following services: Storage Service, Cache Service, and Scan Service. The Storage Service provides access to externally provided object storage, the Cache Service provides an interface to an external cache, and the Scan Service provides the Tool API that lets clients download SAST and SCA tools.
 
-The external, Synopsys-provided Black Duck SCA scanning endpoint will receive a Black Duck BDIO file used for Black Duck Rapid Scans. The file gets sent to a Synopsys Code Sight endpoint and is then handled by Black Duck server and Black Duck KnowledgeBase instances. For general [communication with Black Duck services](https://sig-product-docs.synopsys.com/bundle/bd-hub/page/Network_Communications/CommunicationWithBDServers.html) information, refer to the Black Duck documentation.
+The external, Black Duck Software-provided Black Duck SCA scanning endpoint will receive a Black Duck BDIO file used for Black Duck Rapid Scans. The file gets sent to a Code Sight endpoint and is then handled by Black Duck server and Black Duck KnowledgeBase instances. For general [communication with Black Duck services](https://documentation.blackduck.com/bundle/bd-hub/page/Network_Communications/CommunicationWithBDServers.html) information, refer to the Black Duck documentation.
 
 ## Tool Orchestration Feature
 
@@ -267,7 +270,7 @@ You can now log on to the cluster as `user1` and deploy the Core feature with an
 
 ### Kubernetes Privileges for Scan Farm Feature Deployment
 
-The [required Kubernetes privileges for the Scan Farm feature deployment](https://sig-product-docs.synopsys.com/bundle/coverity-docs/page/cnc/topics/infrastructure_prerequisites.html) are documented externally under the `Access privileges` section.
+The [required Kubernetes privileges for the Scan Farm feature deployment](https://documentation.blackduck.com/bundle/coverity-docs/page/cnc/topics/infrastructure_prerequisites.html) are documented externally under the `Access privileges` section.
 
 ### Kubernetes Privileges for Tool Orchestration Feature Deployment
 
@@ -383,7 +386,7 @@ This section covers the requirements you must satisfy with the external dependen
 
 ### Scan Farm Database Requirements
 
-The Scan Farm feature depends on a PostgreSQL database supporting versions 12 to 15, including all minor versions. Synopsys recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
+The Scan Farm feature depends on a PostgreSQL database supporting versions 12 to 15, including all minor versions. Black Duck recommends using a DBaaS (database as a service) database. Configure your PostgreSQL database by reserving 1 CPU core and 2 GB RAM. The recommended database volume size is 5GB.
 
 ### Scan Farm Cache Requirements
 
@@ -399,7 +402,7 @@ Here are the requirements and recommendations for your Redis instance:
 
 - Allocate 1 vCPU for on-cluster Redis workloads.
 
-Synopsys recommends configuring your Redis instance with both authentication and TLS.
+Black Duck recommends configuring your Redis instance with both authentication and TLS.
 
 ### Scan Farm Object Storage Requirements
 
@@ -446,19 +449,19 @@ The Software Risk Manager web pod communicates with Scan Farm pods using port 99
 
 ### Scan Farm Private Registry
 
-When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Synopsys SIG (Software Integrity Group) private Docker registry (SIG repo) and push them to your private registry. This includes the Docker images for all the features you plan to install, not just Scan Farm-related ones. 
+When you enable the Scan Farm feature, you must pull Software Risk Manager Docker images from the Black Duck private Docker registry (Black Duck Repo) and push them to your private registry. This includes the Docker images for all the features you plan to install, not just Scan Farm-related ones. 
 
 You can use a private registry hosted by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own (see [registry.md](deploy/registry.md) for details).
 
 ### Scan Farm Ingress Requirements
 
-The Scan Farm feature requires you to use an ingress controller, and your ingress controller must support multiple ingress resources referencing the same hostname. Synopsys recommends the [NGINX Community](https://kubernetes.github.io/ingress-nginx/) ingress controller. You can find the Installation Guide [here](https://kubernetes.github.io/ingress-nginx/deploy/).
+The Scan Farm feature requires you to use an ingress controller, and your ingress controller must support multiple ingress resources referencing the same hostname. Black Duck recommends the [NGINX Community](https://kubernetes.github.io/ingress-nginx/) ingress controller. You can find the Installation Guide [here](https://kubernetes.github.io/ingress-nginx/deploy/).
 
 ### Scan Farm Internet Access Requirements
 
-SCA scanning depends on an external Black Duck system hosted by Synopsys at `https://codesight.synopsys.com`. SCA scans will fail if this endpoint is inaccessible from your cluster.
+SCA scanning depends on an external Black Duck system hosted by Black Duck at `https://codesight.blackduck.com` (34.8.121.57). SCA scans will fail if this endpoint is inaccessible from your cluster.
 
-The Scan Service also depends on the Synopsys SIG Repo hosted at sig-repo.synopsys.com. The service downloads Scan Farm components at boot time and will not work correctly without a SIG Repo connection.
+The Scan Service also depends on the Black Duck Repo hosted at repo.blackduck.com (34.149.5.115). The service downloads Scan Farm components at boot time and will not work correctly without a Black Duck Repo connection.
 
 ### Scan Farm Default Pod Resources
 
@@ -776,7 +779,7 @@ Software Risk Manager does not include the dependencies required for the Scan Fa
 
 When using the Scan Farm feature, you must have access to a private registry where you will store Software Risk Manager Docker images. Determine whether your private registry requires a Kubernetes Image Pull Secret. Your private registry may not require an explicit username and password if your cluster's configuration already includes access. If you need a registry credential, identify the username and password, but do not pre-create the Kubernetes Image Pull Secret.
 
-Determine whether you will use a prefix for repositories added to your private registry. Your registry may require one, or you may create one to simplify pushing Docker images by pre-creating a single repository. For example, if you use Google Cloud Platform Artifact Registry in the us-central1 region, your registry host will be us-central1-docker.pkg.dev, but your repository prefix could be my-gcp-project-name/srm (assuming a GCP project named "my-gcp-project-name"). In that case, you should pre-create the srm repository before pushing Docker images from SIG repo to us-central1-docker.pkg.dev/my-gcp-project-name/srm.
+Determine whether you will use a prefix for repositories added to your private registry. Your registry may require one, or you may create one to simplify pushing Docker images by pre-creating a single repository. For example, if you use Google Cloud Platform Artifact Registry in the us-central1 region, your registry host will be us-central1-docker.pkg.dev, but your repository prefix could be my-gcp-project-name/srm (assuming a GCP project named "my-gcp-project-name"). In that case, you should pre-create the srm repository before pushing Docker images from Black Duck Repo to us-central1-docker.pkg.dev/my-gcp-project-name/srm.
 
 You can find instructions for pulling the latest Software Risk Manager Docker images for Scan Farm deployments [here](deploy/registry.md).
 
@@ -1519,7 +1522,7 @@ How many passwords you must set will depend on how you deploy Software Risk Mana
 | SAML Java Keystore Password | Core (SAML Authentication) | Y |
 | SAML Java Private Key Password | Core (SAML Authentication) | Y |
 | | | |
-| SIG Repo Password | Scan Farm | N |
+| Black Duck Password | Scan Farm | N |
 | | | |
 | Scan Farm PostgreSQL Password | Scan Farm | N |
 | | | |
@@ -1756,7 +1759,7 @@ Ensure you can run PowerShell Core scripts on Windows by switching your PowerShe
 
 ### PowerShell Module
 
-The Helm Prep Wizard has a dependency on a Synopsys PowerShell module published to the [PowerShell Gallery](https://www.powershellgallery.com/packages/guided-setup) and [NuGet Repository](https://www.nuget.org/packages/guided-setup). The wizard will automatically download and install the module when it starts. If you would prefer to download and install the module by hand, refer to the [manual installation note](../.install-guided-setup-module.ps1#L12) in the module installation script.
+The Helm Prep Wizard has a dependency on a Black Duck PowerShell module published to the [PowerShell Gallery](https://www.powershellgallery.com/packages/guided-setup) and [NuGet Repository](https://www.nuget.org/packages/guided-setup). The wizard will automatically download and install the module when it starts. If you would prefer to download and install the module by hand, refer to the [manual installation note](../.install-guided-setup-module.ps1#L12) in the module installation script.
 
 ## Clone GitHub Repository
 
@@ -1830,7 +1833,7 @@ K8s Installation Notes
   *   Assign a pool-type label (pool-type=small) to analysis node(s).
   *   Assign a scanner node taint (NodeType=ScannerNode:NoSchedule) to analysis node(s).
   *   NOTE: A "small" pool-type requires one or more nodes with 6.5 vCPUs and 26 GB of memory
-- Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Synopsys Docker images to your private registry.
+- Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Black Duck Docker images to your private registry.
 
 
 ----------------------
@@ -2052,7 +2055,7 @@ Below is an example showing config.json and srm-extra-props, renamed from srm-ex
 
 # Customizing Software Risk Manager
 
-You can use a Helm values file to customize your Software Risk Manager deployment. Add custom helm property values to a file named `srm-extra-props.yaml`, and store this file alongside your config.json file when using the Helm Prep Script. You should include any custom chart settings and any web component property values you would specify in a [Software Risk Manager "props" file like codedx.props](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/config-files.html).
+You can use a Helm values file to customize your Software Risk Manager deployment. Add custom helm property values to a file named `srm-extra-props.yaml`, and store this file alongside your config.json file when using the Helm Prep Script. You should include any custom chart settings and any web component property values you would specify in a [Software Risk Manager "props" file like codedx.props](https://documentation.blackduck.com/bundle/srm/page/install_guide/SRMConfiguration/config-files.html).
 
 If you store your `srm-extra-props.yaml` file alongside your config.json file generated by the Helm Prep Wizard, when you run your `run-helm-prep.ps1` script, the Helm Prep Script will automatically include `-f /path/to/srm-extra-props.yaml` in the `helm upgrade` command it generates.
 
@@ -2077,7 +2080,7 @@ You can change the behavior of Software Risk Manager's web component by adding c
 
 There are two types of `codedx.props` property values you may want to configure. Private property values are those that should be protected, such as passwords, and they get stored in a Kubernetes Secret. Public property values are stored and loaded from a Kubernetes ConfigMap.
 
-To explain the configuration of public and private properties, the following example shows how to configure a [proxy server](https://sig-product-docs.synopsys.com/bundle/srm/page/install_guide/SRMConfiguration/proxy.html) for Software Risk Manager. When you are finished configuring the public and private proxy configuration, rerun `helm upgrade` as described in the previous section.
+To explain the configuration of public and private properties, the following example shows how to configure a [proxy server](https://documentation.blackduck.com/bundle/srm/page/install_guide/SRMConfiguration/proxy.html) for Software Risk Manager. When you are finished configuring the public and private proxy configuration, rerun `helm upgrade` as described in the previous section.
 
 ### Public Web Properties Proxy Example
 
@@ -2281,18 +2284,17 @@ web:
       hostBasePath: https://<hostname>/mysrm
 ```
 
-If you use the Scan Farm feature, you must also update the `cnc.scanfarm.srm.url` helm chart parameter. Here is an example for the `/mysrm` context path where you would replace `srm-web` as necessary:
+If you use the Scan Farm feature, you must also update the `scan-services.srm.url` helm chart parameter. Here is an example for the `/mysrm` context path where you would replace `srm-web` as necessary:
 
 ```
 web:
   appName: mysrm
-cnc:
-  scanfarm:
-    srm:
-      url: http://srm-web:9090/mysrm
+scan-services:
+  srm:
+    url: http://srm-web:9090/mysrm
 ```
 
->Note: Synopsys Bridge requires an /srm context path, so do not use a custom context path if you plan to use Synopsys Bridge.
+>Note: Bridge CLI requires an /srm context path, so do not use a custom context path if you plan to use Bridge CLI.
 
 If you are using the Ingress-NGINX controller, refer to this ingress resource example that uses path-based/fanout routing to make Software Risk Manager available at `/mysrm`:
 
@@ -2328,8 +2330,8 @@ You can change the CPU and memory required for SAST and SCA scan jobs. Custom si
 To control the amount of CPU and memory used for SCA buildless scans, add the following content to your srm-extra-props.yaml file:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKSCAN_CPU: cpu-in-millicores
       BLACKDUCKSCAN_MEM: memory-in-mebibytes
@@ -2338,8 +2340,8 @@ cnc:
 For example, to configure three vCPUs (3000m) and 3500Mi of memory, specify the following values:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKSCAN_CPU: 3000
       BLACKDUCKSCAN_MEM: 3500
@@ -2348,8 +2350,8 @@ cnc:
 The above configuration will run on the default node pool (see [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)), so your CPU and memory configuration must not exceed the capacity of nodes in that pool. If you want to use a custom node pool with higher capacity nodes, use the below configuration after creating a node pool with the label pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKSCAN_LABEL: "custom"
       BLACKDUCKSCAN_CPU: cpu-in-millicores
@@ -2361,8 +2363,8 @@ cnc:
 To control the amount of CPU and memory used for SCA scans started with Bridge, add the following content to your srm-extra-props.yaml file:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKBDIO_CPU: cpu-in-millicores
       BLACKDUCKBDIO_MEM: memory-in-mebibytes
@@ -2371,8 +2373,8 @@ cnc:
 For example, to configure two vCPUs (2000m) and 2500Mi of memory, specify the following values:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKBDIO_CPU: 2000
       BLACKDUCKBDIO_MEM: 2500
@@ -2381,8 +2383,8 @@ cnc:
 The above configuration will run on the default node pool (see [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)), so your CPU and memory configuration must not exceed the capacity of nodes in that pool. If you want to use a custom node pool with higher capacity nodes, use the below configuration after creating a node pool with the label pool-type=custom with taint NodeType=ScannerNode (refer to [Scan Farm Node Pool requirements](#scan-farm-node-pool-requirements)).
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       BLACKDUCKBDIO_LABEL: "custom"
       BLACKDUCKBDIO_CPU: cpu-in-millicores
@@ -2394,8 +2396,8 @@ cnc:
 To control the amount of CPU and memory used for SAST scans, add the following content to your srm-extra-props.yaml file:
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       COVCAPTURE_DEFAULTPOOLTYPE: "custom"
       COVANALYSIS_DEFAULTPOOLTYPE: "custom"
@@ -2409,8 +2411,8 @@ cnc:
 For example, to configure four vCPUs (4000m) and 8000Mi of memory, specify the following values after creating a custom node pool that can support workloads of that size.
 
 ```
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     environment:
       COVCAPTURE_DEFAULTPOOLTYPE: "custom"
       COVANALYSIS_DEFAULTPOOLTYPE: "custom"
@@ -2533,6 +2535,35 @@ Run the following command to create the configmap resource, replacing the namesp
 ```
 kubectl -n cdx-svc create -f ./cdx-toolsvc-mytool-resource-requirements.yaml
 ```
+
+## Specify Scan Farm Engine Versions
+
+Each Software Risk Manager version depends on a specific SAST and SCA engine version. If you upgrade to a new Software Risk Manager version with a different SAST and SCA engine version, you can retain the previous versions by specifying helm values.
+
+Specify the SAST version by entering the version number in the following properties:
+
+- web.scanfarm.sast
+- scan-services.scan-service.environment.TOOL_COVERITY_VERSION
+
+Specify the SCA version by entering the version number in the following properties:
+
+- web.scanfarm.sca
+- scan-services.scan-service.environment.TOOL_DETECT_VERSION
+
+For example, if you want to continue using SAST 2024.3.0 after upgrading Software Risk Manager, add the following to your srm-extra-props.yaml file:
+
+```
+web:
+  scanfarm:
+    sast:
+      version: 2024.3.0
+scan-services:
+  scan-service:
+    environment:
+      TOOL_COVERITY_VERSION: "2024.3.0"
+```
+
+>Note: You must specify SAST/SCA versions that are compatible with Software Risk Manager.
 
 ## Add Extra Pod Labels
 
@@ -3057,7 +3088,7 @@ An upgrade occurs with this four-step process:
    ```
    >Note: The above command assumes you are upgrading to the latest version. You can update to a specific version by running `git checkout version-number` instead.
 
-2. If you previously pulled Software Risk Manager Docker images from the Synopsys Docker registry or you copied Docker images from Docker Hub to your private Docker registry, refer to the [registry deployment script](deploy/registry.md) to re-pull/push required Docker images.
+2. If you previously pulled Software Risk Manager Docker images from the Black Duck Docker registry or you copied Docker images from Docker Hub to your private Docker registry, refer to the [registry deployment script](deploy/registry.md) to re-pull/push required Docker images.
 
 3. Rerun the Helm Prep Script
    ```
@@ -3066,6 +3097,8 @@ An upgrade occurs with this four-step process:
    ```
 
 4. Follow the instructions printed by the Helm Prep script and rerun the printed helm/kubectl commands
+
+>Note: The Helm Prep script instructions may include pulling updated Docker images from Black Duck Repo, which you must do before running the recommended helm commands.
 
 ### TLS
 
@@ -3181,7 +3214,7 @@ Before you get started, make sure that you have satisified the Software Risk Man
 
 Back up your Code Dx system now so that you can restore its state should something go wrong with your data migration.
 
->Note: Data migration for external workflow storage is unsupported because it will be reused with your Software Risk Manager deployment. Contact Synopsys if you would like guidance on how to avoid reuse for external workflow storage.
+>Note: Data migration for external workflow storage is unsupported because it will be reused with your Software Risk Manager deployment. Contact Black Duck if you would like guidance on how to avoid reuse for external workflow storage.
 
 ## Clone the srm-k8s GitHub Repository
 
@@ -3686,9 +3719,9 @@ Depending on the Software Risk Manager features you install and how you configur
 | Name | Feature | Repository | Purpose |
 |:-|:-|:-|:-|
 | argo-workflows | Tool Orchestration | https://argoproj.github.io/argo-helm | Required to manage orchestrated analyses |
-| cnc | Scan Farm | https://sig-repo.synopsys.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
 | mariadb | Core | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
 | minio | Tool Orchestration | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
+| scan-services | Scan Farm | https://repo.blackduck.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
 
 ## Values
 
@@ -3713,9 +3746,9 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | argo-workflows.executor.image.registry | string | `docker.io` | the Argo executor Docker image registry |
 | argo-workflows.images.pullSecrets | list | `[]` | the K8s image pull secret to use for Argo Docker images |
 | argo-workflows.images.tag | string | `"v3.5.11"` | the Docker image version for the Argo workload |
-| cnc.cnc-common-infra.cleanupSchedule | string | `"*/55 * * * *"` | the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob |
-| cnc.imagePullPolicy | string | `"Always"` | the image pull policy for scan farm components |
-| cnc.scanfarm.srm.port | string | `"9090"` | the port number of the SRM web service |
+| scan-services.common-infra.cleanupSchedule | string | `"*/55 * * * *"` | the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob |
+| scan-services.imagePullPolicy | string | `"Always"` | the image pull policy for scan farm components |
+| scan-services.srm.port | string | `"9090"` | the port number of the SRM web service |
 | features.mariadb | bool | `true` | whether to enable the on-cluster MariaDB; an external database must be used otherwise |
 | features.minio | bool | `false` | whether to enable the on-cluster MinIO for the SRM Tool Orchestration feature; an external object storage system must be used otherwise |
 | features.scanfarm | bool | `false` | whether to enable the Scan Farm feature, which requires an SRM Scan Farm license |
@@ -3738,7 +3771,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | mariadb.image.pullSecrets | list | `[]` | the K8s image pull secret to use for MariaDB Docker images |
 | mariadb.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the MariaDB Docker image |
 | mariadb.image.repository | string | `"codedx/codedx-mariadb"` | the Docker image repository name for the MariaDB workload |
-| mariadb.image.tag | string | `"v1.35.0"` | the Docker image version for the MariaDB workload |
+| mariadb.image.tag | string | `"v1.36.0"` | the Docker image version for the MariaDB workload |
 | mariadb.master.masterCaConfigMap | string | `nil` | the configmap name containing the CA cert with required field ca.crt Command: kubectl -n srm create configmap master-ca-configmap --from-file ca.crt=/path/to/ca.crt |
 | mariadb.master.masterTlsSecret | string | `nil` | the K8s secret name containing the public and private TLS key with required fields tls.crt and tls.key Command: kubectl -n srm create secret tls master-tls-secret --cert=path/to/cert-file --key=path/to/key-file |
 | mariadb.master.nodeSelector | object | `{}` | the node selector to use for the MariaDB primary database workload |
@@ -3805,8 +3838,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | to.image.repository.sendResults | string | `"codedx/codedx-results"` | the Docker image repository name for the SRM send-results workload |
 | to.image.repository.toolService | string | `"codedx/codedx-tool-service"` | the Docker image repository name for the SRM tool service workload |
 | to.image.repository.tools | string | `"codedx/codedx-tools"` | the Docker image repository name for the SRM tools workload |
-| to.image.repository.toolsMono | string | `"codedx/codedx-toolsmono"` | the Docker image repository name for the SRM toolsmono workload |
-| to.image.tag | string | `"v2.4.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|
+| to.image.tag | string | `"v2.5.0"` | the Docker image version for the SRM Tool Orchestration workloads (tools use the web.image.tag version)|
 | to.logs.maxBackups | int | `20` | the maximum number of tool service log files to retain |
 | to.logs.maxSizeMB | int | `10` | the maximum size of a tool service log file |
 | to.minimumWorkflowStepRunTimeSeconds | int | `3` | the minimum seconds for an orchestrated analysis workflow step |
@@ -3854,7 +3886,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.image.pullPolicy | string | `"IfNotPresent"` | the K8s Docker image pull policy for the SRM web workload |
 | web.image.registry | string | `"docker.io"` | the registry name and optional registry suffix for the SRM web Docker image |
 | web.image.repository | string | `"codedx/codedx-tomcat"` | the Docker image repository name for the SRM web workload |
-| web.image.tag | string | `"v2024.9.4.1"` | the Docker image version for the SRM web workload |
+| web.image.tag | string | `"v2024.9.5"` | the Docker image version for the SRM web workload |
 | web.javaOpts | string | `"-XX:MaxRAMPercentage=75.0"` | the Java options for the SRM web workload |
 | web.licenseSecret | string | `""` | the K8s secret name containing the SRM license password with required field license.lic Command: kubectl -n srm create secret generic srm-web-license-secret --from-file license.lic=./license.lic |
 | web.loggingConfigMap | string | `""` | the K8s configmap containing the logging configuration file with required field logback.xml Command: kubectl -n srm create configmap srm-web-logging-cfgmap --from-file logback.xml=./logback.xml |
@@ -3882,7 +3914,7 @@ The following table lists the Software Risk Manager Helm chart values. Run `helm
 | web.resources.limits.cpu | string | `"4000m"` | the required CPU for the web workload (must be >= 2 vCPUs) |
 | web.resources.limits.ephemeral-storage | string | `"2868Mi"` | the ephemeral storage for the web workload |
 | web.resources.limits.memory | string | `"16384Mi"` | the required memory for the web workload |
-| web.scanfarm.sast.version | string | `"2024.3.0"` | the SAST component version to use |
+| web.scanfarm.sast.version | string | `"2024.9.1"` | the SAST component version to use |
 | web.scanfarm.sca.version | string | `"9.2.0"` | the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable) |
 | web.scanfarm.key.validForDays | int | 45 | the duration of the Scan Farm API key |
 | web.scanfarm.key.regenSchedule | string | `"0 0 1 * *"` | the Scan Farm API key regeneration period (minute hour day-of-month month day-of-week) |
@@ -4010,6 +4042,8 @@ This section includes troubleshooting guidance for the Scan Farm feature.
 
 ### Scan Farm Migration Job Fails
 
+>Note: This section applies to Software Risk Manager versions prior to 2024.9.5.
+
 A misconfiguration could cause a Scan Farm migration job to fail. The job's restartPolicy is "on-failure," so the related container gets removed, making the logs hard to grab from the command line. If you have something collecting generated logs on your cluster, you should be able to troubleshoot from that output. Otherwise, you can edit the Scan Farm chart directly by switching the restartPolicy for the job to Never.
 
 The Scan Farm chart does not include a helm value setting for the job's restart policy, so you have to edit the chart locally like this:
@@ -4026,6 +4060,29 @@ $ rm -r cnc # delete working chart
 >Note: The above procedure uses the "cnc" dependency chart version 2024.3.0.
 
 Avoid rerunning the `helm dependency update` command until you have inspected the job pod's log and have resolved the problem.
+
+### Scan Service GetAccessToken Fails
+
+The Scan Farm feature may fail if a required key is unexpectedly missing from your deployment. This failure may have occurred if you see scan service log error messages that look like these:
+
+```
+{"client-id":"...","job-uuid":"...","level":"error","method":"/scan.ScanService/GetAccessToken","msg":"cannot create JWT: srm api key is empty","organization-id":"...","scan-uuid":"...","service":"scan-jobs-svc","time":"..."}
+```
+```
+{"client-id":"...","job-uuid":"...","level":"error","method":"/scan.ScanService/GetAccessToken","msg":"unable to create token on http://srm-web:9090/srm: code 401, body {\"error\":\"invalid_client\",\"error_description\":\"unknown client\"}","organization-id":"...","scan-uuid":"...","service":"scan-jobs-svc","time":"..."}
+```
+
+A CronJob Kubernetes resource periodically regenerates the key upon which the Scan Farm feature depends. You can resolve this issue by manually running the job with the following command (assumes an `srm` namespace and release name):
+
+```
+kubectl -n srm create job --from=cronjob/srm-internal-svc-cronjob srm-internal-svc-job-fix
+```
+
+Wait for the job to finish, and then remove it by running this command:
+
+```
+kubectl -n srm delete job srm-internal-svc-job-fix
+```
 
 # Appendix
 
@@ -4052,8 +4109,8 @@ Refer to the [lock/unlock scripts](../admin/config) to edit [protected config.js
 |scanFarmSastLicenseFile|Scan Farm|file path to the SRM SAST license file||1.0|
 |scanFarmScaLicenseFile|Scan Farm|file path to the SRM SCA license file||1.0|
 ||||||
-|sigRepoUsername|Scan Farm|username for the Synopsys SIG repo||1.0|
-|sigRepoPwd|Scan Farm|password for the Synopsys SIG repo||1.0|
+|repoUsername|Scan Farm|username for the Black Duck Repo||1.0|
+|repoPwd|Scan Farm|password for the Black Duck Repo||1.0|
 ||||||
 |scanFarmDatabaseHost|Scan Farm|hostname of the scan farm PostgreSQL database||1.0|
 |scanFarmDatabasePort|Scan Farm|port number of the scan farm PostgreSQL database||1.0|
@@ -4313,33 +4370,33 @@ $ kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME -
 $ # Start pwsh session
 $ pwsh
 PS> $global:PSNativeCommandArgumentPassing='Legacy'
-PS> Install-Module guided-setup
+PS> Install-Module guided-setup -RequiredVersion 1.17.0
 
 PS> $caPath = Get-ChildItem ./ca.crt | Select-Object -ExpandProperty FullName
 
 PS> # Create SRM web certificate
-PS> $webSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-web"
+PS> $webSvcName = "$(Get-HelmChartFullnameEquals $env:SRM_RELEASE_NAME 'srm')-web"
 PS> New-Certificate $env:CERT_SIGNER $caPath $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $env:SRM_NAMESPACE
 
 PS> # Create SRM web Secret
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
 
 PS> # Create primary DB certificate (required for deployments using an on-cluster MariaDB)
-PS> $dbSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'mariadb'
+PS> $dbSvcName = Get-HelmChartFullnameContains $env:SRM_RELEASE_NAME 'mariadb'
 PS> New-Certificate $env:CERT_SIGNER $caPath $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $env:SRM_NAMESPACE
 
 PS> # Create DB Secret (required for deployments using an on-cluster MariaDB)
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
 
 PS> # Create TO certificate (required for deployments using Tool Orchestration)
-PS> $toSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-to"
+PS> $toSvcName = "$(Get-HelmChartFullnameEquals $env:SRM_RELEASE_NAME 'srm')-to"
 PS> New-Certificate $env:CERT_SIGNER $caPath $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $env:SRM_NAMESPACE
 
 PS> # Create TO Secret (required for deployments using Tool Orchestration)
 PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
 
 PS> # Create MinIO certificate (required for deployments using an on-cluster, built-in MinIO)
-PS> $minioSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'minio'
+PS> $minioSvcName = Get-HelmChartFullnameContains $env:SRM_RELEASE_NAME 'minio'
 PS> New-Certificate $env:CERT_SIGNER $caPath $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $env:SRM_NAMESPACE
 
 PS> # Create MinIO Secret (required for deployments using an on-cluster, built-in MinIO)
@@ -4388,33 +4445,33 @@ PS> # Create cacerts Secret
 PS> kubectl -n $SRM_NAMESPACE create secret generic $SRM_WEB_CACERTS_SECRET_NAME --from-file cacerts=$CACERTS_PATH --from-literal cacerts-password=changeit
 
 PS> $global:PSNativeCommandArgumentPassing='Legacy'
-PS> Install-Module guided-setup
+PS> Install-Module guided-setup -RequiredVersion 1.17.0
 
 PS> $caPath = Get-ChildItem ./ca.crt | Select-Object -ExpandProperty FullName
 
 PS> # Create SRM web certificate
-PS> $webSvcName = "$(Get-HelmChartFullname $SRM_RELEASE_NAME 'srm')-web"
+PS> $webSvcName = "$(Get-HelmChartFullnameEquals $SRM_RELEASE_NAME 'srm')-web"
 PS> New-Certificate $CERT_SIGNER $caPath $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $SRM_NAMESPACE
 
 PS> # Create SRM web Secret
 PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
 
 PS> # Create primary DB certificate (required for deployments using an on-cluster MariaDB)
-PS> $dbSvcName = Get-HelmChartFullname $SRM_RELEASE_NAME 'mariadb'
+PS> $dbSvcName = Get-HelmChartFullnameContains $SRM_RELEASE_NAME 'mariadb'
 PS> New-Certificate $CERT_SIGNER $caPath $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $SRM_NAMESPACE
 
 PS> # Create DB Secret (required for deployments using an on-cluster MariaDB)
 PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
 
 PS> # Create TO certificate (required for deployments using Tool Orchestration)
-PS> $toSvcName = "$(Get-HelmChartFullname $SRM_RELEASE_NAME 'srm')-to"
+PS> $toSvcName = "$(Get-HelmChartFullnameEquals $SRM_RELEASE_NAME 'srm')-to"
 PS> New-Certificate $CERT_SIGNER $caPath $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $SRM_NAMESPACE
 
 PS> # Create TO Secret (required for deployments using Tool Orchestration)
 PS> New-CertificateSecretResource $SRM_NAMESPACE $SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
 
 PS> # Create MinIO certificate (required for deployments using an on-cluster, built-in MinIO)
-PS> $minioSvcName = Get-HelmChartFullname $SRM_RELEASE_NAME 'minio'
+PS> $minioSvcName = Get-HelmChartFullnameContains $SRM_RELEASE_NAME 'minio'
 PS> New-Certificate $CERT_SIGNER $caPath $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $SRM_NAMESPACE
 
 PS> # Create MinIO Secret (required for deployments using an on-cluster, built-in MinIO)
@@ -4493,6 +4550,38 @@ fsGroup = 1000
 ### Upgrading to v1.28
 
 This chart version replaces the `codedx/codedx-argoexec` and `codedx/codedx-workflow-controller` Docker images with `argoproj/argoexec` and `argoproj/workflow-controller`.
+
+### Upgrading to v1.40
+
+This chart version uses a different subchart for the Scan Farm feature, switching from chart `cnc` (version 2024.3.0) to the `scan-services` chart (version 2024.9.1). The Helm Prep Script for this version will switch your helm config from one chart to the other, but if you previously customized your Scan Farm configuration via your `srm-extra-props.yaml` file, refer to the [Scan Farm Job Resources](#scan-farm-job-resources) and [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) sections to update your customizations.
+
+This chart also switches the Scan Farm SAST component from version 2024.3.0 to 2024.9.1. Refer to [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) if you'd prefer to use a previous SAST version that SRM supports.
+
+This version of Software Risk Manager works with the new Black Duck Repo (34.149.5.115) where Scan Farm feature users must download Docker images with the following updated names:
+
+| Previous Docker Image Name | New Docker Image Name |
+|:-|:-|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2024.9.4.1|repo.blackduck.com/containers/codedx/codedx-tomcat:v2024.9.4.1|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2024.9.4.1|repo.blackduck.com/containers/codedx/codedx-tools:v2024.9.4.1|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2024.9.4.1|repo.blackduck.com/containers/codedx/codedx-toolsmono:v2024.9.4.1|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v2.4.0|repo.blackduck.com/containers/codedx/codedx-prepare:v2.4.0|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v2.4.0|repo.blackduck.com/containers/codedx/codedx-newanalysis:v2.4.0|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-results:v2.4.0|repo.blackduck.com/containers/codedx/codedx-results:v2.4.0|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-tool-service:v2.4.0|repo.blackduck.com/containers/codedx/codedx-tool-service:v2.4.0|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-cleanup:v2.4.0|repo.blackduck.com/containers/codedx/codedx-cleanup:v2.4.0|
+|sig-repo.synopsys.com/synopsys/codedx/codedx-mariadb:v1.35.0|repo.blackduck.com/containers/codedx/codedx-mariadb:v1.35.0|
+|sig-repo.synopsys.com/synopsys/bitnami/minio:2021.4.6-debian-10-r11|repo.blackduck.com/containers/bitnami/minio:2021.4.6-debian-10-r11|
+|sig-repo.synopsys.com/synopsys/argoproj/workflow-controller:v3.5.11|repo.blackduck.com/containers/argoproj/workflow-controller:v3.5.11|
+|sig-repo.synopsys.com/synopsys/argoproj/argoexec:v3.5.11|repo.blackduck.com/containers/argoproj/argoexec:v3.5.11|
+|sig-repo.synopsys.com/synopsys/cnc-cache-service:2024.9.1|repo.blackduck.com/containers/cache-service:2024.9.1|
+|sig-repo.synopsys.com/synopsys/cnc-common-infra:2024.9.1|repo.blackduck.com/containers/common-infra:2024.9.1|
+|sig-repo.synopsys.com/synopsys/cnc-scan-service:2024.9.1|repo.blackduck.com/containers/scan-service:2024.9.1|
+|sig-repo.synopsys.com/synopsys/cnc-scan-service-migration:2024.9.1|repo.blackduck.com/containers/scan-service-migration:2024.9.1|
+|sig-repo.synopsys.com/synopsys/cnc-storage-service:2024.9.1|repo.blackduck.com/containers/storage-service:2024.9.1|
+|sig-repo.synopsys.com/synopsys/cnc-storage-service-migration:2024.9.1|repo.blackduck.com/containers/storage-service-migration:2024.9.1|
+|sig-repo.synopsys.com/synopsys/cnc-job-runner:2024.9.1|repo.blackduck.com/containers/job-runner:2024.9.1|
+
+The srm-k8s GitHub repository for this version of Software Risk Manager depends on an updated Guided Setup module with version 1.17.0. Scripts requiring the Guided Setup module will download it automatically; to manually download the module, refer to the instructions in [.install-guided-setup-module.ps1](../.install-guided-setup-module.ps1#L12).
 
 ## Helm Prep Wizard
 

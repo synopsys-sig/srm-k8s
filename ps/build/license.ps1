@@ -31,8 +31,9 @@ function New-ScanFarmLicenseConfig($config) {
 
 	New-ScanFarmLicenseSecret $config
     @"
-cnc:
-  licenseSecretName: $(Get-ScanFarmLicenseSecretName $config)
+scan-services:
+  scan-service:
+    licenseSecretName: $(Get-ScanFarmLicenseSecretName $config)
 "@ | Out-File (Get-ScanFarmLicenseValuesPath $config)
 }
 

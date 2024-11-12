@@ -56,8 +56,6 @@ spec:
           - "{{ .Values.to.caConfigMap }}"
           - "-imageNameCodeDxTools"
           - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.tools }}:{{ .Values.web.image.tag }}"
-          - "-imageNameCodeDxToolsMono"
-          - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.toolsMono }}:{{ .Values.web.image.tag }}"
           - "-imageNamePrepare"
           - "{{ .Values.to.image.registry }}/{{ .Values.to.image.repository.prepare }}:{{ .Values.to.image.tag }}"
           - "-imageNameNewAnalysis"

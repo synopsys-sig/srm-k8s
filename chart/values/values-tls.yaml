@@ -40,33 +40,33 @@
 # $ # Start pwsh session
 # $ pwsh
 # PS> $global:PSNativeCommandArgumentPassing='Legacy'
-# PS> Install-Module guided-setup
+# PS> Install-Module guided-setup -RequiredVersion 1.17.0
 #
 # PS> $caPath = Get-ChildItem ./ca.crt | Select-Object -ExpandProperty FullName
 # 
 # PS> # Create SRM web certificate
-# PS> $webSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-web"
+# PS> $webSvcName = "$(Get-HelmChartFullnameEquals $env:SRM_RELEASE_NAME 'srm')-web"
 # PS> New-Certificate $env:CERT_SIGNER $caPath $webSvcName $webSvcName './web-tls.crt' './web-tls.key' $env:SRM_NAMESPACE
 # 
 # PS> # Create SRM web Secret
 # PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_WEB_SECRET_NAME './web-tls.crt' './web-tls.key'
 # 
 # PS> # Create primary DB certificate (required for deployments using an on-cluster MariaDB)
-# PS> $dbSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'mariadb'
+# PS> $dbSvcName = Get-HelmChartFullnameContains $env:SRM_RELEASE_NAME 'mariadb'
 # PS> New-Certificate $env:CERT_SIGNER $caPath $dbSvcName $dbSvcName './db-tls.crt' './db-tls.key' $env:SRM_NAMESPACE
 # 
 # PS> # Create DB Secret (required for deployments using an on-cluster MariaDB)
 # PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_DB_SECRET_NAME './db-tls.crt' './db-tls.key'
 # 
 # PS> # Create TO certificate (required for deployments using Tool Orchestration)
-# PS> $toSvcName = "$(Get-HelmChartFullname $env:SRM_RELEASE_NAME 'srm')-to"
+# PS> $toSvcName = "$(Get-HelmChartFullnameEquals $env:SRM_RELEASE_NAME 'srm')-to"
 # PS> New-Certificate $env:CERT_SIGNER $caPath $toSvcName $toSvcName './to-tls.crt' './to-tls.key' $env:SRM_NAMESPACE
 # 
 # PS> # Create TO Secret (required for deployments using Tool Orchestration)
 # PS> New-CertificateSecretResource $env:SRM_NAMESPACE $env:SRM_TO_SECRET_NAME './to-tls.crt' './to-tls.key'
 # 
 # PS> # Create MinIO certificate (required for deployments using an on-cluster, built-in MinIO)
-# PS> $minioSvcName = Get-HelmChartFullname $env:SRM_RELEASE_NAME 'minio'
+# PS> $minioSvcName = Get-HelmChartFullnameContains $env:SRM_RELEASE_NAME 'minio'
 # PS> New-Certificate $env:CERT_SIGNER $caPath $minioSvcName $minioSvcName './minio-tls.crt' './minio-tls.key' $env:SRM_NAMESPACE
 # 
 # PS> # Create MinIO Secret (required for deployments using an on-cluster, built-in MinIO)

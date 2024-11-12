@@ -1,7 +1,8 @@
 <#PSScriptInfo
-.VERSION 1.2.2
+.VERSION 1.3.0
 .GUID b6b17e02-ecb1-4780-afbc-2128026b7464
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 #>
 
 <# 
@@ -90,19 +91,21 @@ if (-not (Test-HelmRelease $namespace $releaseName)) {
 	Write-Error "Unable to find Helm release named $releaseName in namespace $namespace."
 }
 
-$deployment = "$(Get-HelmChartFullname $releaseName 'srm')-web"
-$statefulSetMariaDBMaster = "$releaseName-mariadb-master"
-$statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
+$deployment = "$(Get-HelmChartFullnameEquals $releaseName 'srm')-web"
+
+$dbFullChartName = Get-HelmChartFullnameContains $releaseName 'mariadb'
+$statefulSetMariaDBMaster = "$dbFullChartName-master"
+$statefulSetMariaDBSlave = "$dbFullChartName-slave"
 
 $values = Get-HelmValuesAll $namespace $releaseName
 $statefulSetMariaDBSlaveCount = $values.mariadb.slave.replicas
 if (-not $values.mariadb.replication.enabled) {
 	$statefulSetMariaDBSlaveCount = 0
-	$statefulSetMariaDBMaster = "$releaseName-mariadb"
+	$statefulSetMariaDBMaster = $dbFullChartName
 	$statefulSetMariaDBSlave = ''
 }
 
-$mariaDbMasterServiceName = "$releaseName-mariadb"
+$mariaDbMasterServiceName = $dbFullChartName
 
 if (-not (Test-Deployment $namespace $deployment)) {
 	Write-Error "Unable to find Deployment named $deployment in namespace $namespace."

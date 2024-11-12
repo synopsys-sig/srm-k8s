@@ -1,7 +1,8 @@
 <#PSScriptInfo
 .VERSION 1.0.0
 .GUID 7f63d41a-acd4-470e-9fc2-b8c99208d17d
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 .DESCRIPTION Tests PowerShell edition and version requirements.
 #>
 

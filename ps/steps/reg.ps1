@@ -49,13 +49,13 @@ private Docker registry hosts:
 
 	static [string] hidden $pullPushInstructionLink = 'https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md'
 
-	static [string] hidden $notes = "- Follow instructions at $([DockerRegistryHost]::pullPushInstructionLink) to pull/push Synopsys Docker images to your private registry."
+	static [string] hidden $notes = "- Follow instructions at $([DockerRegistryHost]::pullPushInstructionLink) to pull/push Black Duck Docker images to your private registry."
 
 	static [string] hidden $scanFarmDescription = @"
 Your SRM configuration requires you to pull SRM Docker images from the
-Synopsys SIG (Software Integrity Group) private Docker registry and push
-them to your own private registry. You can use a private registry hosted
-by a cloud provider (e.g., AWS, GCP, Azure, etc.) or deploy your own.
+Black Duck private Docker registry and push them to your own private 
+registry. You can use a private registry hosted by a cloud provider 
+(e.g., AWS, GCP, Azure, etc.) or deploy your own.
 
 Visit the following links for Docker image pull/tag/push instructions:
 $([DockerRegistryHost]::pullPushInstructionLink)

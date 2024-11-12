@@ -1,4 +1,4 @@
-using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.17.0' }
 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
@@ -45,8 +45,8 @@ Describe 'Indicating HTTPS will be used' {
 		"srmLicenseFile": "srm-web-license",
 		"scanFarmSastLicenseFile": "",
 		"scanFarmScaLicenseFile": "",
-		"sigRepoUsername": "",
-		"sigRepoPwd": "",
+		"repoUsername": "",
+		"repoPwd": "",
 		"scanFarmDatabaseHost": "",
 		"scanFarmDatabasePort": "",
 		"scanFarmDatabaseUser": "",
@@ -255,8 +255,8 @@ Describe 'Indicating HTTPS will not be used' {
 		"srmLicenseFile": "srm-web-license",
 		"scanFarmSastLicenseFile": "",
 		"scanFarmScaLicenseFile": "",
-		"sigRepoUsername": "",
-		"sigRepoPwd": "",
+		"repoUsername": "",
+		"repoPwd": "",
 		"scanFarmDatabaseHost": "",
 		"scanFarmDatabasePort": "",
 		"scanFarmDatabaseUser": "",

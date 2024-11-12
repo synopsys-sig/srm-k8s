@@ -52,8 +52,6 @@ to:
     repository:
       # -- the Docker image repository name for the SRM tools workload
       tools: 'codedx/codedx-tools'
-      # -- the Docker image repository name for the SRM toolsmono workload
-      toolsMono: 'codedx/codedx-toolsmono'
       # -- the Docker image repository name for the SRM cleanup workload
       helmPreDelete: 'codedx/codedx-cleanup'
       # -- the Docker image repository name for the SRM prepare workload
@@ -64,8 +62,8 @@ to:
       sendResults: 'codedx/codedx-results'
       # -- the Docker image repository name for the SRM tool service workload
       toolService: 'codedx/codedx-tool-service'
-    # -- the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)
-    tag: v2.4.0
+    # -- the Docker image version for the SRM Tool Orchestration workloads (tools use the web.image.tag version)
+    tag: v2.5.0
   logs:
     # -- the maximum size of a tool service log file
     maxSizeMB: 10

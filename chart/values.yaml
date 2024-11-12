@@ -124,7 +124,7 @@ web:
     # -- the Docker image repository name for the SRM web workload
     repository: codedx/codedx-tomcat
     # -- the Docker image version for the SRM web workload
-    tag: v2024.9.4.1
+    tag: v2024.9.5
     # -- the K8s Docker image pull policy for the SRM web workload
     pullPolicy: IfNotPresent
 
@@ -212,8 +212,8 @@ web:
 
   scanfarm:
     sast:
-      # -- the SAST component version to use for build-less scans
-      version: 2024.3.0
+      # -- the SAST component version to use for build-less scans (must match scan service's TOOL_COVERITY_VERSION environment variable)
+      version: 2024.9.1
     sca:
       # -- the SCA component version to use for build-less scans (must match scan service's TOOL_DETECT_VERSION environment variable)
       version: 9.2.0
@@ -221,7 +221,7 @@ web:
       # -- the duration of the Scan Farm API key
       validForDays: 45
       # -- the Scan Farm API key regeneration period (minute hour day-of-month month day-of-week)
-      regenSchedule: '0 0 1 * *' # monthly
+      regenSchedule: '0 0 1 * *'
 
   securityContext:
     # -- whether the SRM web workload uses a read-only filesystem
@@ -267,46 +267,18 @@ web:
   webSecret: ""
 
 
-cnc:
+scan-services:
   # -- the image pull policy for scan farm components
   imagePullPolicy: "Always"
 
-  cim:
-    # @ignore
-    cimtools:
-      # @ignore
-      # must be set to false
-      enabled: false
-    # @ignore
-    cimweb:
-      # @ignore
-      # must be set to false
-      enabled: false
-    # @ignore
-    ingress:
-      # @ignore
-      # must be set to false
-      enabled: false
-    # @ignore
-    setupJob:
-      # @ignore
-      # must be set to false
-      enabled: false
-
-  cnc-common-infra:
+  common-infra:
     # -- the schedule to use for the cleanup cronjob - must be a valid schedule for a K8s cronjob
     cleanupSchedule: '*/55 * * * *'
 
   # @ignore
-  cnc-db-admin:
-    # @ignore
-    enabled: false
+  mode: "SRM"
 
-  cnc-scan-service:
-    # @ignore
-    syncJob:
-      # @ignore
-      enabled: false
+  scan-service:
     # @ignore
     retention:
       # @ignore
@@ -314,18 +286,17 @@ cnc:
     environment:
       # -- must match web.scanfarm.sca.version
       TOOL_DETECT_VERSION: "9.2.0"
+      # -- must match web.scanfarm.sast.version
+      TOOL_COVERITY_VERSION: "2024.9.1"
+      # @ignore
+      SCANFARM_CONSUMER_TYPE: "Srm"
+      # -- SRM version reported to scan service
+      SCANFARM_CONSUMER_VERSION: "2024.9.0"
 
   # @ignore
-  cnc-cache-service:
+  cache-service:
     # @ignore
     enabled: true
-
-  scanfarm:
-    # @ignore
-    enabled: true
-    srm:
-      # @ignore
-      enabled: true
 
   # @ignore
   trust-stores:
@@ -348,7 +319,7 @@ mariadb:
     # -- the Docker image repository name for the MariaDB workload
     repository: codedx/codedx-mariadb
     # -- the Docker image version for the MariaDB workload
-    tag: v1.35.0
+    tag: v1.36.0
     # -- the K8s Docker image pull policy for the MariaDB workload
     pullPolicy: IfNotPresent
     # -- the K8s image pull secret to use for MariaDB Docker images

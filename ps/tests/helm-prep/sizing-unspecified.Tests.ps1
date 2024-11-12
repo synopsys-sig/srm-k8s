@@ -1,4 +1,4 @@
-using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.17.0' }
 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
@@ -45,8 +45,8 @@ Describe 'Specifying no system size...' -Tag 'size' {
   "srmLicenseFile": "srm-web-license",
   "scanFarmSastLicenseFile": null,
   "scanFarmScaLicenseFile": null,
-  "sigRepoUsername": null,
-  "sigRepoPwd": null,
+  "repoUsername": null,
+  "repoPwd": null,
   "scanFarmDatabaseHost": null,
   "scanFarmDatabasePort": null,
   "scanFarmDatabaseUser": null,
@@ -268,8 +268,8 @@ Describe 'Specifying no system size...' -Tag 'size' {
   "srmLicenseFile": "srm-web-license",
   "scanFarmSastLicenseFile": null,
   "scanFarmScaLicenseFile": null,
-  "sigRepoUsername": null,
-  "sigRepoPwd": null,
+  "repoUsername": null,
+  "repoPwd": null,
   "scanFarmDatabaseHost": null,
   "scanFarmDatabasePort": null,
   "scanFarmDatabaseUser": null,
@@ -481,8 +481,8 @@ Describe 'Specifying no system size...' -Tag 'size' {
   "srmLicenseFile": "srm-web-license",
   "scanFarmSastLicenseFile": null,
   "scanFarmScaLicenseFile": null,
-  "sigRepoUsername": null,
-  "sigRepoPwd": null,
+  "repoUsername": null,
+  "repoPwd": null,
   "scanFarmDatabaseHost": null,
   "scanFarmDatabasePort": null,
   "scanFarmDatabaseUser": null,

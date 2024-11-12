@@ -1,10 +1,11 @@
 <#PSScriptInfo
-.VERSION 1.0.0
+.VERSION 1.1.0
 .GUID 0ed65ef9-0f8f-43d3-9fdd-b778072c08f0
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 #>
 
-using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.17.0' }
 param (
 	[Parameter(Mandatory=$true)][string] $configPath,
 	[string] $configFilePwd

@@ -1,4 +1,4 @@
-using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.17.0' }
 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
@@ -30,8 +30,8 @@ Describe 'Running the add certificates wizard' -Tag 'size' {
 			"srmLicenseFile": "work-dir-placeholder\\srm-web-license.txt",
 			"scanFarmSastLicenseFile": null,
 			"scanFarmScaLicenseFile": null,
-			"sigRepoUsername": null,
-			"sigRepoPwd": null,
+			"repoUsername": null,
+			"repoPwd": null,
 			"scanFarmDatabaseHost": null,
 			"scanFarmDatabasePort": null,
 			"scanFarmDatabaseUser": null,
@@ -234,8 +234,8 @@ Describe 'Running the add certificates wizard' -Tag 'size' {
 			"srmLicenseFile": "work-dir-placeholder\\srm-web-license.txt",
 			"scanFarmSastLicenseFile": null,
 			"scanFarmScaLicenseFile": null,
-			"sigRepoUsername": null,
-			"sigRepoPwd": null,
+			"repoUsername": null,
+			"repoPwd": null,
 			"scanFarmDatabaseHost": null,
 			"scanFarmDatabasePort": null,
 			"scanFarmDatabaseUser": null,
@@ -467,8 +467,8 @@ Describe 'Running the add certificates wizard' -Tag 'size' {
 			"srmLicenseFile": "work-dir-placeholder\\srm-web-license.txt",
 			"scanFarmSastLicenseFile": null,
 			"scanFarmScaLicenseFile": null,
-			"sigRepoUsername": null,
-			"sigRepoPwd": null,
+			"repoUsername": null,
+			"repoPwd": null,
 			"scanFarmDatabaseHost": null,
 			"scanFarmDatabasePort": null,
 			"scanFarmDatabaseUser": null,
@@ -702,8 +702,8 @@ Describe 'Running the add certificates wizard' -Tag 'size' {
 			"srmLicenseFile": "work-dir-placeholder\\srm-web-license.txt",
 			"scanFarmSastLicenseFile": null,
 			"scanFarmScaLicenseFile": null,
-			"sigRepoUsername": null,
-			"sigRepoPwd": null,
+			"repoUsername": null,
+			"repoPwd": null,
 			"scanFarmDatabaseHost": null,
 			"scanFarmDatabasePort": null,
 			"scanFarmDatabaseUser": null,

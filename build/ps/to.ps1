@@ -27,8 +27,8 @@ function Set-ToolOrchestrationDeploymentGuideTag([string] $repoDir, [string] $ta
 
 	$docPath = Get-DeploymentGuidePath $repoDir
 
-	$pattern     = '\| to.image.tag \| string \| `.+` \| the Docker image version for the SRM Tool Orchestration workloads \(tools and toolsMono use the web.image.tag version\)\|'
-	$replacement = "| to.image.tag | string | ``""$tag""`` | the Docker image version for the SRM Tool Orchestration workloads (tools and toolsMono use the web.image.tag version)|"
+	$pattern     = '\| to.image.tag \| string \| `.+` \| the Docker image version for the SRM Tool Orchestration workloads \(tools use the web.image.tag version\)\|'
+	$replacement = "| to.image.tag | string | ``""$tag""`` | the Docker image version for the SRM Tool Orchestration workloads (tools use the web.image.tag version)|"
 
 	(Get-Content $docPath) -replace $pattern,$replacement | Set-Content $docPath
 }

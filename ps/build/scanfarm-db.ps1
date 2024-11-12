@@ -27,7 +27,7 @@ function New-ScanFarmDatabaseTlsConfig($config) {
 
 	New-ScanFarmDatabaseCertConfigMap $config
 	@"
-cnc:
+scan-services:
   trust-stores:
     configmapName: $(Get-ScanFarmDatabaseCertConfigMapName $config)
     enabled: true
@@ -38,11 +38,11 @@ function New-ScanFarmDatabaseConfig($config) {
 
 	New-ScanFarmDatabaseSecret $config
 	@"
-cnc:
-  cnc-scan-service:
+scan-services:
+  scan-service:
     postgres:
       database: $($config.scanFarmScanDatabaseCatalog)
-  cnc-storage-service:
+  storage-service:
     postgres:
       database: $($config.scanFarmStorageDatabaseCatalog)
   postgres:

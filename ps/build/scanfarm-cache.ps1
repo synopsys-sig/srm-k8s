@@ -17,8 +17,8 @@ function New-ScanFarmCacheAuthConfig($config) {
 
 	New-ScanFarmCacheAuthSecret $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     redis:
       authEnabled: true
       passwordSecret: $(Get-ScanFarmCacheAuthSecretName $config)
@@ -36,8 +36,8 @@ function New-ScanFarmCacheTlsConfig($config) {
 
 	New-ScanFarmCacheCertSecret $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     redis:
       cacertSecret: $(Get-ScanFarmCacheCertSecretName $config)
       verifyHostName: $(ConvertTo-Json ($config.scanFarmRedisVerifyHostname))
@@ -47,8 +47,8 @@ cnc:
 function New-ScanFarmCacheConfig($config) {
 
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     redis:
       host: $($config.scanFarmRedisHost)
       port: $($config.scanFarmRedisPort)

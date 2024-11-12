@@ -1,10 +1,11 @@
 <#PSScriptInfo
-.VERSION 1.8.0
+.VERSION 1.9.0
 .GUID 0ab56564-8d45-485c-829a-bffed0882237
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 #>
 
-using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.17.0' }
 
 $ErrorActionPreference = 'Stop'
 $VerbosePreference = 'Continue'
@@ -187,8 +188,8 @@ $s = @{}
 [ServiceAccountNameToolService],
 [ServiceAccountNameWorkflow],
 [SignerName],
-[SigRepoUsername],
-[SigRepoPassword],
+[RepoUsername],
+[RepoPassword],
 [Size],
 [SrmWebLicense],
 [StorageClassName],
@@ -239,7 +240,7 @@ $s = @{}
 	Add-Step $graph $s[$_]
 }
 
-Add-StepTransitions $graph $s[[UseScanFarm]] $s[[SigRepoUsername]],$s[[SigRepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
+Add-StepTransitions $graph $s[[UseScanFarm]] $s[[RepoUsername]],$s[[RepoPassword]],$s[[ScanFarmType]],$s[[ScanFarmSastLicense]],$s[[ScanFarmScaLicense]],
 	$s[[ScanFarmDatabaseHost]],$s[[ScanFarmDatabasePort]],$s[[ScanFarmDatabaseUsername]],$s[[ScanFarmDatabasePwd]],
 	$s[[ScanFarmDatabaseTls]],$s[[ScanFarmDatabaseCert]],$s[[ScanFarmScanServiceDatabaseName]],$s[[ScanFarmStorageServiceDatabaseName]],
 	$s[[ScanFarmRedisRequirements]],$s[[ScanFarmRedisHost]],$s[[ScanFarmRedisPort]],$s[[ScanFarmRedisDatabase]],

@@ -1,13 +1,13 @@
 {{- define "srm-sf.scanSvcName" -}}
-{{- printf "%s-cnc-scan-service" .Release.Name }}
+{{- printf "%s-scan-service" .Release.Name }}
 {{- end }}
 
 {{- define "srm-sf.storageSvcName" -}}
-{{- printf "%s-cnc-storage-service" .Release.Name }}
+{{- printf "%s-storage-service" .Release.Name }}
 {{- end -}}
 
 {{- define "srm-sf.cacheSvcName" -}}
-{{- printf "%s-cnc-cache-service" .Release.Name }}
+{{- printf "%s-cache-service" .Release.Name }}
 {{- end -}}
 
 {{- define "srm-sf.scanSvcUrl" -}}
@@ -36,3 +36,19 @@ app.kubernetes.io/name: {{ include "srm-web.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/component: configuration
 {{- end }}
+
+{{- define "srm-sf.assert-sast-version" -}}
+{{- include "srm-sf.assert-tool-version" (dict "type" "SAST" "version" .Values.web.scanfarm.sast.version "supportedVersions" (list "2024.9.1" "2024.3.0" "2023.9.2" "2023.6.1")) -}}
+{{- end -}}
+
+{{- define "srm-sf.assert-sca-version" -}}
+{{- include "srm-sf.assert-tool-version" (dict "type" "SCA" "version" .Values.web.scanfarm.sca.version "supportedVersions" (list "9.2.0" "8.9.0")) -}}
+{{- end -}}
+
+{{- define "srm-sf.assert-tool-version" -}}
+    {{- if has .version .supportedVersions -}}
+        {{- .version -}}
+    {{- else -}}
+        {{- fail (printf "%s is not a supported %s tool version; use one of these tested values instead: %s" .version .type (toString .supportedVersions)) -}}
+    {{- end -}}
+{{- end -}}

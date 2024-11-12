@@ -29,8 +29,8 @@ function New-ScanFarmMinIOTlsConfig($config) {
 
 	New-ScanFarmMinIOCertConfigMap $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     minio:
       cacert: $(Get-ScanFarmMinIOCertConfigMapName $config)
 "@ | Out-File (Get-ScanFarmMinIOTlsValuesPath $config)
@@ -77,8 +77,8 @@ function New-ScanFarmMinIOConfig($config) {
 	$credentialSecretName = Get-ScanFarmMinIOSecretName $config
 	New-ScanFarmMinIORootSecretName $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     aws:
       secret: $credentialSecretName
     bucketName: $($config.scanFarmCacheBucketName)
@@ -89,7 +89,7 @@ cnc:
       secure: $(ConvertTo-Json ($config.scanFarmMinIOSecure))
       verifyHostName: $(ConvertTo-Json ($config.scanFarmMinIOVerifyHostname))
     storageProvider: minio
-  cnc-storage-service:
+  storage-service:
     storageType: minio
     minio:
       bucket: $($config.scanFarmStorageBucketName)
@@ -113,14 +113,14 @@ function New-ScanFarmAwsS3KeyConfig($config) {
 	$credentialSecretName = Get-ScanFarmAwsS3CredentialName $config
 	New-ScanFarmAwsS3SecretName $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     aws:
       region: $($config.scanFarmS3Region)
       secret: $credentialSecretName
     bucketName: $($config.scanFarmCacheBucketName)
     storageProvider: aws
-  cnc-storage-service:
+  storage-service:
     storageType: s3
     s3:
       bucket: $($config.scanFarmStorageBucketName)
@@ -134,14 +134,14 @@ function New-ScanFarmAwsS3IrsaConfig($config) {
 
 	$serviceAccountName = $config.scanFarmS3ServiceAccountName
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     aws:
       region: $($config.scanFarmS3Region)
       serviceAccount: $serviceAccountName
     bucketName: $($config.scanFarmCacheBucketName)
     storageProvider: aws
-  cnc-storage-service:
+  storage-service:
     storageType: s3
     s3:
       bucket: $($config.scanFarmStorageBucketName)
@@ -155,14 +155,14 @@ function New-ScanFarmGcsConfig($config) {
 	$credentialSecretName = Get-ScanFarmGcsCredentialName $config
 	New-ScanFarmGcsSecretName $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     gcp:
       project: $($config.scanFarmGcsProjectName)
       secret: $credentialSecretName
     bucketName: $($config.scanFarmCacheBucketName)
     storageProvider: gcp
-  cnc-storage-service:
+  storage-service:
     storageType: gcs
     gcs:
       bucket: $($config.scanFarmStorageBucketName)
@@ -177,13 +177,13 @@ function New-ScanFarmAzureConfig($config) {
 	$credentialSecretName = Get-ScanFarmAzureCredentialName $config
 	New-ScanFarmAzureSecretName $config
 	@"
-cnc:
-  cnc-cache-service:
+scan-services:
+  cache-service:
     azure:
       secret: $credentialSecretName
     bucketName: $($config.scanFarmCacheBucketName)
     storageProvider: azure
-  cnc-storage-service:
+  storage-service:
     storageType: azure
     azure:
       container: $($config.scanFarmStorageBucketName)

@@ -1,7 +1,8 @@
 <#PSScriptInfo
 .VERSION 1.0.0
 .GUID 6ec2869a-938b-4b49-8e64-28f0ad5876dc
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 #>
 param (
 	[Parameter(Mandatory=$true)][string] $configPath,

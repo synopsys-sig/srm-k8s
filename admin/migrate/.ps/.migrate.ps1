@@ -1,11 +1,11 @@
 <#PSScriptInfo
-.VERSION 1.6.0
+.VERSION 1.7.0
 .GUID 62c5091b-7337-44aa-a87b-f9828ae1013a
 .AUTHOR Code Dx
 .DESCRIPTION This script helps you migrate from Code Dx to SRM (w/o the scan farm feature enabled)
 #>
 
-using module @{ModuleName='guided-setup'; RequiredVersion='1.16.0' }
+using module @{ModuleName='guided-setup'; RequiredVersion='1.17.0' }
 
 param (
 	[string]                 $codeDxSetupScriptPath,
@@ -339,9 +339,9 @@ Specify the SAML hostBasePath name to associate with the SRM web application. Th
 IdP will connect to your SRM instance using the SRM Assertion Consumer Service (ACS) 
 endpoint, which will be a URL that is based on your SRM DNS name.
 
-If your DNS name will be my-srm.synopsys.com accessed via HTTPS, enter this hostBasePath:
+If your DNS name will be my-srm.blackduck.com accessed via HTTPS, enter this hostBasePath:
 
-https://my-srm.synopsys.com/srm
+https://my-srm.blackduck.com/srm
 
 Enter your SAML hostBasePath
 '@
@@ -483,7 +483,7 @@ if ('' -ne $backupType) {
 
 $extraValuesFiles = $extraCodeDxValuesPaths + $extraToolOrchestrationValuesPath
 if ($extraValuesFiles.Length -gt 0) {
-	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#customizing-software-risk-manager-props for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/synopsys-sig/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Synopsys for help with this task.`n"
+	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#customizing-software-risk-manager-props for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/synopsys-sig/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Black Duck for help with this task.`n"
 	$extraValuesFiles | ForEach-Object {
 		Write-Host "  - $_"
 	}

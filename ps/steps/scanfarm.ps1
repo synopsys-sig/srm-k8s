@@ -101,36 +101,36 @@ feature. Your component TLS configuration must be removed.
 	}
 }
 
-class SigRepoUsername : Step {
+class RepoUsername : Step {
 
 	static [string] hidden $description = @'
 To use the Scan Farm feature, you must provide a username and password
-for the Synopsys SIG Docker Registry. You can obtain your credential by
+for the Black Duck Docker Registry. You can obtain your credential by
 clicking the 'View/Request Docker Registry Credential' button in the
-Synopsys Community portal.
+Black Duck Community portal.
 
-If you are new to Synopsys SIG, request access to Synopsys SIG Community
-at https://community.synopsys.com/s/SelfRegistrationForm. Complete and
+If you are new to Black Duck, request access to Black Duck Community
+at https://community.blackduck.com/s/SelfRegistrationForm. Complete and
 submit the registration form, and you should receive access instantaneously.
 
 Your credential is the same one you will use to copy Docker images from
-the Synopsys Docker registry to your private Docker registry.
+the Black Duck Docker registry to your private Docker registry.
 '@
 
-	SigRepoUsername([Config] $config) : base(
-		[SigRepoUsername].Name, 
+	RepoUsername([Config] $config) : base(
+		[RepoUsername].Name, 
 		$config,
-		'Synopsys SIG Docker Repo Username',
-		[SigRepoUsername]::description,
-		'Enter your SIG Docker Repo username') {}
+		'Black Duck Docker Repo Username',
+		[RepoUsername]::description,
+		'Enter your Black Duck Docker Repo username') {}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.sigRepoUsername = ([Question]$question).response
+		$this.config.repoUsername = ([Question]$question).response
 		return $true
 	}
 
 	[void]Reset(){
-		$this.config.sigRepoUsername = ''
+		$this.config.repoUsername = ''
 	}
 	
 	[bool]CanRun() {
@@ -138,28 +138,28 @@ the Synopsys Docker registry to your private Docker registry.
 	}
 }
 
-class SigRepoPassword : Step {
+class RepoPassword : Step {
 
 	static [string] hidden $description = @'
 To use the Scan Farm feature, you must provide a username and password
-for the Synopsys SIG Docker Registry. You can obtain your credential by
+for the Black Duck Docker Registry. You can obtain your credential by
 clicking the 'View/Request Docker Registry Credential' button in the
-Synopsys Community portal.
+Black Duck Community portal.
 
-If you are new to Synopsys SIG, request access to Synopsys SIG Community
-at https://community.synopsys.com/s/SelfRegistrationForm. Complete and
+If you are new to Black Duck, request access to Black Duck Community
+at https://community.blackduck.com/s/SelfRegistrationForm. Complete and
 submit the registration form, and you should receive access instantaneously.
 
 Your credential is the same one you will use to copy Docker images from
-the Synopsys Docker registry to your private Docker registry.
+the Black Duck Docker registry to your private Docker registry.
 '@
 
-	SigRepoPassword([Config] $config) : base(
-		[SigRepoPassword].Name, 
+	RepoPassword([Config] $config) : base(
+		[RepoPassword].Name, 
 		$config,
-		'Synopsys SIG Docker Repo Password',
-		[SigRepoPassword]::description,
-		'Enter your SIG Docker Repo password') {}
+		'Black Duck Docker Repo Password',
+		[RepoPassword]::description,
+		'Enter your Black Duck Docker Repo password') {}
 
 	[IQuestion]MakeQuestion([string] $prompt) {
 		$question = new-object ConfirmationQuestion($prompt)
@@ -168,12 +168,12 @@ the Synopsys Docker registry to your private Docker registry.
 	}
 
 	[bool]HandleResponse([IQuestion] $question) {
-		$this.config.sigRepoPwd = ([ConfirmationQuestion]$question).response
+		$this.config.repoPwd = ([ConfirmationQuestion]$question).response
 		return $true
 	}
 
 	[void]Reset(){
-		$this.config.sigRepoPwd = ''
+		$this.config.repoPwd = ''
 	}
 
 	[bool]CanRun() {

@@ -2,8 +2,8 @@ apiVersion: v2
 name: srm
 description: Software Risk Manager
 type: application
-icon: https://github.com/synopsys-sig/srm-k8s/raw/refs/heads/main/docs/images/icon.svg
-version: 1.39.0
+icon: https://github.com/synopsys-sig/srm-k8s/blob/main/docs/images/icon.svg
+version: 1.39.0-3
 appVersion: "v2024.9.4.1"
 
 dependencies:
@@ -11,9 +11,9 @@ dependencies:
   version: 7.6.0
   repository: https://synopsys-sig.github.io/srm-k8s
   condition: features.mariadb
-- name: cnc
-  version: "2024.3.0"
-  repository: https://sig-repo.synopsys.com/artifactory/sig-cloudnative
+- name: scan-services
+  version: "2024.9.1"
+  repository: https://repo.blackduck.com/artifactory/sig-cloudnative
   condition: features.scanfarm
 - name: argo-workflows
   version: 0.42.4

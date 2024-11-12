@@ -1,7 +1,8 @@
 <#PSScriptInfo
-.VERSION 1.2.0
+.VERSION 1.3.0
 .GUID e3f56093-60e5-4035-8e61-f4bad1bebae9
-.AUTHOR Synopsys
+.AUTHOR Black Duck
+.COPYRIGHT Copyright 2024 Black Duck Software, Inc. All rights reserved.
 #>
 
 <# 
@@ -27,9 +28,11 @@ if (-not (Test-HelmRelease $namespace $releaseName)) {
 	Write-Error "Unable to find Helm release named $releaseName in namespace $namespace."
 }
 
-$deploymentSRM = "$(Get-HelmChartFullname $releaseName 'srm')-web"
-$statefulSetMariaDBMaster = "$releaseName-mariadb-master"
-$statefulSetMariaDBSlave = "$releaseName-mariadb-slave"
+$deploymentSRM = "$(Get-HelmChartFullnameEquals $releaseName 'srm')-web"
+
+$dbFullChartName = Get-HelmChartFullnameContains $releaseName 'mariadb'
+$statefulSetMariaDBMaster = "$dbFullChartName-master"
+$statefulSetMariaDBSlave = "$dbFullChartName-slave"
 
 # identify the number of replicas
 $statefulSetMariaDBSlaveCount = 0
@@ -42,7 +45,7 @@ if ($values.mariadb.replication.enabled) {
 }
 
 if ($statefulSetMariaDBSlaveCount -eq 0) {
-	$statefulSetMariaDBMaster = "$releaseName-mariadb"
+	$statefulSetMariaDBMaster = $dbFullChartName
 	$statefulSetMariaDBSlave = ''
 }
 

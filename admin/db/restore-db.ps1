@@ -18,7 +18,7 @@ param (
 	[string] $namespace = 'srm',
 	[string] $releaseName = 'srm',
 	[int]    $waitSeconds = 600,
-	[string] $imageDatabaseRestore = 'codedx/codedx-dbrestore:v1.12.0',
+	[string] $imageDatabaseRestore = 'codedx/codedx-dbrestore:v1.13.0',
 	[string] $dockerImagePullSecretName,
 	[switch] $skipSRMWebRestart
 )
