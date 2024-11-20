@@ -9,7 +9,7 @@ Full path to the AppData directory
 Full path to the profile directory
 */}}
 {{- define "srm-web.profile.path" -}}
-/home/codedx/.codedx
+/opt/.codedx
 {{- end -}}
 
 {{/*
