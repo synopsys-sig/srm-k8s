@@ -349,15 +349,19 @@ class Config {
 		$this.serviceAccountWorkflow = ''
 		# v1.5 fields
 		$this.authCookieSecure = $false
+
+		# Note: the restore-version.ps1 script should account for any config.json format changes
 	}
 
 	static [PSObject] RenameJsonField($json, $oldField, $newField) {
 
-		$hasOldField = $null -ne ($json.PSObject.Properties | Where-Object { $_.Name -eq $oldField })
+		# convert JSON object to a hashtable
+		$json = $json | ConvertTo-Json | ConvertFrom-Json -AsHashtable
+		$hasOldField = $null -ne $json.$oldField
 
 		if ($hasOldField) {
-			$json | add-member -name $newField -value $json.$oldField -MemberType NoteProperty
-			$json.PSObject.Properties.Remove($oldField)
+			$json.$newField = $json.$oldField
+			$json.Remove($oldField)
 
 			# update related salt to avoid an unlock problem
 			if ($json.salts.length -gt 0) {
@@ -368,7 +372,9 @@ class Config {
 				}
 			}
 		}
-		return $json
+
+		# convert hashtable back to a custom PSObject
+		return $json | ConvertTo-Json | ConvertFrom-Json
 	}
 
 	static [Config] FromJsonFile($configJsonFile) {
