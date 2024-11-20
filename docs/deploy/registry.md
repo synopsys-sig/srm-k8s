@@ -171,7 +171,6 @@ If you are not using the SRM Tool Orchestration feature, skip this section.
 The SRM Tool Orchestration feature requires these Docker images:
 
 - repo.blackduck.com/containers/codedx/codedx-tools:v2024.9.6
-- repo.blackduck.com/containers/codedx/codedx-toolsmono:v2024.9.4-1
 - repo.blackduck.com/containers/codedx/codedx-prepare:v2.5.0
 - repo.blackduck.com/containers/codedx/codedx-newanalysis:v2.5.0
 - repo.blackduck.com/containers/codedx/codedx-results:v2.5.0

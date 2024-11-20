@@ -4563,7 +4563,6 @@ This version of Software Risk Manager works with the new Black Duck Repo (34.149
 |:-|:-|
 |sig-repo.synopsys.com/synopsys/codedx/codedx-tomcat:v2024.9.4.1|repo.blackduck.com/containers/codedx/codedx-tomcat:v2024.9.4.1|
 |sig-repo.synopsys.com/synopsys/codedx/codedx-tools:v2024.9.4.1|repo.blackduck.com/containers/codedx/codedx-tools:v2024.9.4.1|
-|sig-repo.synopsys.com/synopsys/codedx/codedx-toolsmono:v2024.9.4.1|repo.blackduck.com/containers/codedx/codedx-toolsmono:v2024.9.4.1|
 |sig-repo.synopsys.com/synopsys/codedx/codedx-prepare:v2.4.0|repo.blackduck.com/containers/codedx/codedx-prepare:v2.4.0|
 |sig-repo.synopsys.com/synopsys/codedx/codedx-newanalysis:v2.4.0|repo.blackduck.com/containers/codedx/codedx-newanalysis:v2.4.0|
 |sig-repo.synopsys.com/synopsys/codedx/codedx-results:v2.4.0|repo.blackduck.com/containers/codedx/codedx-results:v2.4.0|
