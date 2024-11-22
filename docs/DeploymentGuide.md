@@ -4096,7 +4096,7 @@ The Helm Prep Wizard generates a config.json file used as input to the Helm Prep
 
 Refer to the [lock/unlock scripts](../admin/config) to edit [protected config.json fields](../ps/config.ps1#L66).
 
-![config.json version: 1.4.0](https://img.shields.io/badge/config.json%20version-1.4.0-informational?style=flat-square)
+![config.json version: 1.6.0](https://img.shields.io/badge/config.json%20version-1.6.0-informational?style=flat-square)
 
 |Parameter|Feature|Description|Example|Since|
 |:---|:---|:---|:---|:---|
