@@ -1662,7 +1662,7 @@ The Software Risk Manager Helm chart creates multiple Kubernetes Secret resource
 Run the following commands to install Software Risk Manager Core using the default configuration:
 
 ```
-$ helm -n srm upgrade --reset-values --install --create-namespace --repo https://synopsys-sig.github.io/srm-k8s srm srm # --set openshift.createSCC=true
+$ helm -n srm upgrade --reset-values --install --create-namespace --repo https://codedx.github.io/srm-k8s srm srm # --set openshift.createSCC=true
 ```
 
 >Note: If you are using OpenShift, remove `#` when running the last command.
@@ -1672,9 +1672,9 @@ $ helm -n srm upgrade --reset-values --install --create-namespace --repo https:/
 Run the following commands to install Software Risk Manager with Tool Orchestration using the default configuration:
 
 ```
-$ git clone https://github.com/synopsys-sig/srm-k8s
+$ git clone https://github.com/codedx/srm-k8s
 $ kubectl apply -f srm-k8s/crds/v1
-$ helm -n srm upgrade --reset-values --install --create-namespace --repo https://synopsys-sig.github.io/srm-k8s -f srm-k8s/chart/values/values-to.yaml srm srm # --set openshift.createSCC=true
+$ helm -n srm upgrade --reset-values --install --create-namespace --repo https://codedx.github.io/srm-k8s -f srm-k8s/chart/values/values-to.yaml srm srm # --set openshift.createSCC=true
 ```
 
 >Note 1: If you are installing in a namespace other than srm, you must specify that namespace by replacing "srm" in the following helm --set command: `argo-workflows.controller.workflowNamespaces={srm}`.
@@ -1706,7 +1706,7 @@ The Software Risk Manager Helm chart creates multiple Kubernetes Secret resource
 
 ## Prerequisites
 
-The deployment scripts in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. 
+The deployment scripts in the [srm-k8s GitHub repository](https://github.com/codedx/srm-k8s) require [PowerShell Core](https://learn.microsoft.com/en-us/powershell/scripting/overview), which runs on macOS, Linux, and Windows. 
 
 >Note: PowerShell Core differs from Windows PowerShell, which is available on Windows only.
 
@@ -1763,10 +1763,10 @@ The Helm Prep Wizard has a dependency on a Black Duck PowerShell module publishe
 
 ## Clone GitHub Repository
 
-The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) repository contains what you need to start your Software Risk Manager Kubernetes deployment. Clone the repository to a stable directory on your system. You will use your cloned repository for both your initial deployment and for deploying future Software Risk Manager software upgrades.
+The [srm-k8s GitHub repository](https://github.com/codedx/srm-k8s) repository contains what you need to start your Software Risk Manager Kubernetes deployment. Clone the repository to a stable directory on your system. You will use your cloned repository for both your initial deployment and for deploying future Software Risk Manager software upgrades.
 
 ```
-$ git clone https://github.com/synopsys-sig/srm-k8s
+$ git clone https://github.com/codedx/srm-k8s
 ```
 
 ## Helm Prep Wizard
@@ -1833,7 +1833,7 @@ K8s Installation Notes
   *   Assign a pool-type label (pool-type=small) to analysis node(s).
   *   Assign a scanner node taint (NodeType=ScannerNode:NoSchedule) to analysis node(s).
   *   NOTE: A "small" pool-type requires one or more nodes with 6.5 vCPUs and 26 GB of memory
-- Follow instructions at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Black Duck Docker images to your private registry.
+- Follow instructions at https://github.com/codedx/srm-k8s/blob/main/docs/deploy/registry.md to pull/push Black Duck Docker images to your private registry.
 
 
 ----------------------
@@ -1878,7 +1878,7 @@ After running the Helm Prep Wizard and Helm Prep scripts, you can optionally dep
 
 This section describes how to configure a fictitious GitHub repository named "srm-gitops" for use with [Flux](https://fluxcd.io/flux/) and [Bitnami's Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets). The configuration in the git repository will manage a Kubernetes cluster referred to as the "demo" cluster where a Software Risk Manager deployment can be managed using GitOps.
 
-Instructions that follow refer to a fictitious GitHub repository at https://github.com/synopsys-sig/srm-gitops and a made-up "srm" kubectl context. To follow along with the instructions, replace the following content:
+Instructions that follow refer to a fictitious GitHub repository at https://github.com/codedx/srm-gitops and a made-up "srm" kubectl context. To follow along with the instructions, replace the following content:
 
 - replace the demo directory references with a directory name that represents your cluster
 - replace the srm-gitops GitHub repository references with the location of your GitHub repository
@@ -1911,7 +1911,7 @@ For the most up-to-date instructions, refer to the [Flux bootstrap instructions]
 4) Download the repo:
 
     ```
-    git clone https://github.com/synopsys-sig/srm-gitops
+    git clone https://github.com/codedx/srm-gitops
     ```
 
 5) Bootstrap flux components on cluster (--token-auth bootstraps Flux for HTTPS repo access):
@@ -1986,7 +1986,7 @@ param (
 	[string]   $workDir = "$HOME/.k8s-srm",
 	[Parameter(Mandatory=$true)][string] $namespace,
 	[Parameter(Mandatory=$true)][string] $releaseName,
-	[string]   $helmChartRepoUrl = 'https://synopsys-sig.github.io/srm-k8s',
+	[string]   $helmChartRepoUrl = 'https://codedx.github.io/srm-k8s',
 	[string[]] $extraValuesFiles = @(),
 	[switch]   $useSealedSecrets,
 	[string]   $sealedSecretsNamespace = 'flux-system',
@@ -2956,7 +2956,7 @@ During Step 2, you will run the admin/restore-db.ps1 script to restore the Softw
 
 At this point, you can find the database backup corresponding to the backup you want to restore. Refer to the Verify Backup section for the command to list backup files on a MariaDB slave database instance. Note the name of the database backup that coincides with the Velero backup you restored (e.g., '20200523-020200-Full'). You will enter this name when prompted by the restore-db.ps1 script.
 
-You must add both the helm and kubectl programs to your path before running the restore database script. Start a new PowerShell Core 7 session and change directory to where you downloaded the setup scripts from the [srm-k8s repository](https://github.com/synopsys-sig/srm-k8s).
+You must add both the helm and kubectl programs to your path before running the restore database script. Start a new PowerShell Core 7 session and change directory to where you downloaded the setup scripts from the [srm-k8s repository](https://github.com/codedx/srm-k8s).
 
 ```
 /$ pwsh
@@ -3069,7 +3069,7 @@ Software Risk Manager has four major releases typically spaced evenly throughout
 
 ## Applying an Update
 
-The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) is updated with each Software Risk Manager release. Additional Kubernetes-specific releases may occur between planned Software Risk Manager releases. Each release has a version number based on [Semantic Versioning](https://semver.org/) with release notes published on the [releases page](https://github.com/synopsys-sig/srm-k8s/releases). 
+The [srm-k8s GitHub repository](https://github.com/codedx/srm-k8s) is updated with each Software Risk Manager release. Additional Kubernetes-specific releases may occur between planned Software Risk Manager releases. Each release has a version number based on [Semantic Versioning](https://semver.org/) with release notes published on the [releases page](https://github.com/codedx/srm-k8s/releases). 
 
 >Note: It is essential to read release notes associated with releases introducing breaking changes.
 
@@ -3164,8 +3164,8 @@ The new deployment model differs from the legacy one in the following ways:
 | Script | Deployment Script | Helm Prep Script |
 | Requires Connected Cluster | Yes | No |
 ||||
-| Git Repo | [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) | [srm-k8s](https://github.com/synopsys-sig/srm-k8s) |
-| Chart Repo | n/a | https://synopsys-sig.github.io/srm-k8s |
+| Git Repo | [codedx-kubernetes](https://github.com/codedx/codedx-kubernetes) | [srm-k8s](https://github.com/codedx/srm-k8s) |
+| Chart Repo | n/a | https://codedx.github.io/srm-k8s |
 ||||
 | Helm Charts | 2 | 1 |
 | Namespaces | 2 | 1 |
@@ -3218,10 +3218,10 @@ Back up your Code Dx system now so that you can restore its state should somethi
 
 ## Clone the srm-k8s GitHub Repository
 
-The [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s) includes the scripts you need to migrate from the Code Dx deployment model to the Software Risk Manager one. Run the following command to clone the repository by fetching the files required to install the latest Software Risk Manager release:
+The [srm-k8s GitHub repository](https://github.com/codedx/srm-k8s) includes the scripts you need to migrate from the Code Dx deployment model to the Software Risk Manager one. Run the following command to clone the repository by fetching the files required to install the latest Software Risk Manager release:
 
 ```
-$ git clone https://github.com/synopsys-sig/srm-k8s
+$ git clone https://github.com/codedx/srm-k8s
 $ cd /path/to/git/srm-k8s
 ```
 
@@ -3698,7 +3698,7 @@ $ curl -L https://dl.k8s.io/release/v1.28.4/bin/linux/amd64/kubectl -o /usr/loca
 $ chmod +x /usr/local/bin/kubectl
 
 $ # start Helm Prep Wizard
-$ git clone https://github.com/synopsys-sig/srm-k8s
+$ git clone https://github.com/codedx/srm-k8s
 $ cd srm-k8s
 $ pwsh ./helm-prep-wizard.ps1
 
@@ -3710,7 +3710,7 @@ $ pwsh "/root/.k8s-srm/run-helm-prep.ps1"
 
 This section describes the Software Risk Manager Helm chart that the Helm Prep Wizard and Helm Prep Script help you configure.
 
->Note: The chart is available in the [srm-k8s GitHub repository](https://github.com/synopsys-sig/srm-k8s/tree/main/chart) and the [srm-k8s chart repository](https://synopsys-sig.github.io/srm-k8s/index.yaml).
+>Note: The chart is available in the [srm-k8s GitHub repository](https://github.com/codedx/srm-k8s/tree/main/chart) and the [srm-k8s chart repository](https://codedx.github.io/srm-k8s/index.yaml).
 
 ## Chart Dependencies
 
@@ -3719,15 +3719,15 @@ Depending on the Software Risk Manager features you install and how you configur
 | Name | Feature | Repository | Purpose |
 |:-|:-|:-|:-|
 | argo-workflows | Tool Orchestration | https://argoproj.github.io/argo-helm | Required to manage orchestrated analyses |
-| mariadb | Core | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
-| minio | Tool Orchestration | https://synopsys-sig.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
+| mariadb | Core | https://codedx.github.io/srm-k8s | Optional on-cluster Software Risk Manager database |
+| minio | Tool Orchestration | https://codedx.github.io/srm-k8s | Optional on-cluster Software Risk Manager workflow storage |
 | scan-services | Scan Farm | https://repo.blackduck.com/artifactory/sig-cloudnative | Required to run SAST and SCA scans |
 
 ## Values
 
-The following table lists the Software Risk Manager Helm chart values. Run `helm show values srm --repo https://synopsys-sig.github.io/srm-k8s` to see the values for the latest chart.
+The following table lists the Software Risk Manager Helm chart values. Run `helm show values srm --repo https://codedx.github.io/srm-k8s` to see the values for the latest chart.
 
->Note: You can run `helm show values srm --repo https://synopsys-sig.github.io/srm-k8s --version 1.15.0` to see the values for a specific chart version, like 1.15.0 in the example.
+>Note: You can run `helm show values srm --repo https://codedx.github.io/srm-k8s --version 1.15.0` to see the values for a specific chart version, like 1.15.0 in the example.
 
 | Key | Type | Default/Example | Description |
 |:---|:---|:---|:---|
@@ -4487,7 +4487,7 @@ This section describes important considerations when moving from one SRM Helm ch
 
 These chart versions depend on an updated Scan Farm chart with a list of Docker images that differ from the previous version.
 
-- Scan Farm users should note the [changes to the list of Docker images](https://github.com/synopsys-sig/srm-k8s/commit/40de24a7ebb1cc96a8eb0f0660b652ae00c8c523#diff-af237e092dd7904bc46102ce0fd5f2986aacb50543ef5a558db6df195fe119b6) you must copy to your private registry.
+- Scan Farm users should note the [changes to the list of Docker images](https://github.com/codedx/srm-k8s/commit/40de24a7ebb1cc96a8eb0f0660b652ae00c8c523#diff-af237e092dd7904bc46102ce0fd5f2986aacb50543ef5a558db6df195fe119b6) you must copy to your private registry.
 
 ### Upgrading to v1.26
 
@@ -4504,7 +4504,7 @@ helm repo add argo-workflows https://argoproj.github.io/argo-helm --force-update
 
 >Note: Visit the [argo-workflows](https://github.com/argoproj/argo-helm/tree/main/charts/argo-workflows) site to ensure any custom overrides you may have added are valid for Argo v3.
 
-- Argo v3 uses newer versions of the Argo Custom Resource Definitions (CRDs); run `kubectl apply` on the latest [CRD files](https://github.com/synopsys-sig/srm-k8s/tree/main/crds/v1) to update your Argo v2 CRD definitions. Run the following command to update your Argo CRDs:
+- Argo v3 uses newer versions of the Argo Custom Resource Definitions (CRDs); run `kubectl apply` on the latest [CRD files](https://github.com/codedx/srm-k8s/tree/main/crds/v1) to update your Argo v2 CRD definitions. Run the following command to update your Argo CRDs:
 
 ```
 kubectl apply -f /path/to/git/srm-k8s/crds/v1

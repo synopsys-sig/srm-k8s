@@ -257,7 +257,7 @@ if ($skipDatabase) {
 Before invoking helm to install SRM, you must provision your external database by following the
 guidance at this URL:
 
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#external-web-database-pre-work.
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#external-web-database-pre-work.
 
 Your SRM deployment will fail if your '$($config.externalDatabaseHost)' host 
 does not have an empty '$($config.externalDatabaseName)' database that the user '$($config.externalDatabaseUser)' can access.
@@ -377,7 +377,7 @@ $config.useDefaultCACerts = -not [string]::IsNullOrEmpty($caCertsFilePath)
 $config.caCertsFilePath = $caCertsFilePath
 $config.caCertsFilePwd = $caCertsFilePwd
 
-Write-Host 'For a description of SRM System Size, see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size'
+Write-Host 'For a description of SRM System Size, see https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size'
 
 $cpuCountWeb = Get-VirtualCpuCountFromReservation $codeDxCPUReservation
 if ($cpuCountWeb -lt 4) {
@@ -483,7 +483,7 @@ if ('' -ne $backupType) {
 
 $extraValuesFiles = $extraCodeDxValuesPaths + $extraToolOrchestrationValuesPath
 if ($extraValuesFiles.Length -gt 0) {
-	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#customizing-software-risk-manager-props for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/synopsys-sig/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Black Duck for help with this task.`n"
+	Write-Host "`n---`nWARNING: You must map these files to the new deployment because they cannot be migrated automatically. Refer to https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#customizing-software-risk-manager-props for details on how to specify SRM properties. For extra value files referencing legacy chart values, refer to the new chart's values documentation at https://github.com/codedx/srm-k8s/tree/main/chart. Remember to reference your migrated files with the '-f' parameter when invoking the helm command that will be generated for you by the Helm Prep script. Contact Black Duck for help with this task.`n"
 	$extraValuesFiles | ForEach-Object {
 		Write-Host "  - $_"
 	}

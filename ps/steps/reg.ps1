@@ -47,7 +47,7 @@ private Docker registry hosts:
   - id-placeholder.dkr.ecr.us-east-2.amazonaws.com (AWS Elastic Container Registry)
 '@
 
-	static [string] hidden $pullPushInstructionLink = 'https://github.com/synopsys-sig/srm-k8s/blob/main/docs/deploy/registry.md'
+	static [string] hidden $pullPushInstructionLink = 'https://github.com/codedx/srm-k8s/blob/main/docs/deploy/registry.md'
 
 	static [string] hidden $notes = "- Follow instructions at $([DockerRegistryHost]::pullPushInstructionLink) to pull/push Black Duck Docker images to your private registry."
 

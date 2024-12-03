@@ -25,14 +25,14 @@ param (
 	[Parameter(Mandatory=$true)][string] $releaseName,
 
 	[Parameter(ParameterSetName = 'Helm')]
-	[string]   $helmChartRepoUrl = 'https://synopsys-sig.github.io/srm-k8s',
+	[string]   $helmChartRepoUrl = 'https://codedx.github.io/srm-k8s',
 	
 	[Parameter(ParameterSetName = 'Helm')]
 	[Parameter(ParameterSetName = 'Git')]
 	[string]   $helmChartVersion = '',
 
 	[Parameter(ParameterSetName = 'Git')]
-	[string]   $gitChartRepoUrl = 'https://github.com/synopsys-sig/srm-k8s',
+	[string]   $gitChartRepoUrl = 'https://github.com/codedx/srm-k8s',
 	[Parameter(ParameterSetName = 'Git')]
 	[string]   $gitChartBranchName = 'main',
 	[Parameter(ParameterSetName = 'Git')]
@@ -101,7 +101,7 @@ function Get-LatestSoftwareRiskManagerChartVersion([string] $chartRepo) {
 
 	$tempFile = New-TemporaryFile
 
-	# this assumes that chartRepo has the index.yaml available at https://synopsys-sig.github.io/srm-k8s/index.yaml
+	# this assumes that chartRepo has the index.yaml available at https://codedx.github.io/srm-k8s/index.yaml
 	Invoke-RestMethod "$chartRepo/index.yaml" | Out-File $tempFile.FullName
 
 	$yaml = Get-Yaml $tempFile.FullName

@@ -19,7 +19,7 @@ function New-WebCPUConfig($config) {
 	$limit = $cpuCountWeb * 1000
 	$dbLimit = $cpuCountDB * 1000
 
-	# https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size
+	# https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size
 	$concurrentAnalyses = $cpuCountWeb * 2
 
 	@"
