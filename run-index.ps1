@@ -1,1 +1,1 @@
-helm repo index . --url https://synopsys-sig.github.io/srm-k8s
+helm repo index . --url https://codedx.github.io/srm-k8s
