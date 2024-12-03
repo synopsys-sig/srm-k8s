@@ -85,7 +85,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: scan-services
@@ -97,11 +97,11 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 0c9770d60be0c06df7aea82152c6fce5aec68ac4c2ce923079cd7adfa7996cd7
-    icon: https://github.com/synopsys-sig/srm-k8s/blob/main/docs/images/icon.svg
+    icon: https://github.com/codedx/srm-k8s/blob/main/docs/images/icon.svg
     name: srm
     type: application
     urls:
@@ -113,7 +113,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: scan-services
@@ -125,11 +125,11 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: dfc376ff7475daad4ed676f0fdb6a1d6d2b13561b22018824093521443b51094
-    icon: https://github.com/synopsys-sig/srm-k8s/blob/main/docs/images/icon.svg
+    icon: https://github.com/codedx/srm-k8s/blob/main/docs/images/icon.svg
     name: srm
     type: application
     urls:
@@ -141,7 +141,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -153,7 +153,7 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: efd335ee32adb312eba046882d59f10babcaed78ce8ef40de4cc0cc5373ada57
@@ -169,7 +169,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -181,7 +181,7 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: b33107e2ae220f1b4fd91dd0ed30301b5084292e4da5fd98eb4eaa3bd01b743f
@@ -197,7 +197,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -209,7 +209,7 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: b1d3e97f4944a9194d51699098bcb15f1b24a54675aed04a4cf6d5b9b601016b
@@ -225,7 +225,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -237,7 +237,7 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 4a2418eec1664eff86b5dd30029d6a209ec6460a96913d9baf5f87afc3e0cdef
@@ -253,7 +253,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -265,7 +265,7 @@ entries:
       version: 0.42.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 3e1d4949439be1f57206aed8ced9591dd7b05834d86396cff51c5b50d5d17455
@@ -281,7 +281,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -293,7 +293,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: b1f6a957c6e14f5eca3224cea1a4b3edba819ddf1812e64a313cf991e9803ec8
@@ -309,7 +309,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -321,7 +321,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 330b9233aba2d6270aa219dc6afb41dcee909395bd396fdab05c4acc53c8ddf8
@@ -337,7 +337,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -349,7 +349,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: b4df2192b503579c8d3f4423df8889fcbcb3f58c854bc3b843d2d1c9cb171aa7
@@ -365,7 +365,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -377,7 +377,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 8f746bbf5e2484facb36f310724b51c602d14aa43e2b7931921a1c543e42e8e2
@@ -393,7 +393,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -405,7 +405,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 625500a6824c0c5578a366586fa14f6f4f1cd21c93339c8960f4858dc2fc1e68
@@ -421,7 +421,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -433,7 +433,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: c4f80d0a1dd7f9dafbb04a1a649e3e27cc63bc58dbb6fa55ec605a347afa2ffe
@@ -449,7 +449,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.6.0
     - condition: features.scanfarm
       name: cnc
@@ -461,7 +461,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: 886b6f05ed8d3c95e7a91b78e3ebe268b3f9755b7c68d59048287ba880d18395
@@ -477,7 +477,7 @@ entries:
     dependencies:
     - condition: features.mariadb
       name: mariadb
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 7.5.0
     - condition: features.scanfarm
       name: cnc
@@ -489,7 +489,7 @@ entries:
       version: 0.41.4
     - condition: features.minio
       name: minio
-      repository: https://synopsys-sig.github.io/srm-k8s
+      repository: https://codedx.github.io/srm-k8s
       version: 3.3.0
     description: Software Risk Manager
     digest: bc39027d8a12c5aa5b0a68f8087a6896fee8770946efe187183362997c513032
