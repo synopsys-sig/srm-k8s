@@ -12,7 +12,7 @@ secure the communication between SRM and your database (recommended).
 If you plan to use an external database for the SRM Web component, complete
 the External Web Database pre-work before continuing:
 
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#external-web-database-pre-work
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#external-web-database-pre-work
 '@
 
 	UseExternalDatabase([Config] $config) : base(

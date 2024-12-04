@@ -42,7 +42,7 @@ Refer to the following URL for LDAP configuration instructions. Read the
 instructions at this time and remember to add any necessary certificates 
 if you plan to use LDAPS:
 
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#specify-ldap-configuration
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#specify-ldap-configuration
 '@
 
 	LdapInstructions([Config] $config) : base(
@@ -251,7 +251,7 @@ You can find the entire list of SRM SAML properties at
 https://documentation.blackduck.com/bundle/srm/page/install_guide/SRMConfiguration/saml-props.html
 
 To configure additional SAML properties, follow these instructions:
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#specify-extra-saml-configuration
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#specify-extra-saml-configuration
 '@
 
 	SamlExtraConfig([Config] $config) : base(

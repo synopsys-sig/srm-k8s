@@ -1,8 +1,8 @@
 #
 # Follow the instructions at https://cert-manager.io/docs/usage/kube-csr/ to install cert-manager kube-csr - you can
-# find an example at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#cert-manager-self-signed-ca-example
+# find an example at https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#cert-manager-self-signed-ca-example
 #
-# (the commands below are also available at https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#helm-tls-values-values-tlsyaml)
+# (the commands below are also available at https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#helm-tls-values-values-tlsyaml)
 #
 # $ export CACERTS_PATH='/path/to/cacerts'
 # $ export CERT_MANAGER_NAMESPACE='cert-manager'

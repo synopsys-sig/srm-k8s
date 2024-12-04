@@ -15,7 +15,7 @@ features:
 
 # -- controls sizing for the Core and Tool Orchestration features (does not cover dependencies)
 sizing:
-  # -- whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size)
+  # -- whether the deployment size is considered Unspecified, Small, Medium, Large, or Extra Large (see https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#system-size)
   size: Unspecified
   # -- the version of the sizing guidance
   version: v1.0

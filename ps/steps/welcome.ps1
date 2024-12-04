@@ -38,7 +38,7 @@ class About : Step {
 This wizard will ask you a series of questions based on the SRM features
 you plan to deploy. Follow this link to read the SRM Deployment Guide:
 
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md
 
 You should complete any required pre-work before continuing.
 

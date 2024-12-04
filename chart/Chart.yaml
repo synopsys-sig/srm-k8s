@@ -2,14 +2,14 @@ apiVersion: v2
 name: srm
 description: Software Risk Manager
 type: application
-icon: https://github.com/synopsys-sig/srm-k8s/blob/main/docs/images/icon.svg
+icon: https://raw.githubusercontent.com/codedx/srm-k8s/refs/heads/main/docs/images/icon.svg
 version: 1.41.0
 appVersion: "v2024.9.6"
 
 dependencies:
 - name: mariadb
   version: 7.6.0
-  repository: https://synopsys-sig.github.io/srm-k8s
+  repository: https://codedx.github.io/srm-k8s
   condition: features.mariadb
 - name: scan-services
   version: "2024.9.1"
@@ -21,5 +21,5 @@ dependencies:
   condition: features.to
 - name: minio
   version: 3.3.0
-  repository: https://synopsys-sig.github.io/srm-k8s
+  repository: https://codedx.github.io/srm-k8s
   condition: features.minio

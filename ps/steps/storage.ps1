@@ -277,7 +277,7 @@ Specify the Tool Service Kubernetes service account name that you linked
 to an IAM role/policy with the required object storage permissions.
 
 You can find the Tool Service AWS object storage permissions at the following URL:
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#aws-irsa
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#aws-irsa
 '@
 
 	ServiceAccountNameToolService([Config] $config) : base(
@@ -308,7 +308,7 @@ Specify the tool workflow Kubernetes service account name that you linked
 to an IAM role/policy with the required object storage permissions.
 
 You can find the tool workflow AWS object storage permissions at the following URL:
-https://github.com/synopsys-sig/srm-k8s/blob/main/docs/DeploymentGuide.md#aws-irsa
+https://github.com/codedx/srm-k8s/blob/main/docs/DeploymentGuide.md#aws-irsa
 '@
 
 	ServiceAccountNameWorkflow([Config] $config) : base(
