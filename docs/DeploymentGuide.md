@@ -192,6 +192,7 @@
     + [Upgrading to v1.26](#upgrading-to-v126)
     + [Upgrading to v1.28](#upgrading-to-v128)
     + [Upgrading to v1.40](#upgrading-to-v140)
+    + [Upgrading to v1.42](#upgrading-to-v142)
   * [Helm Prep Wizard](#helm-prep-wizard-1)
   * [Add Certificates Wizard](#add-certificates-wizard)
   * [Add SAML Authentication Wizard](#add-saml-authentication-wizard)
@@ -4491,6 +4492,8 @@ These chart versions depend on an updated Scan Farm chart with a list of Docker 
 
 ### Upgrading to v1.26
 
+If you are upgrading from an earlier chart version, refer to any previous chart note(s) in addition to this one.
+
 This chart version switches the Tool Orchestration feature's Argo dependency from v2 to v3. 
 
 >Note: The Helm Prep Script will handle Argo-related chart configuration adjustments. If you previously deployed using the script, rerun the latest script version and follow its instructions.
@@ -4549,9 +4552,13 @@ fsGroup = 1000
 
 ### Upgrading to v1.28
 
+If you are upgrading from an earlier chart version, refer to any previous chart note(s) in addition to this one.
+
 This chart version replaces the `codedx/codedx-argoexec` and `codedx/codedx-workflow-controller` Docker images with `argoproj/argoexec` and `argoproj/workflow-controller`.
 
 ### Upgrading to v1.40
+
+If you are upgrading from an earlier chart version, refer to any previous chart note(s) in addition to this one.
 
 This chart version uses a different subchart for the Scan Farm feature, switching from chart `cnc` (version 2024.3.0) to the `scan-services` chart (version 2024.9.1). The Helm Prep Script for this version will switch your helm config from one chart to the other, but if you previously customized your Scan Farm configuration via your `srm-extra-props.yaml` file, refer to the [Scan Farm Job Resources](#scan-farm-job-resources) and [Specify Scan Farm Engine Versions](#specify-scan-farm-engine-versions) sections to update your customizations.
 
@@ -4581,6 +4588,13 @@ This version of Software Risk Manager works with the new Black Duck Repo (34.149
 |sig-repo.synopsys.com/synopsys/cnc-job-runner:2024.9.1|repo.blackduck.com/containers/job-runner:2024.9.1|
 
 The srm-k8s GitHub repository for this version of Software Risk Manager depends on an updated Guided Setup module with version 1.17.0. Scripts requiring the Guided Setup module will download it automatically; to manually download the module, refer to the instructions in [.install-guided-setup-module.ps1](../.install-guided-setup-module.ps1#L12).
+
+### Upgrading to v1.42
+
+If you are upgrading from an earlier chart version, refer to any previous chart note(s) in addition to this one.
+
+This version of Software Risk Manager is hosted in a new GitHub location and uses a new chart repository. Refer to the [README](https://github.com/codedx/srm-k8s/tree/main?tab=readme-ov-file#new-repository-location) file for more details.
+
 
 ## Helm Prep Wizard
 
