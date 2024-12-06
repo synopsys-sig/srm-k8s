@@ -4,7 +4,7 @@ You will use Helm to deploy Software Risk Manager on your Kubernetes cluster. If
 
 ### New Repository Location
 
->Note: Ignore this section if you are installing SRM on a Kubernetes cluster for the first time.
+Ignore this section if you are installing SRM on a Kubernetes cluster for the first time.
 
 The srm-k8s repo was previously hosted at https://github.com/synopsys-sig. Git requests to that repo should get redirected to this one, so your local srm-k8s clone should continue working. To explicitly update your clone's origin to this repo, run the following command, which uses an HTTPS git connection:
 
