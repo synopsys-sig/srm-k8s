@@ -8,7 +8,7 @@ allowHostIPC: false
 allowHostNetwork: false
 allowHostPID: false
 allowHostPorts: false
-allowPrivilegeEscalation: true
+allowPrivilegeEscalation: false
 allowPrivilegedContainer: false
 allowedCapabilities: []
 defaultAddCapabilities: []
@@ -21,6 +21,7 @@ requiredDropCapabilities:
 - MKNOD
 - SETUID
 - SETGID
+- NET_RAW
 runAsUser:
   type: MustRunAsRange
   uidRangeMin: 1000

@@ -88,7 +88,7 @@ Create the name of the TO workflow service account to use
 
 {{- define "srm-to.storageEndpoint" -}}
 {{- if .Values.minio.enabled -}}
-{{- print (include "minio.ref.fullname" .) "." .Release.Namespace ".svc.cluster.local:" .Values.minio.service.port -}}
+{{- print (include "minio.ref.fullname" .) "." .Release.Namespace ".svc.cluster.local:" .Values.minio.service.ports.api -}}
 {{- else -}}
 {{- .Values.to.workflowStorage.endpoint -}}
 {{- end -}}
@@ -96,7 +96,7 @@ Create the name of the TO workflow service account to use
 
 {{- define "srm-to.storageTlsEnabled" -}}
 {{- $enabled := 0 -}}
-{{- if (or .Values.to.workflowStorage.endpointSecure (and .Values.minio.enabled .Values.minio.tlsSecret)) -}}
+{{- if (or .Values.to.workflowStorage.endpointSecure (and .Values.minio.enabled .Values.minio.tls.existingSecret)) -}}
 {{- $enabled = 1 -}}
 {{- end -}}
 {{ $enabled }}
@@ -216,5 +216,16 @@ Duplicates of a Minio template helper so we can reference Minio's service name
 {{- default (include "minio.ref.fullname" .) .Values.minio.serviceAccount.name | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- default "default" .Values.minio.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the PVC name, potentially forcing a switch to the single-node, single-drive configuration (overwrites template).
+*/}}
+{{- define "minio.claimName" -}}
+{{- if and .Values.persistence.existingClaim }}
+    {{- printf "%s" (tpl .Values.persistence.existingClaim $) -}}
+{{- else -}}
+    {{- printf "%s-snsd" (include "common.names.fullname" .) -}}
 {{- end -}}
 {{- end -}}
