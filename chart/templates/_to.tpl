@@ -14,6 +14,10 @@
 {{- printf "%s-to-scc" ((include "srm.fullname" .) | trunc 55 | trimSuffix "-") }}
 {{- end -}}
 
+{{- define "srm-workflow-controller.scc" -}}
+{{- printf "%s-workflow-controller-scc" ((include "srm.fullname" .) | trunc 38 | trimSuffix "-") }}
+{{- end -}}
+
 {{- define "srm-to.workflow-scc" -}}
 {{- printf "%s-wf-to-scc" ((include "srm.fullname" .) | trunc 52 | trimSuffix "-") }}
 {{- end -}}
@@ -216,6 +220,37 @@ Duplicates of a Minio template helper so we can reference Minio's service name
 {{- default (include "minio.ref.fullname" .) .Values.minio.serviceAccount.name | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- default "default" .Values.minio.serviceAccount.name -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Duplicates of an Argo template helper so we can reference the Argo controller's service name
+*/}}
+
+{{- define "argo-workflows.ref.fullname" -}}
+{{- $workflowValues := index .Values "argo-workflows" -}}
+{{- if $workflowValues.fullnameOverride -}}
+{{- $workflowValues.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "argo-workflows" $workflowValues.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "argo-workflows.ref.controller.fullname" -}}
+{{- printf "%s-%s" (include "argo-workflows.ref.fullname" .) (index .Values "argo-workflows" "controller" "name") | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "argo-workflows.ref.controllerServiceAccountName" -}}
+{{- $serviceAccount := index .Values "argo-workflows" "controller" "serviceAccount" -}}
+{{- if $serviceAccount.create -}}
+    {{ default (include "argo-workflows.ref.controller.fullname" .) $serviceAccount.name }}
+{{- else -}}
+    {{ default "default" $serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 

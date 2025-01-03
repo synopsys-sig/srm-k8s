@@ -188,6 +188,9 @@ minio:
       # Command:
       # kubectl -n srm create secret generic minio-secret --from-literal=access-key=admin --from-literal=secret-key=password
       existingSecret:
+    security:
+      # -- true to avoid error when using a MinIO with a private container image registry
+      allowInsecureImages: true
   image:
     # -- the registry name and optional registry suffix for the MinIO Docker image
     registry: docker.io

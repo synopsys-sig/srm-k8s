@@ -3,41 +3,50 @@ apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
   name: {{ include "srm-web.scc" . }}
-allowHostDirVolumePlugin: false
-allowHostIPC: false
-allowHostNetwork: false
-allowHostPID: false
-allowHostPorts: false
 allowPrivilegeEscalation: false
-allowPrivilegedContainer: false
-allowedCapabilities: []
-defaultAddCapabilities: []
 fsGroup:
-  type: RunAsAny
-groups: []
-readOnlyRootFilesystem: false
-requiredDropCapabilities:
-- KILL
-- MKNOD
-- SETUID
-- SETGID
-- NET_RAW
+  type: MustRunAs
+  ranges:
+  - min: 1000
+    max: 1000
+readOnlyRootFilesystem: true
 runAsUser:
-  type: MustRunAsRange
-  uidRangeMin: 1000
-  uidRangeMax: 1001
+  type: MustRunAs
+  uid: 1000
+seccompProfiles:
+- runtime/default
 seLinuxContext:
   type: MustRunAs
-supplementalGroups:
-  type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ include "srm-web.serviceAccountName" . }}
-{{ if .Values.features.mariadb -}}
-- system:serviceaccount:{{ .Release.Namespace }}:{{ include "srm-web.database.serviceAccountName" . }}
-{{- end }}
 volumes:
 - configMap
 - emptyDir
 - persistentVolumeClaim
 - secret
+{{ if .Values.features.mariadb -}}
+---
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: {{ include "srm-web.database.scc" . }}
+allowPrivilegeEscalation: false
+fsGroup:
+  type: MustRunAs
+  ranges:
+  - min: 1001
+    max: 1001
+readOnlyRootFilesystem: false
+runAsUser:
+  type: MustRunAs
+  uid: 1001
+seLinuxContext:
+  type: MustRunAs
+users:
+- system:serviceaccount:{{ .Release.Namespace }}:{{ include "srm-web.database.serviceAccountName" . }}
+volumes:
+- configMap
+- persistentVolumeClaim
+- secret
+{{- end }}
 {{- end -}}
